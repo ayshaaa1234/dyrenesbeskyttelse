@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using ClassLibrary.Services;
 using ClassLibrary.Models;
 
@@ -197,19 +199,39 @@ namespace ConsoleApp.Menus
             }
 
             Console.Write("Indtast adoptantens navn: ");
-            var adopterName = Console.ReadLine() ?? string.Empty;
+            var adopterName = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(adopterName))
+            {
+                ShowError("Adoptantens navn kan ikke være tomt");
+                return;
+            }
 
             Console.Write("Indtast adoptantens email: ");
-            var adopterEmail = Console.ReadLine() ?? string.Empty;
+            var adopterEmail = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(adopterEmail))
+            {
+                ShowError("Adoptantens email kan ikke være tomt");
+                return;
+            }
 
             Console.Write("Indtast adoptantens telefonnummer: ");
-            var adopterPhone = Console.ReadLine() ?? string.Empty;
+            var adopterPhone = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(adopterPhone))
+            {
+                ShowError("Adoptantens telefonnummer kan ikke være tomt");
+                return;
+            }
 
             Console.Write("Indtast adoptionstype: ");
-            var adoptionType = Console.ReadLine() ?? string.Empty;
+            var adoptionType = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(adoptionType))
+            {
+                ShowError("Adoptionstype kan ikke være tomt");
+                return;
+            }
 
             Console.Write("Indtast noter: ");
-            var notes = Console.ReadLine() ?? string.Empty;
+            var notes = Console.ReadLine()?.Trim() ?? string.Empty;
 
             var adoption = new Adoption
             {
@@ -224,8 +246,15 @@ namespace ConsoleApp.Menus
                 Status = AdoptionStatus.Pending
             };
 
-            await _adoptionService.CreateAdoptionAsync(adoption);
-            ShowSuccess("Adoption oprettet succesfuldt!");
+            try
+            {
+                await _adoptionService.CreateAdoptionAsync(adoption);
+                ShowSuccess("Adoption oprettet succesfuldt!");
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
         }
 
         private async Task UpdateAdoption()
@@ -239,44 +268,57 @@ namespace ConsoleApp.Menus
                 return;
             }
 
-            var adoption = await _adoptionService.GetAdoptionByIdAsync(id);
-            if (adoption == null)
+            try
             {
-                ShowError("Adoption ikke fundet");
-                return;
+                var adoption = await _adoptionService.GetAdoptionByIdAsync(id);
+                if (adoption == null)
+                {
+                    ShowError("Adoption ikke fundet");
+                    return;
+                }
+
+                if (adoption.Status == AdoptionStatus.Completed)
+                {
+                    ShowError("Kan ikke opdatere en gennemført adoption");
+                    return;
+                }
+
+                Console.WriteLine("\nNuværende information:");
+                DisplayAdoptionInfo(adoption);
+                Console.WriteLine("\nIndtast ny information (tryk Enter for at beholde nuværende værdi):");
+
+                Console.Write($"Adoptantens navn [{adoption.AdopterName}]: ");
+                var adopterName = Console.ReadLine()?.Trim();
+                if (!string.IsNullOrWhiteSpace(adopterName))
+                    adoption.AdopterName = adopterName;
+
+                Console.Write($"Adoptantens email [{adoption.AdopterEmail}]: ");
+                var adopterEmail = Console.ReadLine()?.Trim();
+                if (!string.IsNullOrWhiteSpace(adopterEmail))
+                    adoption.AdopterEmail = adopterEmail;
+
+                Console.Write($"Adoptantens telefonnummer [{adoption.AdopterPhone}]: ");
+                var adopterPhone = Console.ReadLine()?.Trim();
+                if (!string.IsNullOrWhiteSpace(adopterPhone))
+                    adoption.AdopterPhone = adopterPhone;
+
+                Console.Write($"Adoptionstype [{adoption.AdoptionType}]: ");
+                var adoptionType = Console.ReadLine()?.Trim();
+                if (!string.IsNullOrWhiteSpace(adoptionType))
+                    adoption.AdoptionType = adoptionType;
+
+                Console.Write($"Noter [{adoption.Notes}]: ");
+                var notes = Console.ReadLine()?.Trim();
+                if (!string.IsNullOrWhiteSpace(notes))
+                    adoption.Notes = notes;
+
+                await _adoptionService.UpdateAdoptionAsync(adoption);
+                ShowSuccess("Adoption opdateret succesfuldt!");
             }
-
-            Console.WriteLine("\nNuværende information:");
-            DisplayAdoptionInfo(adoption);
-            Console.WriteLine("\nIndtast ny information (tryk Enter for at beholde nuværende værdi):");
-
-            Console.Write($"Adoptantens navn [{adoption.AdopterName}]: ");
-            var adopterName = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(adopterName))
-                adoption.AdopterName = adopterName;
-
-            Console.Write($"Adoptantens email [{adoption.AdopterEmail}]: ");
-            var adopterEmail = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(adopterEmail))
-                adoption.AdopterEmail = adopterEmail;
-
-            Console.Write($"Adoptantens telefonnummer [{adoption.AdopterPhone}]: ");
-            var adopterPhone = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(adopterPhone))
-                adoption.AdopterPhone = adopterPhone;
-
-            Console.Write($"Adoptionstype [{adoption.AdoptionType}]: ");
-            var adoptionType = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(adoptionType))
-                adoption.AdoptionType = adoptionType;
-
-            Console.Write($"Noter [{adoption.Notes}]: ");
-            var notes = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(notes))
-                adoption.Notes = notes;
-
-            await _adoptionService.UpdateAdoptionAsync(adoption);
-            ShowSuccess("Adoption opdateret succesfuldt!");
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
         }
 
         private async Task DeleteAdoption()

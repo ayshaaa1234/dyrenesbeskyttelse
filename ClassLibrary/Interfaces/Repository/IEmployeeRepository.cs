@@ -39,5 +39,30 @@ namespace ClassLibrary.Interfaces
         /// Finder medarbejdere baseret på navn (søger i både fornavn og efternavn)
         /// </summary>
         Task<IEnumerable<Employee>> SearchByNameAsync(string name);
+
+        /// <summary>
+        /// Finder medarbejdere baseret på navn
+        /// </summary>
+        Task<IEnumerable<Employee>> GetByNameAsync(string name);
+
+        /// <summary>
+        /// Finder medarbejdere baseret på telefonnummer
+        /// </summary>
+        Task<IEnumerable<Employee>> GetByPhoneAsync(string phone);
+
+        /// <summary>
+        /// Finder medarbejdere baseret på afdeling
+        /// </summary>
+        Task<IEnumerable<Employee>> GetByDepartmentAsync(string department);
+
+        /// <summary>
+        /// Finder medarbejdere baseret på status
+        /// </summary>
+        Task<IEnumerable<Employee>> GetByStatusAsync(bool isActive);
+
+        /// <summary>
+        /// Finder medarbejdere baseret på løninterval
+        /// </summary>
+        Task<IEnumerable<Employee>> GetBySalaryRangeAsync(decimal minSalary, decimal maxSalary);
     }
 } 

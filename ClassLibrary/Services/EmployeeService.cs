@@ -107,17 +107,6 @@ namespace ClassLibrary.Services
         }
 
         /// <summary>
-        /// Henter medarbejdere baseret på telefonnummer
-        /// </summary>
-        public async Task<IEnumerable<Employee>> GetEmployeesByPhoneAsync(string phone)
-        {
-            if (string.IsNullOrWhiteSpace(phone))
-                throw new ArgumentException("Telefonnummer kan ikke være tomt");
-
-            return await _employeeRepository.GetByPhoneAsync(phone);
-        }
-
-        /// <summary>
         /// Henter medarbejdere baseret på stilling
         /// </summary>
         public async Task<IEnumerable<Employee>> GetEmployeesByPositionAsync(string position)
@@ -161,18 +150,7 @@ namespace ClassLibrary.Services
             return await _employeeRepository.GetByStatusAsync(isActive);
         }
 
-        /// <summary>
-        /// Henter medarbejdere baseret på løninterval
-        /// </summary>
-        public async Task<IEnumerable<Employee>> GetEmployeesBySalaryRangeAsync(decimal minSalary, decimal maxSalary)
-        {
-            if (minSalary < 0)
-                throw new ArgumentException("Minimumsløn kan ikke være negativ");
-            if (maxSalary < minSalary)
-                throw new ArgumentException("Maksimumsløn skal være større end minimumsløn");
-
-            return await _employeeRepository.GetBySalaryRangeAsync(minSalary, maxSalary);
-        }
+    
 
         /// <summary>
         /// Henter aktive medarbejdere
@@ -288,6 +266,30 @@ namespace ClassLibrary.Services
 
             employee.Specializations.Remove(specialization);
             await _employeeRepository.UpdateAsync(employee);
+        }
+
+        /// <summary>
+        /// Henter medarbejdere baseret på telefonnummer
+        /// </summary>
+        public async Task<IEnumerable<Employee>> GetEmployeesByPhoneAsync(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                throw new ArgumentException("Telefonnummer kan ikke være tomt");
+
+            return await _employeeRepository.GetByPhoneAsync(phone);
+        }
+
+        /// <summary>
+        /// Henter medarbejdere baseret på løninterval
+        /// </summary>
+        public async Task<IEnumerable<Employee>> GetEmployeesBySalaryRangeAsync(decimal minSalary, decimal maxSalary)
+        {
+            if (minSalary < 0)
+                throw new ArgumentException("Minimumsløn kan ikke være negativ");
+            if (maxSalary < minSalary)
+                throw new ArgumentException("Maksimumsløn skal være større end minimumsløn");
+
+            return await _employeeRepository.GetBySalaryRangeAsync(minSalary, maxSalary);
         }
 
         /// <summary>

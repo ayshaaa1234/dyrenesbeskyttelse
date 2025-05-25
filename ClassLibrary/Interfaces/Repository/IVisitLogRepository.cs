@@ -44,5 +44,35 @@ namespace ClassLibrary.Interfaces
         /// Finder det seneste besøg for et dyr
         /// </summary>
         Task<VisitLog> GetLatestVisitForAnimalAsync(int animalId);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på besøgstype
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByVisitTypeAsync(string visitType);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på besøger
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByVisitorAsync(string visitor);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på formål
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByPurposeAsync(string purpose);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på varighedsinterval
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByDurationRangeAsync(int minDuration, int maxDuration);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på lægebesøg
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByVeterinaryVisitAsync(bool isVeterinaryVisit);
+
+        /// <summary>
+        /// Finder besøgslogge baseret på adoptionsresultat
+        /// </summary>
+        Task<IEnumerable<VisitLog>> GetByAdoptionResultAsync(bool resultedInAdoption);
     }
 } 
