@@ -1,106 +1,91 @@
 using System;
 using System.Threading.Tasks;
-using ClassLibrary.Services;
+using ClassLibrary.Features.AnimalManagement.Application.Abstractions;
+using ClassLibrary.Features.Adoptions.Application.Abstractions;
+using ClassLibrary.Features.Blog.Application.Abstractions;
+using ClassLibrary.Features.Customers.Application.Abstractions;
+using ClassLibrary.Features.Employees.Application.Abstractions;
+using ClassLibrary.Features.Memberships.Application.Abstractions;
 
 namespace ConsoleApp.Menus
 {
-    /// <summary>
-    /// Hovedmenu for applikationen
-    /// </summary>
-    public class MainMenu : MenuBase
+    public class MainMenu
     {
-        private readonly AnimalMenu _animalMenu;
-        private readonly CustomerMenu _customerMenu;
-        private readonly EmployeeMenu _employeeMenu;
-        private readonly HealthRecordMenu _healthRecordMenu;
-        private readonly VisitLogMenu _visitLogMenu;
-        private readonly AdoptionMenu _adoptionMenu;
-        private readonly BookingMenu _bookingMenu;
-        private readonly BlogPostMenu _blogPostMenu;
-        private readonly ActivityMenu _activityMenu;
+        private readonly IAnimalManagementService _animalManagementService;
+        private readonly ICustomerService _customerService;
+        private readonly IEmployeeService _employeeService;
+        private readonly IAdoptionService _adoptionService;
+        private readonly IBlogPostService _blogPostService;
+        private readonly IMembershipService _membershipService;
 
         public MainMenu(
-            AnimalService animalService,
-            CustomerService customerService,
-            EmployeeService employeeService,
-            HealthRecordService healthRecordService,
-            VisitLogService visitLogService,
-            AdoptionService adoptionService,
-            BookingService bookingService,
-            BlogPostService blogPostService,
-            ActivityService activityService)
+            IAnimalManagementService animalManagementService,
+            ICustomerService customerService,
+            IEmployeeService employeeService,
+            IAdoptionService adoptionService,
+            IBlogPostService blogPostService,
+            IMembershipService membershipService)
         {
-            _animalMenu = new AnimalMenu(animalService);
-            _customerMenu = new CustomerMenu(customerService);
-            _employeeMenu = new EmployeeMenu(employeeService);
-            _healthRecordMenu = new HealthRecordMenu(healthRecordService);
-            _visitLogMenu = new VisitLogMenu(visitLogService);
-            _adoptionMenu = new AdoptionMenu(adoptionService);
-            _bookingMenu = new BookingMenu(bookingService);
-            _blogPostMenu = new BlogPostMenu(blogPostService);
-            _activityMenu = new ActivityMenu(activityService);
+            _animalManagementService = animalManagementService;
+            _customerService = customerService;
+            _employeeService = employeeService;
+            _adoptionService = adoptionService;
+            _blogPostService = blogPostService;
+            _membershipService = membershipService;
         }
 
-        public override async Task ShowAsync()
+        public async Task ShowAsync()
         {
             while (true)
             {
-                ShowHeader("Dyrenes Beskyttelse - Hovedmenu");
-                Console.WriteLine("1. Dyr");
-                Console.WriteLine("2. Kunder");
-                Console.WriteLine("3. Medarbejdere");
-                Console.WriteLine("4. Sundhedsjournaler");
-                Console.WriteLine("5. Besøgslog");
-                Console.WriteLine("6. Adoptioner");
-                Console.WriteLine("7. Bookinger");
-                Console.WriteLine("8. Blogindlæg");
-                Console.WriteLine("9. Aktiviteter");
+                Console.Clear();
+                Console.WriteLine("Hovedmenu");
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("1. Dyreadministration");
+                Console.WriteLine("2. Kundeadministration");
+                Console.WriteLine("3. Medarbejderadministration");
+                Console.WriteLine("4. Adoptionsadministration");
+                Console.WriteLine("5. Blogadministration");
+                Console.WriteLine("6. Medlemskabsadministration");
                 Console.WriteLine("0. Afslut");
-                Console.Write("\nVælg en mulighed: ");
+                Console.WriteLine("----------------------------------------");
+                Console.Write("Tag et valg: ");
 
-                var choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
-                try
+                switch (choice)
                 {
-                    switch (choice)
-                    {
-                        case "1":
-                            await _animalMenu.ShowAsync();
-                            break;
-                        case "2":
-                            await _customerMenu.ShowAsync();
-                            break;
-                        case "3":
-                            await _employeeMenu.ShowAsync();
-                            break;
-                        case "4":
-                            await _healthRecordMenu.ShowAsync();
-                            break;
-                        case "5":
-                            await _visitLogMenu.ShowAsync();
-                            break;
-                        case "6":
-                            await _adoptionMenu.ShowAsync();
-                            break;
-                        case "7":
-                            await _bookingMenu.ShowAsync();
-                            break;
-                        case "8":
-                            await _blogPostMenu.ShowAsync();
-                            break;
-                        case "9":
-                            await _activityMenu.ShowAsync();
-                            break;
-                        case "0":
-                            return;
-                        default:
-                            ShowError("Ugyldigt valg");
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    HandleException(ex);
+                    case "1":
+                        AnimalMenu animalMenu = new AnimalMenu(_animalManagementService);
+                        await animalMenu.ShowAsync();
+                        break;
+                    case "2":
+                        CustomerMenu customerMenu = new CustomerMenu(_customerService);
+                        await customerMenu.ShowAsync();
+                        break;
+                    case "3":
+                        EmployeeMenu employeeMenu = new EmployeeMenu(_employeeService);
+                        await employeeMenu.ShowAsync();
+                        break;
+                    case "4":
+                        AdoptionMenu adoptionMenu = new AdoptionMenu(_adoptionService, _animalManagementService, _customerService);
+                        await adoptionMenu.ShowAsync();
+                        break;
+                    case "5":
+                        BlogMenu blogMenu = new BlogMenu(_blogPostService);
+                        await blogMenu.ShowAsync();
+                        break;
+                    case "6":
+                        MembershipMenu membershipMenu = new MembershipMenu(_membershipService, _customerService);
+                        await membershipMenu.ShowAsync();
+                        break;
+                    case "0":
+                        Console.WriteLine("Afslutter programmet.");
+                        return;
+                    default:
+                        Console.WriteLine("Ugyldigt valg. Prøv igen.");
+                        Console.ReadKey();
+                        break;
                 }
             }
         }

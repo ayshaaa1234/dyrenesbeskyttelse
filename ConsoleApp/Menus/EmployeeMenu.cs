@@ -1,564 +1,66 @@
 using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Linq;
-using ClassLibrary.Services;
-using ClassLibrary.Models;
+using System.Threading.Tasks;
+using ClassLibrary.Features.Employees.Application.Abstractions;
+using ClassLibrary.Features.Employees.Core.Models;
 
 namespace ConsoleApp.Menus
 {
-    /// <summary>
-    /// Menu til håndtering af medarbejdere
-    /// </summary>
-    public class EmployeeMenu : MenuBase
+    public class EmployeeMenu
     {
-        private readonly EmployeeService _employeeService;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeeMenu(EmployeeService employeeService)
+        public EmployeeMenu(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
 
-        public override async Task ShowAsync()
+        public async Task ShowAsync()
         {
             while (true)
             {
-                ShowHeader("Medarbejder");
+                Console.Clear();
+                Console.WriteLine("Medarbejderadministration");
+                Console.WriteLine("----------------------------------------");
                 Console.WriteLine("1. Vis alle medarbejdere");
-                Console.WriteLine("2. Vis medarbejder efter ID");
-                Console.WriteLine("3. Vis medarbejder efter email");
-                Console.WriteLine("4. Vis medarbejdere efter navn");
-                Console.WriteLine("5. Vis medarbejdere efter telefon");
-                Console.WriteLine("6. Vis medarbejdere efter stilling");
-                Console.WriteLine("7. Vis medarbejdere efter afdeling");
-                Console.WriteLine("8. Vis medarbejdere efter ansættelsesdato");
-                Console.WriteLine("9. Vis aktive medarbejdere");
-                Console.WriteLine("10. Vis inaktive medarbejdere");
-                Console.WriteLine("11. Vis medarbejdere efter specialisering");
-                Console.WriteLine("12. Vis medarbejdere efter løninterval");
-                Console.WriteLine("13. Opret ny medarbejder");
-                Console.WriteLine("14. Opdater medarbejder");
-                Console.WriteLine("15. Slet medarbejder");
-                Console.WriteLine("16. Aktiver medarbejder");
-                Console.WriteLine("17. Deaktiver medarbejder");
-                Console.WriteLine("18. Opdater løn");
-                Console.WriteLine("19. Tilføj specialisering");
-                Console.WriteLine("20. Fjern specialisering");
+                Console.WriteLine("2. Tilføj ny medarbejder");
+                Console.WriteLine("3. Opdater medarbejder");
+                Console.WriteLine("4. Slet medarbejder");
                 Console.WriteLine("0. Tilbage til hovedmenu");
-                Console.Write("\nVælg en mulighed: ");
+                Console.WriteLine("----------------------------------------");
+                Console.Write("Tag et valg: ");
 
-                var choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
-                try
+                switch (choice)
                 {
-                    switch (choice)
-                    {
-                        case "1":
-                            await ShowAllEmployees();
-                            break;
-                        case "2":
-                            await ShowEmployeeById();
-                            break;
-                        case "3":
-                            await ShowEmployeeByEmail();
-                            break;
-                        case "4":
-                            await ShowEmployeesByName();
-                            break;
-                        case "5":
-                            await ShowEmployeesByPhone();
-                            break;
-                        case "6":
-                            await ShowEmployeesByPosition();
-                            break;
-                        case "7":
-                            await ShowEmployeesByDepartment();
-                            break;
-                        case "8":
-                            await ShowEmployeesByHireDate();
-                            break;
-                        case "9":
-                            await ShowActiveEmployees();
-                            break;
-                        case "10":
-                            await ShowInactiveEmployees();
-                            break;
-                        case "11":
-                            await ShowEmployeesBySpecialization();
-                            break;
-                        case "12":
-                            await ShowEmployeesBySalaryRange();
-                            break;
-                        case "13":
-                            await CreateNewEmployee();
-                            break;
-                        case "14":
-                            await UpdateEmployee();
-                            break;
-                        case "15":
-                            await DeleteEmployee();
-                            break;
-                        case "16":
-                            await ActivateEmployee();
-                            break;
-                        case "17":
-                            await DeactivateEmployee();
-                            break;
-                        case "18":
-                            await UpdateSalary();
-                            break;
-                        case "19":
-                            await AddSpecialization();
-                            break;
-                        case "20":
-                            await RemoveSpecialization();
-                            break;
-                        case "0":
-                            return;
-                        default:
-                            ShowError("Ugyldigt valg");
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    HandleException(ex);
+                    case "1":
+                        await ListAllEmployeesAsync();
+                        break;
+                    case "2":
+                        await AddEmployeeAsync();
+                        break;
+                    case "3":
+                        await UpdateEmployeeAsync();
+                        break;
+                    case "4":
+                        await DeleteEmployeeAsync();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Console.WriteLine("Ugyldigt valg. Prøv igen.");
+                        Console.ReadKey();
+                        break;
                 }
             }
         }
 
-        private async Task ShowAllEmployees()
+        private async Task ListAllEmployeesAsync()
         {
-            ShowHeader("Alle medarbejdere");
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeeById()
-        {
-            ShowHeader("Medarbejder efter ID");
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
-            DisplayEmployeeInfo(employee);
-        }
-
-        private async Task ShowEmployeeByEmail()
-        {
-            ShowHeader("Medarbejder efter email");
-            Console.Write("Indtast email: ");
-            var email = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                ShowError("Email kan ikke være tom");
-                return;
-            }
-
-            var employee = await _employeeService.GetEmployeeByEmailAsync(email);
-            DisplayEmployeeInfo(employee);
-        }
-
-        private async Task ShowEmployeesByName()
-        {
-            ShowHeader("Medarbejdere efter navn");
-            Console.Write("Indtast navn: ");
-            var name = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                ShowError("Navn kan ikke være tomt");
-                return;
-            }
-
-            var employees = await _employeeService.SearchEmployeesByNameAsync(name);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesByPhone()
-        {
-            ShowHeader("Medarbejdere efter telefon");
-            Console.Write("Indtast telefonnummer: ");
-            var phone = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(phone))
-            {
-                ShowError("Telefonnummer kan ikke være tomt");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesByPhoneAsync(phone);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesByPosition()
-        {
-            ShowHeader("Medarbejdere efter stilling");
-            Console.Write("Indtast stilling: ");
-            var position = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(position))
-            {
-                ShowError("Stilling kan ikke være tom");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesByPositionAsync(position);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesByDepartment()
-        {
-            ShowHeader("Medarbejdere efter afdeling");
-            Console.Write("Indtast afdeling: ");
-            var department = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(department))
-            {
-                ShowError("Afdeling kan ikke være tom");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesByDepartmentAsync(department);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesByHireDate()
-        {
-            ShowHeader("Medarbejdere efter ansættelsesdato");
-            Console.Write("Indtast startdato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime startDate))
-            {
-                ShowError("Ugyldig startdato");
-                return;
-            }
-
-            Console.Write("Indtast slutdato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime endDate))
-            {
-                ShowError("Ugyldig slutdato");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesByHireDateRangeAsync(startDate, endDate);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowActiveEmployees()
-        {
-            ShowHeader("Aktive medarbejdere");
-            var employees = await _employeeService.GetActiveEmployeesAsync();
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowInactiveEmployees()
-        {
-            ShowHeader("Inaktive medarbejdere");
-            var employees = await _employeeService.GetEmployeesByStatusAsync(false);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesBySpecialization()
-        {
-            ShowHeader("Medarbejdere efter specialisering");
-            Console.Write("Indtast specialisering: ");
-            var specialization = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(specialization))
-            {
-                ShowError("Specialisering kan ikke være tom");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesBySpecializationAsync(specialization);
-            DisplayEmployees(employees);
-        }
-
-        private async Task ShowEmployeesBySalaryRange()
-        {
-            ShowHeader("Medarbejdere efter løninterval");
-            Console.Write("Indtast minimumsløn: ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal minSalary))
-            {
-                ShowError("Ugyldig minimumsløn");
-                return;
-            }
-
-            Console.Write("Indtast maksimumsløn: ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal maxSalary))
-            {
-                ShowError("Ugyldig maksimumsløn");
-                return;
-            }
-
-            var employees = await _employeeService.GetEmployeesBySalaryRangeAsync(minSalary, maxSalary);
-            DisplayEmployees(employees);
-        }
-
-        private async Task CreateNewEmployee()
-        {
-            ShowHeader("Opret ny medarbejder");
-
-            Console.Write("Indtast fornavn: ");
-            var firstName = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast efternavn: ");
-            var lastName = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast email: ");
-            var email = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast telefon: ");
-            var phone = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast stilling: ");
-            var position = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast afdeling: ");
-            var department = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast specialisering: ");
-            var specialization = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Indtast løn: ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal salary))
-            {
-                ShowError("Ugyldig løn");
-                return;
-            }
-
-            Console.Write("Indtast ansættelsesdato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime hireDate))
-            {
-                ShowError("Ugyldig dato");
-                return;
-            }
-
-            var employee = new Employee
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                Phone = phone,
-                Position = position,
-                Department = department,
-                Specialization = specialization,
-                Salary = salary,
-                HireDate = hireDate,
-                IsActive = true
-            };
-
-            await _employeeService.CreateEmployeeAsync(employee);
-            ShowSuccess("Medarbejder oprettet succesfuldt!");
-        }
-
-        private async Task UpdateEmployee()
-        {
-            ShowHeader("Opdater medarbejder");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
-            if (employee == null)
-            {
-                ShowError("Medarbejder ikke fundet");
-                return;
-            }
-
-            Console.WriteLine("\nNuværende information:");
-            DisplayEmployeeInfo(employee);
-            Console.WriteLine("\nIndtast ny information (tryk Enter for at beholde nuværende værdi):");
-
-            Console.Write($"Fornavn [{employee.FirstName}]: ");
-            var firstName = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(firstName))
-                employee.FirstName = firstName;
-
-            Console.Write($"Efternavn [{employee.LastName}]: ");
-            var lastName = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(lastName))
-                employee.LastName = lastName;
-
-            Console.Write($"Email [{employee.Email}]: ");
-            var email = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(email))
-                employee.Email = email;
-
-            Console.Write($"Telefon [{employee.Phone}]: ");
-            var phone = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(phone))
-                employee.Phone = phone;
-
-            Console.Write($"Stilling [{employee.Position}]: ");
-            var position = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(position))
-                employee.Position = position;
-
-            Console.Write($"Afdeling [{employee.Department}]: ");
-            var department = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(department))
-                employee.Department = department;
-
-            Console.Write($"Specialisering [{employee.Specialization}]: ");
-            var specialization = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(specialization))
-                employee.Specialization = specialization;
-
-            Console.Write($"Løn [{employee.Salary}]: ");
-            var salaryStr = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(salaryStr) && decimal.TryParse(salaryStr, out decimal salary))
-                employee.Salary = salary;
-
-            await _employeeService.UpdateEmployeeAsync(employee);
-            ShowSuccess("Medarbejder opdateret succesfuldt!");
-        }
-
-        private async Task DeleteEmployee()
-        {
-            ShowHeader("Slet medarbejder");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
-            if (employee == null)
-            {
-                ShowError("Medarbejder ikke fundet");
-                return;
-            }
-
-            Console.WriteLine("\nEr du sikker på, at du vil slette denne medarbejder?");
-            DisplayEmployeeInfo(employee);
-            Console.Write("\nSkriv 'JA' for at bekræfte: ");
-            
-            if (Console.ReadLine()?.ToUpper() != "JA")
-            {
-                Console.WriteLine("Sletning annulleret.");
-                Console.WriteLine("\nTryk på en tast for at fortsætte...");
-                Console.ReadKey();
-                return;
-            }
-
-            await _employeeService.DeleteEmployeeAsync(id);
-            ShowSuccess("Medarbejder slettet succesfuldt!");
-        }
-
-        private async Task ActivateEmployee()
-        {
-            ShowHeader("Aktiver medarbejder");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            await _employeeService.ActivateEmployeeAsync(id);
-            ShowSuccess("Medarbejder aktiveret succesfuldt!");
-        }
-
-        private async Task DeactivateEmployee()
-        {
-            ShowHeader("Deaktiver medarbejder");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            await _employeeService.DeactivateEmployeeAsync(id);
-            ShowSuccess("Medarbejder deaktiveret succesfuldt!");
-        }
-
-        private async Task UpdateSalary()
-        {
-            ShowHeader("Opdater løn");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            Console.Write("Indtast ny løn: ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal newSalary))
-            {
-                ShowError("Ugyldig løn");
-                return;
-            }
-
-            await _employeeService.UpdateEmployeeSalaryAsync(id, newSalary);
-            ShowSuccess("Løn opdateret succesfuldt!");
-        }
-
-        private async Task AddSpecialization()
-        {
-            ShowHeader("Tilføj specialisering");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            Console.Write("Indtast specialisering: ");
-            var specialization = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(specialization))
-            {
-                ShowError("Specialisering kan ikke være tom");
-                return;
-            }
-
-            await _employeeService.AddSpecializationAsync(id, specialization);
-            ShowSuccess("Specialisering tilføjet succesfuldt!");
-        }
-
-        private async Task RemoveSpecialization()
-        {
-            ShowHeader("Fjern specialisering");
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int id))
-            {
-                ShowError("Ugyldigt ID");
-                return;
-            }
-
-            Console.Write("Indtast specialisering: ");
-            var specialization = Console.ReadLine() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(specialization))
-            {
-                ShowError("Specialisering kan ikke være tom");
-                return;
-            }
-
-            await _employeeService.RemoveSpecializationAsync(id, specialization);
-            ShowSuccess("Specialisering fjernet succesfuldt!");
-        }
-
-        private void DisplayEmployees(IEnumerable<Employee> employees)
-        {
+            Console.Clear();
+            Console.WriteLine("Alle registrerede medarbejdere:");
+            var employees = await _employeeService.GetAllAsync();
             if (!employees.Any())
             {
                 Console.WriteLine("Ingen medarbejdere fundet.");
@@ -567,35 +69,219 @@ namespace ConsoleApp.Menus
             {
                 foreach (var employee in employees)
                 {
-                    DisplayEmployeeInfo(employee);
-                    Console.WriteLine(new string('-', 50));
+                    Console.WriteLine($"- ID: {employee.Id}, Navn: {employee.FirstName} {employee.LastName}, Stilling: {employee.Position}");
                 }
             }
-
-            Console.WriteLine("\nTryk på en tast for at fortsætte...");
+            Console.WriteLine("Tryk på en tast for at fortsætte...");
             Console.ReadKey();
         }
 
-        private void DisplayEmployeeInfo(Employee employee)
+        private async Task AddEmployeeAsync()
         {
-            Console.WriteLine($"ID: {employee.Id}");
-            Console.WriteLine($"Navn: {employee.Name}");
-            Console.WriteLine($"Email: {employee.Email}");
-            Console.WriteLine($"Telefon: {employee.Phone}");
-            Console.WriteLine($"Stilling: {employee.Position}");
-            Console.WriteLine($"Afdeling: {employee.Department}");
-            Console.WriteLine($"Specialisering: {employee.Specialization}");
-            Console.WriteLine($"Løn: {employee.Salary:C}");
-            Console.WriteLine($"Ansættelsesdato: {employee.HireDate:dd/MM/yyyy}");
-            Console.WriteLine($"Status: {(employee.IsActive ? "Aktiv" : "Inaktiv")}");
-            if (employee.Specializations.Any())
+            Console.Clear();
+            Console.WriteLine("Tilføj ny medarbejder");
+
+            Console.Write("Fornavn: ");
+            string? firstName = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(firstName))
             {
-                Console.WriteLine("Specialiseringer:");
-                foreach (var spec in employee.Specializations)
+                Console.WriteLine("Fornavn må ikke være tomt. Prøv igen.");
+                Console.Write("Fornavn: ");
+                firstName = Console.ReadLine();
+            }
+
+            Console.Write("Efternavn: ");
+            string? lastName = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(lastName))
+            {
+                Console.WriteLine("Efternavn må ikke være tomt. Prøv igen.");
+                Console.Write("Efternavn: ");
+                lastName = Console.ReadLine();
+            }
+
+            Console.Write("Email: ");
+            string? email = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
+            {
+                Console.WriteLine("Ugyldig email. Email må ikke være tom og skal indeholde '@'. Prøv igen.");
+                Console.Write("Email: ");
+                email = Console.ReadLine();
+            }
+
+            Console.Write("Telefonnummer: ");
+            string? phoneNumber = Console.ReadLine();
+
+            Console.Write("Stilling: ");
+            string? position = Console.ReadLine();
+            while (string.IsNullOrWhiteSpace(position))
+            {
+                Console.WriteLine("Stilling må ikke være tom. Prøv igen.");
+                Console.Write("Stilling: ");
+                position = Console.ReadLine();
+            }
+
+            Console.Write("Afdeling: ");
+            string? department = Console.ReadLine();
+
+            Console.Write("Billed-URL (valgfri): ");
+            string? pictureUrl = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(pictureUrl)) pictureUrl = null;
+            
+            Console.Write("Specialiseringer (kommasepareret, valgfri): ");
+            string? specializationsInput = Console.ReadLine();
+            List<string> specializations = string.IsNullOrWhiteSpace(specializationsInput) 
+                ? new List<string>() 
+                : specializationsInput.Split(',').Select(s => s.Trim()).ToList();
+
+            var newEmployee = new Employee()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Phone = phoneNumber ?? string.Empty,
+                Position = position,
+                Department = department ?? string.Empty,
+                PictureUrl = pictureUrl,
+                Specializations = specializations
+            };
+
+            try
+            {
+                var createdEmployee = await _employeeService.CreateAsync(newEmployee);
+                Console.WriteLine($"Medarbejder '{createdEmployee.FirstName} {createdEmployee.LastName}' blev tilføjet med ID: {createdEmployee.Id}.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fejl ved tilføjelse af medarbejder: {ex.Message}");
+            }
+
+            Console.WriteLine("Tryk på en tast for at fortsætte...");
+            Console.ReadKey();
+        }
+
+        private async Task UpdateEmployeeAsync()
+        {
+            Console.Clear();
+            Console.WriteLine("Opdater medarbejder");
+            Console.Write("Indtast ID på medarbejderen der skal opdateres: ");
+            string? idInput = Console.ReadLine();
+            if (!int.TryParse(idInput, out int employeeId))
+            {
+                Console.WriteLine("Ugyldigt ID format. ID skal være et heltal.");
+                Console.ReadKey();
+                return;
+            }
+
+            var employeeToUpdate = await _employeeService.GetByIdAsync(employeeId);
+            if (employeeToUpdate == null)
+            {
+                Console.WriteLine($"Medarbejder med ID {employeeId} blev ikke fundet.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine($"Opdaterer medarbejder: {employeeToUpdate.FirstName} {employeeToUpdate.LastName} (ID: {employeeToUpdate.Id})");
+            Console.WriteLine($"Nuværende værdier vises i parentes. Tryk Enter for at beholde nuværende værdi.");
+
+            Console.Write($"Fornavn ({employeeToUpdate.FirstName}): ");
+            string? firstName = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(firstName)) employeeToUpdate.FirstName = firstName;
+
+            Console.Write($"Efternavn ({employeeToUpdate.LastName}): ");
+            string? lastName = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(lastName)) employeeToUpdate.LastName = lastName;
+
+            Console.Write($"Email ({employeeToUpdate.Email}): ");
+            string? email = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(email) && email.Contains("@")) employeeToUpdate.Email = email;
+            else if (!string.IsNullOrWhiteSpace(email) && !email.Contains("@")) Console.WriteLine("Email ikke opdateret - ugyldigt format.");
+
+            Console.Write($"Telefonnummer ({employeeToUpdate.Phone}): ");
+            string? phoneNumber = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(phoneNumber)) employeeToUpdate.Phone = phoneNumber;
+
+            Console.Write($"Stilling ({employeeToUpdate.Position}): ");
+            string? position = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(position)) employeeToUpdate.Position = position;
+
+            Console.Write($"Afdeling ({employeeToUpdate.Department}): ");
+            string? department = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(department)) employeeToUpdate.Department = department;
+            
+            Console.Write($"Billed-URL ({employeeToUpdate.PictureUrl ?? "Ingen"}): ");
+            string? pictureUrl = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(pictureUrl)) 
+            {
+                employeeToUpdate.PictureUrl = pictureUrl;
+            } else if (pictureUrl == "") {
+                 // Behold eksisterende hvis tom streng og der var en værdi
+            } else {
+                 employeeToUpdate.PictureUrl = null; 
+            }
+            
+            Console.Write($"Specialiseringer (nuværende: {string.Join(", ", employeeToUpdate.Specializations ?? new List<string>())}). Indtast nye kommaseparerede værdier, eller lad stå tom for ingen ændring: ");
+            string? specializationsInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(specializationsInput))
+            {
+                employeeToUpdate.Specializations = specializationsInput.Split(',').Select(s => s.Trim()).ToList();
+            }
+
+            try
+            {
+                await _employeeService.UpdateAsync(employeeToUpdate);
+                Console.WriteLine($"Medarbejder '{employeeToUpdate.FirstName} {employeeToUpdate.LastName}' blev opdateret.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fejl ved opdatering af medarbejder: {ex.Message}");
+            }
+
+            Console.WriteLine("Tryk på en tast for at fortsætte...");
+            Console.ReadKey();
+        }
+
+        private async Task DeleteEmployeeAsync()
+        {
+            Console.Clear();
+            Console.WriteLine("Slet medarbejder");
+            Console.Write("Indtast ID på medarbejderen der skal slettes: ");
+            string? idInput = Console.ReadLine();
+            if (!int.TryParse(idInput, out int employeeId))
+            {
+                Console.WriteLine("Ugyldigt ID format. ID skal være et heltal.");
+                Console.ReadKey();
+                return;
+            }
+
+            var employeeToDelete = await _employeeService.GetByIdAsync(employeeId);
+            if (employeeToDelete == null)
+            {
+                Console.WriteLine($"Medarbejder med ID {employeeId} blev ikke fundet.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine($"Er du sikker på, at du vil slette {employeeToDelete.FirstName} {employeeToDelete.LastName} (ID: {employeeToDelete.Id})? (j/n)");
+            string? confirmation = Console.ReadLine();
+            if (confirmation?.ToLower() == "j")
+            {
+                try
                 {
-                    Console.WriteLine($"  - {spec}");
+                    await _employeeService.DeleteAsync(employeeId);
+                    Console.WriteLine($"Medarbejder '{employeeToDelete.FirstName} {employeeToDelete.LastName}' blev slettet.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fejl ved sletning af medarbejder: {ex.Message}");
                 }
             }
+            else
+            {
+                Console.WriteLine("Sletning annulleret.");
+            }
+
+            Console.WriteLine("Tryk på en tast for at fortsætte...");
+            Console.ReadKey();
         }
     }
-}
+} 

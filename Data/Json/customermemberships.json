@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "CustomerId": 3,
+    "Customer": null,
+    "MembershipProductId": 2,
+    "Product": null,
+    "ActualDonationAmount": null,
+    "StartDate": "2025-03-26T03:50:13.6324169Z",
+    "EndDate": "2026-03-26T03:50:13.6324184Z",
+    "IsActive": true,
+    "WantsPrintedMagazine": false,
+    "WantsDigitalMagazine": true,
+    "SubscribedToNewsletter": true,
+    "OptInForTaxDeduction": true,
+    "PaymentMethod": "PaymentCard",
+    "LastPaymentDate": "2025-03-26T03:50:13.6324572Z",
+    "NextPaymentDate": "2026-03-26T03:50:13.6325308Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 2,
+    "CustomerId": 1,
+    "Customer": null,
+    "MembershipProductId": 4,
+    "Product": null,
+    "ActualDonationAmount": null,
+    "StartDate": "2025-04-16T03:50:13.6326528Z",
+    "EndDate": null,
+    "IsActive": true,
+    "WantsPrintedMagazine": false,
+    "WantsDigitalMagazine": true,
+    "SubscribedToNewsletter": false,
+    "OptInForTaxDeduction": false,
+    "PaymentMethod": "Betalingsservice",
+    "LastPaymentDate": "2025-05-16T03:50:13.6326535Z",
+    "NextPaymentDate": "2025-06-16T03:50:13.6326536Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  }
+]

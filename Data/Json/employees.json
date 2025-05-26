@@ -1,0 +1,119 @@
+[
+  {
+    "Position": "System Administrator",
+    "Department": "IT",
+    "Specializations": [
+      "Systemvedligehold",
+      "Datasikkerhed"
+    ],
+    "Salary": 55000,
+    "HireDate": "2018-01-01T00:00:00",
+    "CreatedHealthRecords": [],
+    "ManagedVisits": [],
+    "BlogPosts": [],
+    "PictureUrl": "https://placehold.co/300x300/black/white?text=Admin",
+    "Id": 1,
+    "FirstName": "Admin",
+    "LastName": "Bruger",
+    "Name": "Admin Bruger",
+    "Email": "admin@dyrenesbeskyttelse.dk",
+    "Phone": "10203040",
+    "RegistrationDate": "2025-05-26T03:50:13.5870083Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Position": "Ledende Dyrepasser",
+    "Department": "Internat",
+    "Specializations": [
+      "Hundeadf\u00E6rd",
+      "Kattepleje"
+    ],
+    "Salary": 42000,
+    "HireDate": "2019-03-15T00:00:00",
+    "CreatedHealthRecords": [],
+    "ManagedVisits": [],
+    "BlogPosts": [],
+    "PictureUrl": "https://placehold.co/300x300/brown/white?text=Peter",
+    "Id": 2,
+    "FirstName": "Peter",
+    "LastName": "Plys",
+    "Name": "Peter Plys",
+    "Email": "peter.plys@dyrenesbeskyttelse.dk",
+    "Phone": "20304050",
+    "RegistrationDate": "2025-05-26T03:50:13.587389Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Position": "Biolog \u0026 Naturvejleder",
+    "Department": "Udek\u00F8rende Enhed",
+    "Specializations": [
+      "Vilde dyr",
+      "Pindsvin",
+      "Fugle"
+    ],
+    "Salary": 38000,
+    "HireDate": "2020-06-01T00:00:00",
+    "CreatedHealthRecords": [],
+    "ManagedVisits": [],
+    "BlogPosts": [],
+    "PictureUrl": "https://placehold.co/300x300/green/white?text=Mette",
+    "Id": 3,
+    "FirstName": "Mette",
+    "LastName": "Munk",
+    "Name": "Mette Munk",
+    "Email": "mette.munk@dyrenesbeskyttelse.dk",
+    "Phone": "30405060",
+    "RegistrationDate": "2025-05-26T03:50:13.5873917Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Position": "Veterin\u00E6rsygeplejerske",
+    "Department": "Klinik",
+    "Specializations": [
+      "Operationassistance",
+      "Laboratoriearbejde"
+    ],
+    "Salary": 36000,
+    "HireDate": "2021-09-10T00:00:00",
+    "CreatedHealthRecords": [],
+    "ManagedVisits": [],
+    "BlogPosts": [],
+    "PictureUrl": "https://placehold.co/300x300/blue/white?text=Sofie",
+    "Id": 4,
+    "FirstName": "Sofie",
+    "LastName": "S\u00F8rensen",
+    "Name": "Sofie S\u00F8rensen",
+    "Email": "sofie.s@dyrenesbeskyttelse.dk",
+    "Phone": "40506070",
+    "RegistrationDate": "2025-05-26T03:50:13.5873927Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Position": "Internatmedarbejder",
+    "Department": "Internat",
+    "Specializations": [
+      "Reng\u00F8ring",
+      "Fodring",
+      "Socialisering af dyr"
+    ],
+    "Salary": 30000,
+    "HireDate": "2022-02-20T00:00:00",
+    "CreatedHealthRecords": [],
+    "ManagedVisits": [],
+    "BlogPosts": [],
+    "PictureUrl": "https://placehold.co/300x300/grey/white?text=Jens",
+    "Id": 5,
+    "FirstName": "Jens",
+    "LastName": "Jensen",
+    "Name": "Jens Jensen",
+    "Email": "jens.j@dyrenesbeskyttelse.dk",
+    "Phone": "50607080",
+    "RegistrationDate": "2025-05-26T03:50:13.5873933Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  }
+]

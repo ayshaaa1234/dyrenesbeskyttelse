@@ -1,0 +1,318 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Color Palette */
+:root {
+  --db-primary-red: #A92028; /* Mørkerød, primær logo farve */
+  --db-support-orange: #E84C3D; /* Klar rød/orange til STØT knap */
+  --db-primary-green: #004c3f; /* Eksisterende mørkegrøn, kan genbruges/justeres */
+  --db-dark-green-accent: #3A4F41; /* Mørkegrøn til tekstbokse som "Killingerne" */
+  --db-light-beige-bg: #F8F5F0; /* Lys beige/råhvid baggrund */
+  --db-white: #FFFFFF;
+  --db-black: #000000;
+  --db-text-on-dark: var(--db-white);
+  --db-text-on-light-primary: #333333; /* Primær tekstfarve på lys baggrund */
+  --db-text-on-light-secondary: #555555; /* Sekundær tekstfarve */
+  --db-link-color: var(--db-primary-red); /* Standard link farve */
+  --db-border-color: #E0E0E0; /* Lidt lysere border color */
+  --db-navbar-bg: var(--db-light-beige-bg); /* Baggrundsfarve for navbar */
+  --db-navbar-link-color: var(--db-text-on-light-primary); /* Link farve i navbar */
+  --db-navbar-link-hover-color: var(--db-primary-red); /* Link hover farve i navbar */
+  --db-navbar-brand-color: var(--db-primary-red); /* Farve på SVG logo */
+}
+
+body {
+  margin-bottom: 0; /* Fjern margin hvis footer ikke er sticky i bunden af viewport */
+  background-color: var(--db-light-beige-bg);
+  color: var(--db-text-on-light-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+    flex: 1 0 auto;
+}
+
+/* Navbar styling */
+.navbar-db {
+  background-color: var(--db-navbar-bg);
+  border-bottom: 1px solid var(--db-border-color) !important; 
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  width: 100%; 
+  min-height: 70px; /* Sikrer en minimumshøjde for navbaren */
+}
+
+/* Skjul toggler på ALLE skærmstørrelser */
+.navbar-db .navbar-toggler {
+    display: none !important;
+}
+
+/* Skjul collapse-elementet (hvor menupunkter normalt er) på ALLE skærmstørrelser */
+.navbar-db .navbar-collapse {
+    display: none !important;
+}
+
+.navbar-db .container {
+    width: auto; /* Juster så containeren ikke nødvendigvis fylder 100% hvis det er det der driller */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-grow: 1; /* Tillad container at vokse hvis nødvendigt for centrering */
+}
+
+.navbar-db .navbar-brand {
+  color: var(--db-navbar-brand-color);
+  margin-right: 0; 
+  padding-top: 0;
+  padding-bottom: 0;
+  display: inline-flex; 
+  align-items: center;
+}
+
+.navbar-db .navbar-brand svg {
+    height: 50px; /* Juster efter behov for at matche billedet */
+    width: auto; /* Bevar aspect ratio */
+    vertical-align: middle;
+}
+
+.navbar-db .nav-link {
+  color: var(--db-navbar-link-color);
+  text-transform: uppercase;
+  font-weight: 600; /* Lidt federe for at matche billede */
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  font-size: 0.9rem; /* Lidt mindre font for at matche billede */
+}
+
+.navbar-db .nav-link:hover,
+.navbar-db .nav-link:focus,
+.navbar-db .nav-link.active { /* Tilføj .active for at style aktivt link */
+  color: var(--db-navbar-link-hover-color);
+}
+
+/* Support Button */
+.btn-db-support {
+  background-color: var(--db-support-orange);
+  color: var(--db-white);
+  border: none;
+  padding: 0.6rem 1.2rem; /* Justeret padding */
+  font-weight: 700; /* Federe tekst for STØT */
+  font-size: 0.9rem; /* Matcher nav links */
+  text-transform: uppercase;
+}
+
+.btn-db-support:hover {
+  background-color: color-mix(in srgb, var(--db-support-orange) 85%, black);
+  color: var(--db-white);
+}
+
+/* Navbar utility text - "Ring 1812" */
+.navbar-utility-text {
+    font-size: 0.85rem;
+    color: var(--db-text-on-light-secondary);
+    padding-left: 0.75rem; /* Lidt afstand */
+    display: flex;
+    align-items: center; /* Vertikal centrering med knappen */
+}
+
+/* Language Switcher - antager det er en simpel tekst eller link */
+.navbar-lang-switch {
+    font-size: 0.85rem; /* Samme som utility text */
+    padding-left: 0.5rem; /* Lidt afstand */
+    padding-right: 0.5rem;
+    color: var(--db-text-on-light-secondary);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-lang-switch a,
+.navbar-lang-switch span { /* Hvis det er links eller bare spans */
+    color: var(--db-text-on-light-secondary);
+    text-decoration: none;
+}
+
+.navbar-lang-switch a:hover {
+    color: var(--db-primary-red);
+    text-decoration: underline;
+}
+
+.navbar-lang-switch .lang-active {
+    font-weight: bold; /* Fremhæv aktivt sprog */
+    color: var(--db-text-on-light-primary);
+}
+
+/* Justering for at få "Ring 1812" og DK/EN på samme linje som STØT på større skærme */
+@media (min-width: 992px) { /* lg breakpoint for Bootstrap navbar collapse */
+    .navbar-db .navbar-nav.ms-auto { /* Eller hvad end der bruges til at højrejustere */
+        align-items: center; /* Vertikal centrering af elementer i højre side */
+    }
+}
+
+/* Override Bootstrap danger buttons to use our primary red */
+.btn-danger {
+    background-color: var(--db-primary-red);
+    border-color: var(--db-primary-red);
+    color: var(--db-white);
+}
+
+.btn-danger:hover {
+    background-color: color-mix(in srgb, var(--db-primary-red) 85%, black);
+    border-color: color-mix(in srgb, var(--db-primary-red) 80%, black);
+    color: var(--db-white);
+}
+
+.btn-outline-danger {
+    color: var(--db-primary-red);
+    border-color: var(--db-primary-red);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--db-primary-red);
+    border-color: var(--db-primary-red);
+    color: var(--db-white);
+}
+
+/* Footer styling */
+.footer-db {
+  background-color: var(--db-primary-red); /* Ny footer farve */
+  color: var(--db-text-on-dark);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  position: relative; /* Ændret fra absolute for at se om det løser overlap */
+  bottom: 0;
+  width: 100%;
+  line-height: 40px; /* Matcher margin-bottom på body for sticky footer */
+}
+
+.footer-db a {
+    color: var(--db-text-on-dark);
+    text-decoration: underline;
+}
+.footer-db a:hover {
+    color: #dddddd; /* Lidt lysere ved hover */
+}
+
+/* General button styling for arrows (example) */
+.btn-arrow::after {
+    content: ' →';
+    font-weight: bold;
+}
+
+/* Placeholder for hero text box */
+.hero-text-box {
+    /* Farver og padding styres primært inline i Index.cshtml for fleksibilitet med forskellige hero-bokse */
+    /* Men vi kan sikre nogle defaults her, hvis det er nødvendigt */
+    /* background-color: var(--db-primary-red); Standard, kan overskrives */
+    /* color: var(--db-white); Standard, kan overskrives */
+    padding: 2rem; /* Standard padding, kan justeres inline */
+    height: 100%; /* Sørger for at boksen fylder højden af sin kolonne */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-text-box h1 {
+    font-size: 2.2rem; /* Justeret størrelse */
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.hero-text-box p.lead {
+    font-size: 1.1rem; /* Justeret størrelse for lead paragraf */
+    margin-bottom: 1.5rem;
+}
+
+.hero-text-box .btn {
+    font-size: 0.9rem; /* Justeret knaptekst størrelse */
+    padding: 0.6rem 1.2rem; /* Justeret knap padding */
+    text-transform: uppercase;
+}
+
+/* Knap i hero-sektion (specifik styling for lys knap på mørk baggrund) */
+.hero-text-box .btn.btn-light {
+    background-color: var(--db-white);
+    color: var(--db-primary-red); /* Mørkerød tekst */
+    border: 2px solid var(--db-white); /* Hvid kant, kan fjernes hvis unødvendigt */ 
+}
+
+.hero-text-box .btn.btn-light:hover {
+    background-color: var(--db-light-beige-bg); /* Let beige hover */
+    color: var(--db-primary-red);
+    border-color: var(--db-light-beige-bg);
+}
+
+/* General button styling for arrows */
+.btn-arrow::after {
+    content: ' →';
+    font-weight: bold; /* Gør pilen lidt tydeligere */
+    display: inline-block; /* Sikrer korrekt linjering og plads */
+    margin-left: 0.3em;
+}
+
+/* Card Customization */
+.card {
+    border: 1px solid var(--db-border-color); /* Subtil border */
+    /* Potentielt fjerne shadow hvis designet er fladere */
+    /* box-shadow: none !important; */
+}
+
+.card-title {
+    color: var(--db-primary-red); /* Gør titler i kort røde for at matche design */
+}
+
+/* Links generelt */
+a {
+    color: var(--db-link-color);
+}
+
+a:hover {
+    color: color-mix(in srgb, var(--db-link-color) 80%, black);
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* Nedenstående er fra den oprindelige site.css, bevaret for en sikkerheds skyld, men kan måske ryddes op */
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+.hero-image-col {
+    background-size: cover;
+    background-position: center;
+    min-height: 300px; /* Minimumshøjde for små skærme */
+}
+
+@media (min-width: 768px) { /* md breakpoint og op */
+    .hero-image-col {
+        min-height: 500px; /* Større minimumshøjde for større skærme */
+    }
+
+    .hero-text-box {
+        padding: 3rem; /* Større padding for tekstboks på md og op */
+    }
+}

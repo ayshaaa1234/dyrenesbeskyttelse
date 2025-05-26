@@ -1,0 +1,53 @@
+[
+  {
+    "Id": 1,
+    "AnimalId": 1,
+    "CustomerId": 3,
+    "EmployeeId": 2,
+    "ApplicationDate": "2025-05-21T03:50:13.601619Z",
+    "AdoptionDate": "2025-05-26T05:50:13.6013459+02:00",
+    "Status": "Pending",
+    "AdoptionType": "",
+    "Animal": null,
+    "Notes": "Carla virker som et godt match til Max. Hjemmebes\u00F8g planlagt.",
+    "ApprovalDate": null,
+    "RejectionDate": null,
+    "CompletionDate": null,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 2,
+    "AnimalId": 2,
+    "CustomerId": 1,
+    "EmployeeId": 4,
+    "ApplicationDate": "2025-05-24T03:50:13.6017227Z",
+    "AdoptionDate": "2025-05-26T05:50:13.6017214+02:00",
+    "Status": "Pending",
+    "AdoptionType": "",
+    "Animal": null,
+    "Notes": "Anders har erfaring med siamesere.",
+    "ApprovalDate": null,
+    "RejectionDate": null,
+    "CompletionDate": null,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 3,
+    "AnimalId": 4,
+    "CustomerId": 2,
+    "EmployeeId": 2,
+    "ApplicationDate": "2025-05-11T03:50:13.6017236Z",
+    "AdoptionDate": "2025-05-26T05:50:13.6017232+02:00",
+    "Status": "Completed",
+    "AdoptionType": "",
+    "Animal": null,
+    "Notes": "Lucy trives hos Bente. Alt forl\u00F8b glat.",
+    "ApprovalDate": "2025-05-14T03:50:13.6017237Z",
+    "RejectionDate": null,
+    "CompletionDate": "2025-05-16T03:50:13.6017799Z",
+    "IsDeleted": false,
+    "DeletedAt": null
+  }
+]

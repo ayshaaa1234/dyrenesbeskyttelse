@@ -1,0 +1,57 @@
+﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+/* Generelle a tag styles er nu i site.css */
+/*
+a {
+  color: #0077cc;
+}
+*/
+
+/* Knap-styling (som .btn-primary) bør primært komme fra site.css eller Bootstrap overrides i site.css */
+/*
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+*/
+
+/* Nav-pills styling er ikke direkte relevant for den globale navbar og kan fjernes, hvis ikke brugt andre steder specifikt. */
+/*
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+*/
+
+/* Border utility classes beholdes, da de kan være generelt nyttige */
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Box-shadow utility beholdes */
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+/* Accept-policy knap styling kan forblive, hvis den bruges specifikt. */
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Generel footer styling er nu i site.css under .footer-db */
+/*
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+*/

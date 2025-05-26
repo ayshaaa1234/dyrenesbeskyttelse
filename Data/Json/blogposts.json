@@ -1,0 +1,107 @@
+[
+  {
+    "Id": 1,
+    "Title": "Velkommen til Dyrenes Beskyttelses nye blog!",
+    "Content": "Dette er det f\u00F8rste indl\u00E6g p\u00E5 vores nye blog. Her vil vi dele historier, tips og nyheder om vores arbejde med at hj\u00E6lpe dyr i n\u00F8d. F\u00F8lg med!",
+    "PictureUrl": "https://placehold.co/800x400/orange/white?text=Velkommen",
+    "AuthorId": 1,
+    "Author": "",
+    "PublishDate": "2025-05-19T03:50:13.5391284Z",
+    "CreatedAt": "2025-05-26T05:50:13.538962+02:00",
+    "IsPublished": true,
+    "Category": "",
+    "Tags": [
+      "velkommen",
+      "nyheder",
+      "internat"
+    ],
+    "Summary": "En kort velkomst til vores platform.",
+    "Likes": 15,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 2,
+    "Title": "Tips til pasning af din nye hvalp",
+    "Content": "At f\u00E5 en hvalp er en stor gl\u00E6de, men ogs\u00E5 et stort ansvar. Her er nogle gode r\u00E5d til, hvordan du bedst tager dig af din nye firbenede ven i den f\u00F8rste tid. Husk t\u00E5lmodighed og masser af k\u00E6rlighed!",
+    "PictureUrl": "https://placehold.co/800x400/green/white?text=HvalpeTips",
+    "AuthorId": 2,
+    "Author": "",
+    "PublishDate": "2025-05-21T03:50:13.5391699Z",
+    "CreatedAt": "2025-05-26T05:50:13.5391694+02:00",
+    "IsPublished": true,
+    "Category": "",
+    "Tags": [
+      "hvalpe",
+      "tips",
+      "hund"
+    ],
+    "Summary": "Gode r\u00E5d til nye hvalpeejere.",
+    "Likes": 42,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 3,
+    "Title": "Vinterhi for pindsvin: S\u00E5dan hj\u00E6lper du",
+    "Content": "Vinteren n\u00E6rmer sig, og det er tid til at t\u00E6nke p\u00E5 havens sm\u00E5 beboere. L\u00E6r hvordan du kan lave et sikkert og hyggeligt vinterhi for pindsvin.",
+    "PictureUrl": "https://placehold.co/800x400/brown/white?text=PindsvinHj\u00E6lp",
+    "AuthorId": 3,
+    "Author": "",
+    "PublishDate": "2025-05-24T03:50:13.539171Z",
+    "CreatedAt": "2025-05-26T05:50:13.5391706+02:00",
+    "IsPublished": true,
+    "Category": "",
+    "Tags": [
+      "pindsvin",
+      "vinter",
+      "natur"
+    ],
+    "Summary": "Hj\u00E6lp pindsvinene gennem vinteren.",
+    "Likes": 28,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 4,
+    "Title": "M\u00F8d Max: En glad labrador s\u00F8ger nyt hjem",
+    "Content": "Max er en energisk og k\u00E6rlig labrador p\u00E5 3 \u00E5r, som leder efter en aktiv familie. L\u00E6s hans historie og se om I er et match!",
+    "PictureUrl": "https://placehold.co/600x400/orange/white?text=Max\u002BHund",
+    "AuthorId": 1,
+    "Author": "",
+    "PublishDate": "2025-05-25T03:50:13.5391719Z",
+    "CreatedAt": "2025-05-26T05:50:13.5391716+02:00",
+    "IsPublished": true,
+    "Category": "",
+    "Tags": [
+      "adoption",
+      "hund",
+      "max"
+    ],
+    "Summary": "Adoptionshistorie for Max.",
+    "Likes": 55,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 5,
+    "Title": "S\u00E5dan spotter du tegn p\u00E5 mistrivsel hos din kat",
+    "Content": "Katte er mestre i at skjule smerte. L\u00E6r de subtile tegn p\u00E5, at din kat m\u00E5ske ikke har det godt, og hvorn\u00E5r du b\u00F8r kontakte dyrl\u00E6gen.",
+    "PictureUrl": "https://placehold.co/800x400/blue/white?text=Kat\u002BSundhed",
+    "AuthorId": 4,
+    "Author": "",
+    "PublishDate": "2025-05-25T15:50:13.5391727Z",
+    "CreatedAt": "2025-05-26T05:50:13.5391724+02:00",
+    "IsPublished": true,
+    "Category": "",
+    "Tags": [
+      "kat",
+      "sundhed",
+      "adf\u00E6rd"
+    ],
+    "Summary": "Forst\u00E5 din kats signaler.",
+    "Likes": 33,
+    "IsDeleted": false,
+    "DeletedAt": null
+  }
+]

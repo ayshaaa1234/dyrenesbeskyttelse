@@ -1,0 +1,62 @@
+[
+  {
+    "Id": 1,
+    "Name": "Basis St\u00F8ttemedlemskab",
+    "Description": "\u00C5rligt medlemskab der st\u00F8tter vores daglige drift og dyrevelf\u00E6rd. Inkluderer digitalt nyhedsbrev og 5% rabat i webshop.",
+    "Price": 250,
+    "Frequency": "Annually",
+    "IsDonation": false,
+    "AllowsCustomAmount": false,
+    "IsAvailable": true,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 2,
+    "Name": "S\u00F8lv St\u00F8ttemedlemskab",
+    "Description": "Et st\u00F8rre \u00E5rligt bidrag med flere fordele, inklusiv vores trykte magasin, 10% rabat i webshop og invitation til \u00E5rligt medlemsarrangement.",
+    "Price": 600,
+    "Frequency": "Annually",
+    "IsDonation": false,
+    "AllowsCustomAmount": false,
+    "IsAvailable": true,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 3,
+    "Name": "Guld St\u00F8ttemedlemskab",
+    "Description": "Vores mest omfattende st\u00F8ttemedlemskab med eksklusive fordele: trykt magasin, 15% rabat i webshop, invitation til medlemsarrangement med ledsager, og s\u00E6rlig tak p\u00E5 hjemmesiden (valgfrit).",
+    "Price": 1200,
+    "Frequency": "Annually",
+    "IsDonation": false,
+    "AllowsCustomAmount": false,
+    "IsAvailable": true,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 4,
+    "Name": "M\u00E5nedlig St\u00F8tte",
+    "Description": "St\u00F8t os med et fast m\u00E5nedligt bel\u00F8b. Alle bidrag g\u00F8r en forskel. Inkluderer digitalt nyhedsbrev.",
+    "Price": 75,
+    "Frequency": "Monthly",
+    "IsDonation": true,
+    "AllowsCustomAmount": false,
+    "IsAvailable": true,
+    "IsDeleted": false,
+    "DeletedAt": null
+  },
+  {
+    "Id": 5,
+    "Name": "Giv en Engangsdonation",
+    "Description": "Ethvert bel\u00F8b hj\u00E6lper os med at redde og passe p\u00E5 dyr i n\u00F8d. Mindstebel\u00F8b 50 kr, maksimum 10.000 kr via denne formular.",
+    "Price": 0,
+    "Frequency": "OneTime",
+    "IsDonation": true,
+    "AllowsCustomAmount": true,
+    "IsAvailable": true,
+    "IsDeleted": false,
+    "DeletedAt": null
+  }
+]
