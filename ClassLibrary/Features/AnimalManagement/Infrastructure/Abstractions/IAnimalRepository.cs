@@ -25,5 +25,6 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Abstractions
         Task<IEnumerable<Animal>> GetAnimalsByNameAsync(string name);
         Task<IEnumerable<Animal>> GetAnimalsByBreedAsync(string breed);
         Task<IEnumerable<Animal>> GetAnimalsNeedingVaccinationAsync(); // Flyttet fra Health Record Operations
+        Task<IEnumerable<Animal>> GetAnimalsByIdsAsync(IEnumerable<int> ids);
     }
 } 

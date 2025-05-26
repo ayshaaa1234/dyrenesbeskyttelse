@@ -112,6 +112,11 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Abstractions // Opd
         /// Henter dyr baseret på race
         /// </summary>
         Task<IEnumerable<Animal>> GetAnimalsByBreedAsync(string breed);
+
+        /// <summary>
+        /// Henter flere dyr baseret på en liste af ID'er
+        /// </summary>
+        Task<IEnumerable<Animal>> GetAnimalsByIdsAsync(IEnumerable<int> ids);
         #endregion
 
         #region Health Record Operations

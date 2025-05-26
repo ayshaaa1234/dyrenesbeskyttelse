@@ -2,10 +2,13 @@
 @model RazorPagesApp.Pages.Admin.Animals.DetailsModel
 @using ClassLibrary.Features.AnimalManagement.Core.Enums
 @using ClassLibrary.SharedKernel.Extensions
+@using System.Text.Json
 
 @{    ViewData["Title"] = Model.Animal != null ? $"Detaljer for {Model.Animal.Name}" : "Dyredetaljer";
     Layout = "/Pages/Shared/_AdminLayout.cshtml";
 }
+
+@Html.AntiForgeryToken()
 
 @if (Model.Animal == null)
 {
@@ -96,9 +99,16 @@ else
             @if (!Model.HealthRecords.Any())
             {
                 <p>Ingen sundhedsjournaler fundet for dette dyr.</p>
+                <table class="table table-sm table-bordered" style="display:none;">
+                    <thead>
+                        <tr><th>Dato</th><th>Dyrlæge</th><th>Diagnose</th><th>Behandling</th><th>Noter</th><th>Vaccineret</th><th>Næste Vaccine</th><th>Handlinger</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             }
             else
             {
+                <p style="display:none;">Ingen sundhedsjournaler fundet for dette dyr.</p>
                 <table class="table table-sm table-bordered">
                     <thead>
                         <tr><th>Dato</th><th>Dyrlæge</th><th>Diagnose</th><th>Behandling</th><th>Noter</th><th>Vaccineret</th><th>Næste Vaccine</th><th>Handlinger</th></tr>
@@ -106,7 +116,7 @@ else
                     <tbody>
                         @foreach(var record in Model.HealthRecords.OrderByDescending(hr => hr.RecordDate))
                         {
-                            <tr>
+                            <tr data-record-id="@record.Id">
                                 <td>@record.RecordDate.ToString("dd-MM-yyyy")</td>
                                 <td>@record.VeterinarianName</td>
                                 <td>@record.Diagnosis</td>
@@ -134,9 +144,16 @@ else
             @if (!Model.Visits.Any())
             {
                 <p>Ingen besøg fundet for dette dyr.</p>
+                <table class="table table-sm table-bordered" style="display:none;">
+                    <thead>
+                        <tr><th>Planlagt Dato</th><th>Varighed</th><th>Type</th><th>Formål</th><th>Besøgende</th><th>Status</th><th>Noter</th><th>Handlinger</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             }
             else
             {
+                <p style="display:none;">Ingen besøg fundet for dette dyr.</p>
                 <table class="table table-sm table-bordered">
                     <thead>
                         <tr><th>Planlagt Dato</th><th>Varighed</th><th>Type</th><th>Formål</th><th>Besøgende</th><th>Status</th><th>Noter</th><th>Handlinger</th></tr>
@@ -165,7 +182,6 @@ else
                                         <button type="button" class="btn btn-sm btn-success btnCompleteVisit ms-1" data-visitid="@visit.Id">Fuldfør</button>
                                         <button type="button" class="btn btn-sm btn-outline-warning btnCancelVisit ms-1" data-visitid="@visit.Id">Annuller</button>
                                     }
-                                    @* Andre statusser (Completed, Cancelled) har ingen yderligere handlinger her *@
                                 </td>
                             </tr>
                         }
@@ -221,457 +237,10 @@ else
     @section Scripts {
         @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
         <script>
-            $(document).ready(function () {
-                var animalId = @Model.Animal.Id; // Gør animalId tilgængelig i scriptet
-                
-                // --- Toast Helper Function ---
-                function showToast(message, type = 'info') { // type kan være 'success', 'error', 'warning', 'info'
-                    var toastId = 'toast-' + new Date().getTime();
-                    var toastHTML = `
-                        <div id="${toastId}" class="toast align-items-center text-white ${type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary') } border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                            <div class="d-flex">
-                                <div class="toast-body">
-                                    ${message}
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                        </div>`;
-                    $('#toastContainer').append(toastHTML);
-                    var toastElement = new bootstrap.Toast(document.getElementById(toastId));
-                    toastElement.show();
-                    // Fjern toast fra DOM efter den er skjult for at undgå ophobning
-                    document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
-                        this.remove();
-                    });
-                }
-
-                // --- HealthRecord Modal Logic ---
-                var healthRecordModal = new bootstrap.Modal(document.getElementById('healthRecordModal'));
-                var currentHealthRecordId = null; 
-
-                function formatDate(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Måneder er 0-indexed
-                    const year = date.getFullYear();
-                    return `${day}-${month}-${year}`;
-                }
-
-                function buildHealthRecordRow(record) {
-                    return `
-                        <tr data-record-id="${record.id}">
-                            <td>${formatDate(record.recordDate)}</td>
-                            <td>${record.veterinarianName || ''}</td>
-                            <td>${record.diagnosis || ''}</td>
-                            <td>${record.treatment || ''}</td>
-                            <td>${record.notes || ''}</td>
-                            <td>${record.isVaccinated ? 'Ja' : 'Nej'}</td>
-                            <td>${formatDate(record.nextVaccinationDate)}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-outline-primary btnEditHealthRecord" data-recordid="${record.id}" data-animalid="${animalId}">Rediger</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger btnDeleteHealthRecord" data-recordid="${record.id}" data-animalid="${animalId}" data-recordname="Notat fra ${formatDate(record.recordDate)}">Slet</button>
-                            </td>
-                        </tr>`;
-                }
-
-                function updateHealthRecordsTable(newRecord, isEdit = false) {
-                    const tbody = $('#healthRecordsTableContainer tbody');
-                    const noRecordsP = $('#healthRecordsTableContainer p'); // "Ingen sundhedsjournaler..."
-                    const table = $('#healthRecordsTableContainer table');
-
-                    if (isEdit) {
-                        tbody.find(`tr[data-record-id="${newRecord.id}"]`).replaceWith(buildHealthRecordRow(newRecord));
-                    } else {
-                        tbody.prepend(buildHealthRecordRow(newRecord)); // Tilføj øverst for nyeste først (eller append)
-                    }
-                    
-                    // Sorter rækker efter dato (nyeste først) - recordDate er i ISO format fra serveren, så string compare virker hvis datoer er ens.
-                    // For robust sortering, konverter til Date objekter.
-                    var rows = tbody.find('tr').get();
-                    rows.sort(function(a, b) {
-                        var dateA = new Date($(a).find('td:first').text().split('-').reverse().join('-')); // dd-mm-yyyy to yyyy-mm-dd
-                        var dateB = new Date($(b).find('td:first').text().split('-').reverse().join('-'));
-                        return dateB - dateA; // Descending
-                    });
-                    $.each(rows, function(index, row) {
-                        tbody.append(row); 
-                    });
-
-
-                    const currentCount = parseInt($('#healthRecordsCount').text());
-                    if (!isEdit) {
-                        $('#healthRecordsCount').text(currentCount + 1);
-                    }
-
-                    if (tbody.find('tr').length > 0) {
-                        noRecordsP.hide();
-                        table.show();
-                    } else {
-                        noRecordsP.show();
-                        table.hide();
-                         $('#healthRecordsCount').text(0);
-                    }
-                }
-
-                $('#btnAddHealthRecord').click(function () {
-                    currentHealthRecordId = null;
-                    $('#healthRecordModalLabel').text('Tilføj Sundhedsnotat');
-                    $('#healthRecordModalBody').load('?handler=CreateHealthRecordForm&animalId=' + animalId, function () {
-                        $.validator.unobtrusive.parse($('#healthRecordModalBody form')); // Gen-parse validator for dynamisk indhold
-                        healthRecordModal.show();
-                    });
-                });
-
-                $(document).on('click', '.btnEditHealthRecord', function () {
-                    currentHealthRecordId = $(this).data('recordid');
-                    $('#healthRecordModalLabel').text('Rediger Sundhedsnotat');
-                    $('#healthRecordModalBody').load('?handler=EditHealthRecordForm&recordId=' + currentHealthRecordId + '&animalId=' + animalId, function () {
-                        $.validator.unobtrusive.parse($('#healthRecordModalBody form')); // Gen-parse validator for dynamisk indhold
-                        healthRecordModal.show();
-                    });
-                });
-
-                $('#btnSaveHealthRecord').click(function () {
-                    var form = $('#healthRecordModalBody form');
-                    if (!form.length) {
-                        console.error("HealthRecord form not found in modal.");
-                        showToast('Formular ikke fundet.', 'error');
-                        return;
-                    }
-
-                    if (!form.valid()) { // Tjekker validering
-                        return false; // Stopper hvis ikke valid
-                    }
-
-                    var formData = form.serialize();
-                    var url = currentHealthRecordId ?
-                        '?handler=EditHealthRecord&recordId=' + currentHealthRecordId + '&animalId=' + animalId :
-                        '?handler=CreateHealthRecord&animalId=' + animalId;
-
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        data: formData,
-                        success: function (response) {
-                            if (response.success && response.data) {
-                                healthRecordModal.hide();
-                                showToast(response.message, 'success');
-                                updateHealthRecordsTable(response.data, !!currentHealthRecordId);
-                            } else {
-                                if (typeof response === 'string') {
-                                    $('#healthRecordModalBody').html(response);
-                                    var newForm = $('#healthRecordModalBody').find('form');
-                                    $.validator.unobtrusive.parse(newForm);
-                                } else if (response.message) {
-                                    showToast('Fejl: ' + response.message, 'error');
-                                }
-                            }
-                        },
-                        error: function (xhr) {
-                            var errorMessage = 'Der skete en serverfejl ved gem af sundhedsnotat.';
-                            if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
-                            else if (xhr.responseText) {
-                                 $('#healthRecordModalBody').html('<div>En serverfejl opstod. Prøv venligst igen. Status: ' + xhr.status + '</div>');
-                                 return;
-                            }
-                            showToast(errorMessage, 'error');
-                        }
-                    });
-                });
-
-                $('#healthRecordsTableContainer').on('click', '.btnDeleteHealthRecord', function () {
-                    var recordIdToDelete = $(this).data('recordid');
-                    var localAnimalIdHrDel = $(this).data('animalid');
-                    var recordName = $(this).data('recordname') || 'dette notat';
-                    if (confirm(`Er du sikker på, at du vil slette ${recordName}?`)) {
-                        var token = $('input[name="__RequestVerificationToken"]').val();
-                        $.ajax({
-                            url: `?handler=DeleteHealthRecord&recordId=${recordIdToDelete}&animalId=${localAnimalIdHrDel}`,
-                            type: 'POST',
-                            headers: { 'RequestVerificationToken': token },
-                            success: function (response) {
-                                if (response.success) { 
-                                    $('#healthRecordsTableContainer tbody tr[data-record-id="' + recordIdToDelete + '"]').remove();
-                                    const currentCount = parseInt($('#healthRecordsCount').text());
-                                    $('#healthRecordsCount').text(currentCount - 1);
-                                    if ((currentCount - 1) === 0) {
-                                        $('#healthRecordsTableContainer table').hide();
-                                        $('#healthRecordsTableContainer p').show(); // Vis "Ingen data" besked
-                                    }
-                                    showToast(response.message || 'Sundhedsnotat slettet!', 'success');
-                                } 
-                                else { 
-                                    showToast('Fejl under sletning: ' + (response.message || 'Ukendt fejl.'), 'error');
-                                }
-                            },
-                            error: function (xhr) {
-                                var errorMessage = 'Der skete en serverfejl under sletning.';
-                                if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
-                                showToast(errorMessage, 'error');
-                            }
-                        });
-                    }
-                });
-                
-                document.getElementById('healthRecordModal').addEventListener('hidden.bs.modal', function () {
-                    $('#healthRecordModalBody').html(''); 
-                    currentHealthRecordId = null; 
-                });
-
-                // --- Visit Modal Logic ---
-                var visitModal = new bootstrap.Modal(document.getElementById('visitModal'));
-                var currentVisitId = null;
-
-                function formatVisitDateTime(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${day}-${month}-${year} ${hours}:${minutes}`;
-                }
-
-                function buildVisitRow(visit) {
-                    // Helper for at bygge handlingsknapper baseret på status
-                    function getActionButtons(currentStatus, visitId, animalId) {
-                        let buttons = `<button type="button" class="btn btn-sm btn-outline-primary btnEditVisit" data-visitid="${visitId}" data-animalid="${animalId}">Rediger</button>
-                                     <button type="button" class="btn btn-sm btn-outline-danger btnDeleteVisit" data-visitid="${visitId}" data-animalid="${animalId}" data-visitname="Besøg d. ${formatVisitDateTime(visit.plannedDate)}">Slet</button>`;
-                        
-                        if (currentStatus === '@VisitStatus.Scheduled.ToString()') {
-                            buttons += ` <button type="button" class="btn btn-sm btn-outline-success btnConfirmVisit ms-1" data-visitid="${visitId}">Bekræft</button>
-                                         <button type="button" class="btn btn-sm btn-outline-warning btnCancelVisit ms-1" data-visitid="${visitId}">Annuller</button>`;
-                        } else if (currentStatus === '@VisitStatus.Confirmed.ToString()') {
-                            buttons += ` <button type="button" class="btn btn-sm btn-success btnCompleteVisit ms-1" data-visitid="${visitId}">Fuldfør</button>
-                                         <button type="button" class="btn btn-sm btn-outline-warning btnCancelVisit ms-1" data-visitid="${visitId}">Annuller</button>`;
-                        }
-                        return buttons;
-                    }
-
-                    return `
-                        <tr data-visit-id="${visit.id}">
-                            <td>${formatVisitDateTime(visit.plannedDate)}</td>
-                            <td>${visit.plannedDuration} min.</td>
-                            <td>${visit.type || ''}</td>
-                            <td>${visit.purpose || ''}</td>
-                            <td>${visit.visitor || ''}</td>
-                            <td class="visit-status">${visit.statusDisplay}</td>
-                            <td>${visit.notes || ''}</td>
-                            <td class="visit-actions">
-                                ${getActionButtons(visit.status.toString(), visit.id, animalId)}
-                            </td>
-                        </tr>`;
-                }
-
-                function updateVisitsTable(newVisit, isEdit = false) {
-                    const tbody = $('#visitsTableContainer tbody');
-                    const noRecordsP = $('#visitsTableContainer p');
-                    const table = $('#visitsTableContainer table');
-
-                    if (isEdit) {
-                        tbody.find(`tr[data-visit-id="${newVisit.id}"]`).replaceWith(buildVisitRow(newVisit));
-                    } else {
-                        tbody.prepend(buildVisitRow(newVisit)); 
-                    }
-
-                    var rows = tbody.find('tr').get();
-                    rows.sort(function(a, b) {
-                        // Antager at plannedDate er i første celle og kan konverteres til Date
-                        var dateAStr = $(a).find('td:first').text(); // Format: dd-MM-yyyy HH:mm
-                        var dateBStr = $(b).find('td:first').text();
-                        // Konverter dd-MM-yyyy HH:mm til yyyy-MM-ddTHH:mm for Date constructor
-                        var isoDateA = dateAStr.substring(6, 10) + '-' + dateAStr.substring(3, 5) + '-' + dateAStr.substring(0, 2) + 'T' + dateAStr.substring(11,16);
-                        var isoDateB = dateBStr.substring(6, 10) + '-' + dateBStr.substring(3, 5) + '-' + dateBStr.substring(0, 2) + 'T' + dateBStr.substring(11,16);
-                        var dateA = new Date(isoDateA);
-                        var dateB = new Date(isoDateB);
-                        return dateB - dateA; // Descending
-                    });
-                    $.each(rows, function(index, row) {
-                        tbody.append(row); 
-                    });
-
-                    const currentCount = parseInt($('#visitsCount').text());
-                    if (!isEdit) {
-                        $('#visitsCount').text(currentCount + 1);
-                    }
-
-                    if (tbody.find('tr').length > 0) {
-                        noRecordsP.hide();
-                        table.show();
-                    } else {
-                        noRecordsP.show();
-                        table.hide();
-                        $('#visitsCount').text(0);
-                    }
-                }
-
-                $('#btnAddVisit').click(function () {
-                    currentVisitId = null;
-                    $('#visitModalLabel').text('Registrer Besøg');
-                    $('#visitModalBody').load('?handler=CreateVisitForm&animalId=' + animalId, function () {
-                        $.validator.unobtrusive.parse($('#visitModalBody form')); // Gen-parse validator for dynamisk indhold
-                        visitModal.show();
-                    });
-                });
-
-                $(document).on('click', '.btnEditVisit', function () {
-                    currentVisitId = $(this).data('visitid');
-                    $('#visitModalLabel').text('Rediger Besøg');
-                    $('#visitModalBody').load('?handler=EditVisitForm&visitId=' + currentVisitId + '&animalId=' + animalId, function () {
-                        $.validator.unobtrusive.parse($('#visitModalBody form')); // Gen-parse validator for dynamisk indhold
-                        visitModal.show();
-                    });
-                });
-
-                $('#btnSaveVisit').click(function () {
-                    var form = $('#visitModalBody form');
-                    if (!form.length) {
-                        console.error("Visit form not found in modal.");
-                        showToast('Formular ikke fundet.', 'error');
-                        return;
-                    }
-                    if (!form.valid()) { // Tjekker validering
-                        return false; // Stopper hvis ikke valid
-                    }
-
-                    var formData = form.serialize();
-                    var url = currentVisitId ?
-                        '?handler=EditVisit&visitId=' + currentVisitId + '&animalId=' + animalId :
-                        '?handler=CreateVisit&animalId=' + animalId;
-
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        data: formData,
-                        success: function (response) {
-                            if (response.success && response.data) {
-                                visitModal.hide();
-                                showToast(response.message, 'success');
-                                updateVisitsTable(response.data, !!currentVisitId);
-                            } else {
-                                if (typeof response === 'string') { // Server returnerede partial med fejl
-                                    $('#visitModalBody').html(`<form id="visitForm">${response}</form>`);
-                                    $.validator.unobtrusive.parse($('#visitForm'));
-                                } else if (response.message) {
-                                    showToast('Fejl: ' + response.message, 'error');
-                                }
-                            }
-                        },
-                        error: function (xhr) {
-                            var errorMessage = 'Der skete en serverfejl ved gem af besøg.';
-                            if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
-                            else if (xhr.responseText) {
-                                 $('#visitModalBody').html('<div>En serverfejl opstod. Prøv venligst igen. Status: ' + xhr.status + '</div>');
-                                 return;
-                            }
-                            showToast(errorMessage, 'error');
-                        }
-                    });
-                });
-
-                $('#visitsTableContainer').on('click', '.btnDeleteVisit', function () {
-                    var visitIdToDelete = $(this).data('visitid');
-                    var localAnimalIdVisitDel = $(this).data('animalid');
-                    var visitName = $(this).data('visitname') || 'dette besøg';
-                    if (confirm(`Er du sikker på, at du vil slette ${visitName}?`)) {
-                        var token = $('input[name="__RequestVerificationToken"]').val();
-                        $.ajax({
-                            url: `?handler=DeleteVisit&visitId=${visitIdToDelete}&animalId=${localAnimalIdVisitDel}`,
-                            type: 'POST',
-                            headers: { 'RequestVerificationToken': token },
-                            success: function (response) {
-                                if (response.success) { 
-                                    $('#visitsTableContainer tbody tr[data-visit-id="' + visitIdToDelete + '"]').remove();
-                                    const currentCount = parseInt($('#visitsCount').text());
-                                    $('#visitsCount').text(currentCount - 1);
-                                    if ((currentCount - 1) === 0) {
-                                        $('#visitsTableContainer table').hide();
-                                        $('#visitsTableContainer p').show();
-                                    }
-                                    showToast(response.message || 'Besøg slettet!', 'success');
-                                }
-                                else { 
-                                    showToast('Fejl under sletning af besøg: ' + (response.message || 'Ukendt fejl.'), 'error');
-                                }
-                            },
-                            error: function (xhr) {
-                                var errorMessage = 'Der skete en serverfejl under sletning af besøg.';
-                                if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
-                                showToast(errorMessage, 'error');
-                            }
-                        });
-                    }
-                });
-
-                document.getElementById('visitModal').addEventListener('hidden.bs.modal', function () {
-                    $('#visitModalBody').html('');
-                    currentVisitId = null;
-                });
-
-                // --- Visit Status Change Logic ---
-                function handleVisitStatusUpdate(visitId, newStatusString, actionUrl) {
-                    if (!confirm(`Er du sikker på, at du vil ændre status for dette besøg?`)) {
-                        return;
-                    }
-
-                    $.ajax({
-                        type: 'POST',
-                        url: actionUrl,
-                        data: { visitId: visitId, animalId: animalId }, // animalId er global i scriptet
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
-                        },
-                        success: function (response) {
-                            if (response.success && response.data) {
-                                showToast(response.message, 'success');
-                                // Opdater kun den specifikke række i stedet for hele tabellen for bedre performance
-                                const visitRow = $(`#visitsTableContainer tr[data-visit-id="${response.data.id}"]`);
-                                if (visitRow.length) {
-                                    visitRow.find('.visit-status').text(response.data.statusDisplay);
-                                    // Opdater handlingsknapperne
-                                    visitRow.find('.visit-actions').html(getActionButtons(response.data.status.toString(), response.data.id, animalId));
-                                } else {
-                                    // Fallback hvis rækken ikke findes, genindlæs tabel (burde ikke ske)
-                                    // Eller indsæt den nye række (hvis det var en oprettelse - ikke relevant her)
-                                    console.warn("Kunne ikke finde besøgsrækken til opdatering. Overvej at genindlæse tabel data.");
-                                }
-                            } else {
-                                showToast(response.message || 'Fejl ved opdatering af besøgsstatus.', 'error');
-                            }
-                        },
-                        error: function (xhr) {
-                            var errorMessage = 'Serverfejl ved opdatering af besøgsstatus.';
-                            if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
-                            else if (xhr.responseText) {
-                                try {
-                                    var err = JSON.parse(xhr.responseText);
-                                    if (err.message) errorMessage = err.message;
-                                } catch (e) { /* Ignorer parse fejl */ }
-                            }
-                            showToast(errorMessage, 'error');
-                        }
-                    });
-                }
-
-                $(document).on('click', '.btnConfirmVisit', function () {
-                    var visitId = $(this).data('visitid');
-                    handleVisitStatusUpdate(visitId, '@VisitStatus.Confirmed.ToString()', `?handler=ConfirmVisit&visitId=${visitId}&animalId=${animalId}`);
-                });
-
-                $(document).on('click', '.btnCancelVisit', function () {
-                    var visitId = $(this).data('visitid');
-                    handleVisitStatusUpdate(visitId, '@VisitStatus.Cancelled.ToString()', `?handler=CancelVisit&visitId=${visitId}&animalId=${animalId}`);
-                });
-
-                $(document).on('click', '.btnCompleteVisit', function () {
-                    var visitId = $(this).data('visitid');
-                    // For 'Complete', kunne vi åbne en lille modal for at indtaste ActualDate/ActualDuration
-                    // For nu, sender vi bare anmodningen. ActualDate/Duration kan sættes i handleren hvis ikke allerede sat.
-                    handleVisitStatusUpdate(visitId, '@VisitStatus.Completed.ToString()', `?handler=CompleteVisit&visitId=${visitId}&animalId=${animalId}`);
-                });
-            });
+            // Definer globale JS variable som det eksterne script forventer
+            var animalId = @Model.Animal.Id;
+            var visitStatusEnum = @Html.Raw(JsonSerializer.Serialize(Enum.GetValues(typeof(VisitStatus)).Cast<VisitStatus>().ToDictionary(e => e.ToString(), e => e.ToString())));
         </script>
+        <script src="~/js/admin/animal-details.js" asp-append-version="true"></script>
     }
 } 

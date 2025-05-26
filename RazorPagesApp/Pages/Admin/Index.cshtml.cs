@@ -35,18 +35,23 @@ namespace RazorPagesApp.Pages.Admin
             // Dette kan være ineffektivt for mange besøg - overvej en mere specifik service metode senere
             var allVisitsRaw = await _animalService.GetAllVisitsAsync(); 
             var upcomingVisitsRaw = allVisitsRaw
-                .Where(v => v.PlannedDate.Date >= DateTime.Today && v.Status == VisitStatus.Scheduled) 
+                .Where(v => v.PlannedDate.Date >= DateTime.Today && (v.Status == VisitStatus.Scheduled || v.Status == VisitStatus.Confirmed))
                 .OrderBy(v => v.PlannedDate)
                 .Take(5) 
                 .ToList();
 
+            var animalIdsForUpcomingVisits = upcomingVisitsRaw.Select(v => v.AnimalId).Distinct().ToList();
+            IEnumerable<Animal> animalsForVisits = new List<Animal>();
+            if (animalIdsForUpcomingVisits.Any())
+            {
+                animalsForVisits = await _animalService.GetAnimalsByIdsAsync(animalIdsForUpcomingVisits);
+            }
+            var animalsDict = animalsForVisits.ToDictionary(a => a.Id);
+
             UpcomingVisits = new List<Visit>();
             foreach (var visitRaw in upcomingVisitsRaw)
             {
-                // Manuelt tilføj Animal objektet. Dette er IKKE optimalt for performance.
-                // Bør løses med .Include() i repository-laget.
-                var animalForVisit = await _animalService.GetAnimalByIdAsync(visitRaw.AnimalId);
-                if (animalForVisit != null) // Sikrer at vi ikke tilføjer et besøg hvis dyret af en eller anden grund ikke findes
+                if (animalsDict.TryGetValue(visitRaw.AnimalId, out var animalForVisit))
                 {
                     visitRaw.Animal = animalForVisit; 
                     UpcomingVisits.Add(visitRaw);

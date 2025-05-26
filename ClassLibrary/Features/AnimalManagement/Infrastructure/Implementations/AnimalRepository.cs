@@ -189,5 +189,16 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
             }
             return animalsNeedingVaccination;
         }
+
+        public async Task<IEnumerable<Animal>> GetAnimalsByIdsAsync(IEnumerable<int> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return Enumerable.Empty<Animal>();
+            }
+            var idSet = new HashSet<int>(ids); // For hurtigere opslag
+            // base.FindAsync vil håndtere indlæsning af data, hvis det er nødvendigt.
+            return await base.FindAsync(a => idSet.Contains(a.Id));
+        }
     }
 } 

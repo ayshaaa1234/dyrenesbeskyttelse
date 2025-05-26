@@ -157,6 +157,15 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Implementations
             if (string.IsNullOrWhiteSpace(breed)) return await GetAllAnimalsAsync(); // Eller anden logik
             return await _animalRepository.GetAnimalsByBreedAsync(breed);
         }
+
+        public async Task<IEnumerable<Animal>> GetAnimalsByIdsAsync(IEnumerable<int> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return Enumerable.Empty<Animal>();
+            }
+            return await _animalRepository.GetAnimalsByIdsAsync(ids); // Forudsætter denne metode findes på IAnimalRepository
+        }
         #endregion
 
         #region Health Record Operations

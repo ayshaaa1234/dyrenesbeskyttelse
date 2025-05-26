@@ -24,10 +24,6 @@ namespace RazorPagesApp.Pages.Admin.Animals
         [BindProperty]
         public Animal Animal { get; set; } = default!;
 
-        public SelectList SpeciesList { get; set; } = default!;
-        public SelectList GenderList { get; set; } = default!;
-        public SelectList StatusList { get; set; } = default!;
-
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -41,7 +37,7 @@ namespace RazorPagesApp.Pages.Admin.Animals
                 return NotFound();
             }
             Animal = animalFromDb;
-            PopulateSelectLists();
+            PopulateSelectListsInViewData();
             return Page();
         }
 
@@ -54,7 +50,7 @@ namespace RazorPagesApp.Pages.Admin.Animals
 
             if (!ModelState.IsValid)
             {
-                PopulateSelectLists();
+                PopulateSelectListsInViewData();
                 return Page();
             }
 
@@ -67,29 +63,29 @@ namespace RazorPagesApp.Pages.Admin.Animals
             catch (KeyNotFoundException ex) 
             {
                 ModelState.AddModelError(string.Empty, ex.Message); // Specifik fejl for ikke fundet
-                PopulateSelectLists();
+                PopulateSelectListsInViewData();
                 return Page();
             }
             catch (ArgumentException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                PopulateSelectLists();
+                PopulateSelectListsInViewData();
                 return Page();
             }
             catch (Exception)
             {
                 // Log ex - overvej at logge her
                 ModelState.AddModelError(string.Empty, "En fejl opstod under opdatering af dyret.");
-                PopulateSelectLists();
+                PopulateSelectListsInViewData();
                 return Page();
             }
         }
 
-        private void PopulateSelectLists()
+        private void PopulateSelectListsInViewData()
         {
-            SpeciesList = new SelectList(Enum.GetValues(typeof(Species)).Cast<Species>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Species);
-            GenderList = new SelectList(Enum.GetValues(typeof(Gender)).Cast<Gender>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Gender);
-            StatusList = new SelectList(Enum.GetValues(typeof(AnimalStatus)).Cast<AnimalStatus>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Status);
+            ViewData["SpeciesList"] = new SelectList(Enum.GetValues(typeof(Species)).Cast<Species>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Species);
+            ViewData["GenderList"] = new SelectList(Enum.GetValues(typeof(Gender)).Cast<Gender>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Gender);
+            ViewData["StatusList"] = new SelectList(Enum.GetValues(typeof(AnimalStatus)).Cast<AnimalStatus>().Select(e => new { Value = e, Text = e.ToString() }), "Value", "Text", Animal?.Status);
         }
     }
 } 
