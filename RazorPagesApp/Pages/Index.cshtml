@@ -4,26 +4,48 @@
     ViewData["Title"] = "Velkommen";
 }
 
-<!-- Hero Sektion -->
-<div class="container-fluid p-0 mb-5 hero-section-wrapper">
-    <div class="row g-0 align-items-stretch">
-        <div class="col-12 col-md-6 col-lg-5 order-md-1">
-            <div class="hero-text-box" style="background-color: var(--db-primary-red); color: var(--db-white); display: flex; flex-direction: column; justify-content: center; padding: 2rem; ">
-                <h1 class="display-4 fw-bold">Lange grisetransporter sætter igen rekord</h1>
-                <p class="lead fs-5 mb-4">Aldrig før har danske landmænd sendt så mange grise på lange dyretransporter. I 2024 blev flere end 13 millioner grise sendt ned igennem Europa på ture af mere end otte timers varighed. Den forfærdelige udvikling er en decideret dyrevelfærdskatastrofe.</p>
-                <p>
-                    <a href="#" class="btn btn-light btn-arrow fw-bold text-uppercase">Det skal forbydes</a>
-                </p>
+@section FullWidthHeaderContent {
+    <a name="_hero_redesign-19630"></a>
+    <section class="super-hero">
+        <div class="image">
+            <div class="image-sizer">
+                <figure>
+                    <img loading="eager" src="/images/grisetransport.png" width="1280" height="720"
+                        alt="Overfyldt grisetransport">
+                </figure>
             </div>
         </div>
-        <div class="col-12 col-md-6 col-lg-7 order-md-2 hero-image-col" 
-             style="background-image: url('https://placehold.co/1000x600/777777/FFFFFF?text=Baggrundsbillede');">
-            <!-- CSS klasse 'hero-image-col' vil styre min-height -->
+        <div class="text">
+            <h1 class="heading-2xl">
+                <div>Lange grisetransporter sætter igen rekord</div>
+            </h1>
+            <div class="body">
+                <div class="content">
+                    <div>Aldrig før har danske landmænd sendt så mange grise på lange dyretransporter. I 2024 blev flere end
+                        13 millioner grise sendt ned igennem Europa på ture af mere end otte timers varighed. Den
+                        forfærdelige udvikling er en decideret dyrevelfærdskatastrofe.</div>
+                    <div class="button-list">
+                        <div>
+                            <a href="/artikler/forfaerdelig-udvikling-skal-stoppes-lange-grisetransporter-saetter-igen-rekord"
+                                role="button" class="button hero-button">
+                                <span class="button-label">Det skal forbydes</span>
+                                <div class="icon">
+                                    <div class="icon-out">
+                                    
+ <svg fill="none" viewBox="0 0 16 12" id="arrow-right-alt" xmlns="http://www.w3.org/2000/svg"><path d="M9.225 11.1A.734.734 0 019 10.562c0-.208.075-.387.225-.537l3.3-3.275H.75A.726.726 0 010 6a.728.728 0 01.75-.75h11.775L9.2 1.95a.766.766 0 01-.2-.525c0-.2.075-.375.225-.525A.687.687 0 019.75.65c.2 0 .383.083.55.25l4.475 4.475a.825.825 0 01.188.287.944.944 0 010 .675.823.823 0 01-.188.288l-4.5 4.5a.72.72 0 01-.525.225.687.687 0 01-.525-.25z" fill="currentColor"></path></symbol>
+                                    
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </section>
+}
 
-<div class="container">
+<div class="container mt-5">
     <!-- Seneste Nyheder -->
     <div class="row mb-5">
         <div class="col-12 text-center mb-4">
@@ -38,20 +60,23 @@
                     <div class="card h-100" style="background-color: var(--db-white);">
                         @if (!string.IsNullOrEmpty(post.PictureUrl))
                         {
-                            <img src="@post.PictureUrl" class="card-img-top" alt="@post.Title" style="height: 200px; object-fit: cover;">
+                            <img src="@post.PictureUrl" class="card-img-top" alt="@post.Title"
+                                style="height: 200px; object-fit: cover;">
                         }
                         else
                         {
-                            <img src="https://placehold.co/600x400/eeeeee/999999?text=Billede+mangler" class="card-img-top" alt="Billede mangler" style="height: 200px; object-fit: cover;">
+                            <img src="https://placehold.co/600x400/eeeeee/999999?text=Billede+mangler" class="card-img-top"
+                                alt="Billede mangler" style="height: 200px; object-fit: cover;">
                         }
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">@post.Title</h5>
-                            @if(post.IsPublished)
+                            @if (post.IsPublished)
                             {
                                 <small class="text-muted mb-2">@post.PublishDate.ToString("dd. MMMM yyyy")</small>
                             }
                             <p class="card-text flex-grow-1">@post.Summary</p>
-                            <a asp-page="/Nyheder/Indlaeg" asp-route-id="@post.Id" class="btn btn-outline-danger btn-arrow align-self-start">Læs mere</a>
+                            <a asp-page="/Nyheder/Indlaeg" asp-route-id="@post.Id"
+                                class="btn btn-outline-danger btn-arrow align-self-start">Læs mere</a>
                         </div>
                     </div>
                 </div>
@@ -59,7 +84,7 @@
         }
         else
         {
-            <div class="col-12">
+            <div class="col-12 text-center">
                 <p>Ingen nyheder at vise i øjeblikket.</p>
             </div>
         }
@@ -72,7 +97,8 @@
     <div class="row p-5 mb-5 text-center" style="background-color: var(--db-primary-red); color: var(--db-white);">
         <div class="col-md-8 mx-auto">
             <h2 class="mb-3">Giv et dyr et nyt hjem</h2>
-            <p class="lead mb-4">Mange skønne dyr venter på en ny, kærlig familie på vores internater. Se hvem der venter på dig.</p>
+            <p class="lead mb-4">Mange skønne dyr venter på en ny, kærlig familie på vores internater. Se hvem der
+                venter på dig.</p>
             <a asp-page="/Adoption/Index" class="btn btn-light btn-arrow fw-bold">Se dyr til adoption</a>
         </div>
     </div>
@@ -80,7 +106,8 @@
     <!-- Bliv Medlem / Støt Sektion -->
     <div class="row text-center mb-5">
         <div class="col-md-6 mb-3">
-            <div class="p-5" style="background-color: var(--db-dark-green-accent); color: var(--db-white); height: 100%;">
+            <div class="p-5"
+                style="background-color: var(--db-dark-green-accent); color: var(--db-white); height: 100%;">
                 <h3 style="color: var(--db-white);">Bliv medlem</h3>
                 <p>Som medlem er du med til at sikre vores fortsatte arbejde for dyrene. Dit bidrag gør en forskel!</p>
                 <a asp-page="/Medlemskab/Index" class="btn btn-light btn-arrow fw-bold">Læs mere om medlemskab</a>
@@ -89,7 +116,8 @@
         <div class="col-md-6 mb-3">
             <div class="p-5" style="background-color: var(--db-primary-red); color: var(--db-white); height: 100%;">
                 <h3 style="color: var(--db-white);">Støt vores sag</h3>
-                <p>Din støtte, stor som lille, hjælper os med at redde dyr i nød, oplyse og kæmpe for bedre dyrevelfærd.</p>
+                <p>Din støtte, stor som lille, hjælper os med at redde dyr i nød, oplyse og kæmpe for bedre dyrevelfærd.
+                </p>
                 <a asp-page="/StoetOs" class="btn btn-light btn-arrow fw-bold">Giv et bidrag</a>
             </div>
         </div>

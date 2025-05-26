@@ -10,26 +10,140 @@
     <link rel="stylesheet" href="~/RazorPagesApp.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-db border-bottom box-shadow">
-            <div class="container d-flex justify-content-center align-items-center">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">
-                    <svg viewBox="0 0 335.6 95.4" xmlns="http://www.w3.org/2000/svg" style="height: 50px; vertical-align: middle;">
-                        <path fill="currentColor" d="M71.8.6C78.3.6 82.9 6 83.6 12.3c.5 4.5.5 9.2 0 13.7-.7 6.4-5.3 11.7-11.8 11.7H60.6c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h11.2zM67.5 8c-.3 0-.5.2-.5.5v21.2c0 .3.2.5.5.5h4.2c2.4 0 4.1-2 4.4-4.3.5-4.5.5-9.2 0-13.7C75.9 10 74.2 8 71.8 8h-4.3zm34.9 8.1c.1.3.5.3.6 0l5.1-14.7c.2-.6.5-.8 1-.8h5.8c.7 0 1.2.7.9 1.5l-9.4 23.7v10.9c0 .6-.5 1.1-1.1 1.1H100c-.6 0-1.1-.5-1.1-1.1v-11L89.6 2.1c-.3-.8.2-1.5.9-1.5h5.8c.5 0 .8.2 1 .8l5.1 14.7zm29.3 6.8c-.3 0-.5.2-.5.5v13.3c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h11.7c6.1 0 11.1 5 11.1 11.1 0 4.1-1.8 6.8-5.5 9.4-.7.5-.7 1-.3 1.8l5.7 13.3c.4.8.1 1.6-1 1.6H141c-.8 0-1.3-.4-1.5-1.1L134 23.6c-.1-.3-.4-.7-1-.7h-1.3zm0-14.9c-.3 0-.5.2-.5.5v6.4c0 .3.2.5.5.5h4.8c2 0 3.7-1.6 3.7-3.7 0-2-1.7-3.7-3.7-3.7h-4.8zm32.4 21.8c0 .3.2.5.5.5h12.6c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1h-19.5c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1H177c.6 0 1.1.5 1.1 1.1V7c0 .6-.5 1.1-1.1 1.1h-12.4c-.3 0-.5.2-.5.5V15c0 .3.2.5.5.5h11.9c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1h-11.9c-.3 0-.5.2-.5.5v6.3zm40.1 7.9c-.9 0-1.3-.5-1.4-.9l-7.2-18.6c-.1-.3-.5-.2-.5.1v18.4c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h6.3c.8 0 1.2.5 1.3 1l7.3 20.2c.1.3.5.2.5-.1v-20c0-.6.5-1.1 1.1-1.1h5.3c.6 0 1.1.5 1.1 1.1v35c0 .6-.5 1.1-1.1 1.1h-6.3zm25.2-7.9c0 .3.2.5.5.5h12.6c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H223c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h19.3c.6 0 1.1.5 1.1 1.1V7c0 .6-.5 1.1-1.1 1.1h-12.4c-.3 0-.5.2-.5.5V15c0 .3.2.5.5.5h11.9c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1h-11.9c-.3 0-.5.2-.5.5v6.3zm33.9-7.3c-6.6-1.5-11.9-4.4-11.9-11.3 0-6.3 5.1-11.2 12.2-11.2s12.2 4.9 12.2 11.2v.8c0 .6-.5 1.1-1.1 1.1h-5.4c-.6 0-1.1-.5-1.1-1.1v-.8c0-2.1-1.7-4-4.7-4s-4.6 1.6-4.6 3.7c0 2 2 3.3 4.7 3.8 7.4 1.5 12.8 4.6 12.8 11.9 0 6.9-5.4 11.6-13 11.6-7.3 0-12.6-5.1-12.6-11.6V25c0-.6.5-1.1 1.1-1.1h5.4c.6 0 1.1.5 1.1 1.1v1.6c0 2.4 1.9 4.4 5.1 4.4 3.2 0 5.3-1.9 5.3-4.4.1-2.2-1.5-3.2-5.5-4.1M24 68.5c0 2.3-1.2 5.1-2.7 6.7-.3.3-.3.7 0 1 1.8 1.5 3.1 4.5 3.1 7.2 0 7-4.4 11.5-10.9 11.5H1.1c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h12.5c5.9 0 10.4 4.8 10.4 10.8m-10.7 3.4c1.9 0 3.5-1.6 3.5-3.5S15.2 65 13.3 65H7.8c-.3 0-.5.2-.5.5v5.8c0 .3.2.5.5.5h5.5zm-5.5 7.5c-.3 0-.5.2-.5.5v7c0 .3.2.5.5.5h5.5c2.3 0 3.7-1.9 3.7-4s-1.5-4-3.7-4H7.8zm32.9 7.5c0 .3.2.5.5.5h12.6c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H34.3c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h19.3c.6 0 1.1.5 1.1 1.1V64c0 .6-.5 1.1-1.1 1.1H41.2c-.3 0-.5.2-.5.5V72c0 .3.2.5.5.5h11.9c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H41.2c-.3 0-.5.2-.5.5v6.4zm34-7.4C68 78 62.8 75.1 62.8 68.3c0-6.3 5.1-11.2 12.2-11.2S87.2 62 87.2 68.3v.8c0 .6-.5 1.1-1.1 1.1h-5.4c-.6 0-1.1-.5-1.1-1.1v-.8c0-2.1-1.7-4-4.7-4s-4.6 1.6-4.6 3.7c0 2 2 3.3 4.7 3.8 7.4 1.5 12.8 4.6 12.8 11.9 0 6.9-5.4 11.6-13 11.6-7.3 0-12.6-5.1-12.6-11.6v-1.6c0-.6.5-1.1 1.1-1.1h5.4c.6 0 1.1.5 1.1 1.1v1.6c0 2.4 1.9 4.4 5.1 4.4 3.2 0 5.3-1.9 5.3-4.4 0-2.2-1.5-3.3-5.5-4.2m29.8.2c-.2-.2-.5-.2-.5.2v13.9c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h5.3c.6 0 1.1.5 1.1 1.1V71c0 .3.4.4.5.2l8.8-12.9c.2-.2.4-.5 1.2-.5h5.4c1 0 1.4 1.1.9 1.9l-9.9 14.7c-.5.7-.4 1.1 0 1.8L121.8 93c.5.7.1 2-1.1 2H115c-.8 0-1.1-.4-1.2-.6l-9.3-14.7zm36.2-6.5c.1.3.5.3.6 0l5.1-14.7c.2-.6.5-.8 1-.8h5.8c.7 0 1.2.7.9 1.5l-9.4 23.7v10.9c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1v-11L128 59.1c-.3-.8.2-1.5.9-1.5h5.8c.5 0 .8.2 1 .8l5 14.8zm35.5-7.6v28.1c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1V65.6c0-.3-.2-.5-.5-.5h-6.6c-.6 0-1.1-.5-1.1-1.1v-5.3c0-.6.5-1.1 1.1-1.1h21.8c.6 0 1.1.5 1.1 1.1V64c0 .6-.5 1.1-1.1 1.1h-6.6c-.4 0-.6.2-.6.5m29.9 0v28.1c0 .6-.5 1.1-1.1 1.1h-5.3c-.6 0-1.1-.5-1.1-1.1V65.6c0-.3-.2-.5-.5-.5h-6.6c-.6 0-1.1-.5-1.1-1.1v-5.3c0-.6.5-1.1 1.1-1.1h21.8c.6 0 1.1.5 1.1 1.1V64c0 .6-.5 1.1-1.1 1.1h-6.6c-.4 0-.6.2-.6.5m23.2 21.3c0 .3.2.5.5.5h12.6c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H223c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h19.3c.6 0 1.1.5 1.1 1.1V64c0 .6-.5 1.1-1.1 1.1h-12.4c-.3 0-.5.2-.5.5V72c0 .3.2.5.5.5h11.9c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1h-11.9c-.3 0-.5.2-.5.5v6.4zm31 0c0 .3.2.5.5.5H272c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1h-18c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h5.3c.6 0 1.1.5 1.1 1.1v28.1zm31.7-7.4c-6.6-1.5-11.9-4.4-11.9-11.3 0-6.3 5.1-11.2 12.2-11.2s12.2 4.9 12.2 11.2v.8c0 .6-.5 1.1-1.1 1.1H298c-.6 0-1.1-.5-1.1-1.1v-.8c0-2.1-1.7-4-4.7-4s-4.6 1.6-4.6 3.7c0 2 2 3.3 4.7 3.8 7.4 1.5 12.8 4.6 12.8 11.9 0 6.9-5.4 11.6-13 11.6-7.3 0-12.6-5.1-12.6-11.6V82c0-.6.5-1.1 1.1-1.1h5.4c.6 0 1.1.5 1.1 1.1v1.6c0 2.4 1.9 4.4 5.1 4.4 3.2 0 5.3-1.9 5.3-4.4.1-2.1-1.5-3.2-5.5-4.1m29.4 7.4c0 .3.2.5.5.5h12.6c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H315c-.6 0-1.1-.5-1.1-1.1v-35c0-.6.5-1.1 1.1-1.1h19.3c.6 0 1.1.5 1.1 1.1V64c0 .6-.5 1.1-1.1 1.1H322c-.3 0-.5.2-.5.5V72c0 .3.2.5.5.5h11.9c.6 0 1.1.5 1.1 1.1v5.3c0 .6-.5 1.1-1.1 1.1H322c-.3 0-.5.2-.5.5v6.4z"/>
-                    </svg>
-                </a>
+    <header class="header-adapt fixed-top">
+        <div class="header-bg">
+            <div class="container-fluid container-adapt">
+                <div class="header-wrapper">
+                    <div class="header-left">
+                        <!-- Mobile STØT Button -->
+                        <div class="header-left-mobile d-xxl-none">
+                            <a class="button stot small" asp-page="/StoetOs">Støt</a>
+                        </div>
+                        <!-- Desktop Menu Links -->
+                        <nav class="desktop-menu d-none d-xxl-block">
+                            <ul>
+                                <li><a class="nav-link" asp-page="/DyrINoed">DYR I NØD</a></li>
+                                <li><a class="nav-link" asp-page="/Adoption">ADOPTION</a></li>
+                                <li><a class="nav-link" asp-page="/ViKaemperFor">VI KÆMPER FOR</a></li>
+                                <li><a class="nav-link" asp-page="/BlivMedlem">BLIV MEDLEM</a></li>
+                                <li><a class="nav-link" asp-page="/BlivFrivillig">BLIV FRIVILLIG</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <a class="header-logo" asp-area="" asp-page="/Index">
+                        <partial name="_LogoPartial" />
+                    </a>
+
+                    <div class="header-right">
+                        <!-- Mobile Toggler -->
+                        <div class="header-right-mobile d-xxl-none">
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavbarCollapse" aria-controls="mobileNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                        </div>
+                        <!-- Desktop Right Items -->
+                        <div class="header-right-desktop d-none d-xxl-flex align-items-center">
+                        
+                            <a class="button stot me-3" asp-page="/StoetOs">STØT</a>
+                        
+                        </div>
+                    </div>
+                </div>
             </div>
-        </nav>
+        </div>
+        <!-- Collapsible Mobile Menu -->
+        <div class="container-fluid d-xxl-none mobile-menu-container-adapt">
+            <div class="collapse navbar-collapse mobile-menu-adapt" id="mobileNavbarCollapse">
+                <ul class="navbar-nav flex-column mx-auto mt-2 text-center">
+                    <li class="nav-item"><a class="nav-link" asp-page="/DyrINoed">DYR I NØD</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Adoption">ADOPTION</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/ViKaemperFor">VI KÆMPER FOR</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/BlivMedlem">BLIV MEDLEM</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/BlivFrivillig">BLIV FRIVILLIG</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Nyheder/Index">NYHEDER</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/OmOs">OM OS</a></li>
+                </ul>
+            </div>
+        </div>
     </header>
+
+    @RenderSection("FullWidthHeaderContent", required: false)
+
     <div class="container content-wrapper">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer-db mt-auto py-3">
-        <div class="container">
-            &copy; @DateTime.Now.Year - Dyrenes Beskyttelse - <a asp-area="" asp-page="/Privacy">Privatlivspolitik</a> - <a asp-area="" asp-page="/Kontakt">Kontakt os</a>
+    <footer class="footer" role="contentinfo">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-icon-emblem">
+                        <!-- Du kan indsætte et lille logo/emblem her hvis du har et -->
+                        <!-- <img src="/path/to/emblem.svg" alt="Emblem" /> -->
+                    </div>
+                    <div class="footer-newsletter">
+                        <h2>Hold dig opdateret på nyt om dyrevelfærd</h2>
+                        <a href="/nyhedsbrev" role="button" class="button secondary">Tilmeld nyhedsbrev</a>
+                        <p>Få sidste nyt om dyrevelfærd direkte i din indbakke. Du kan når som helst framelde dig igen.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-menu">
+                        <nav class="footer-nav">
+                            <div class="footer-nav-item">
+                                <h3>ORGANISATION</h3>
+                                <ul class="footer-nav-list">
+                                    <li><a asp-page="/OmOs">OM OS</a></li>
+                                    <li><a asp-page="/Kontakt">KONTAKT</a></li>
+                                    <li><a href="#">MEDARBEJDERE</a></li>
+                                    <li><a href="#">JOB</a></li>
+                                    <li><a href="#">WEBSHOP</a></li>
+                                    <li><a asp-page="/Privacy">PRIVATLIVSPOLITIK</a></li>
+                                </ul>
+                            </div>
+                            <div class="footer-nav-item">
+                                <h3>STØT OS</h3>
+                                <ul class="footer-nav-list">
+                                    <li><a asp-page="/StoetOs">STØT NU</a></li>
+                                    <li><a asp-page="/BlivMedlem">BLIV MEDLEM</a></li>
+                                    <li><a asp-page="/BlivFrivillig">BLIV FRIVILLIG</a></li>
+                                    <li><a href="#">ARV & TESTAMENTE</a></li>
+                                </ul>
+                            </div>
+                             <div class="footer-nav-item">
+                                <h3>PRESSE</h3>
+                                <ul class="footer-nav-list">
+                                    <li><a href="#">PRESSERUM</a></li>
+                                    <li><a asp-page="/Nyheder/Index">NYHEDER</a></li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="footer-contacts">
+                        <div class="social-buttons">
+                            <a href="#" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.81C10.44 7.31 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96C18.34 21.21 22 17.06 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg></a>
+                            <a href="#" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.8 2H16.2C19.4 2 22 4.6 22 7.8V16.2A5.8 5.8 0 0 1 16.2 22H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2M7.6 4A3.6 3.6 0 0 0 4 7.6V16.4C4 18.39 5.61 20 7.6 20H16.4A3.6 3.6 0 0 0 20 16.4V7.6C20 5.61 18.39 4 16.4 4H7.6M17.25 5.5A1.25 1.25 0 0 1 18.5 6.75A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75A1.25 1.25 0 0 1 17.25 5.5M12 7A5 5 0 0 1 17 12A5 5 0 0 1 12 17A5 5 0 0 1 7 12A5 5 0 0 1 12 7M12 9A3 3 0 0 0 9 12A3 3 0 0 0 12 15A3 3 0 0 0 15 12A3 3 0 0 0 12 9Z"/></svg></a>
+                            <a href="#" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19 3A2 2 0 0 1 21 5V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H19M18.5 18.5V13.2A3.26 3.26 0 0 0 15.24 9.94C14.39 9.94 13.4 10.46 12.92 11.24V10.13H10.13V18.5H12.92V13.57C12.92 12.8 13.54 12.17 14.31 12.17A1.4 1.4 0 0 1 15.71 13.57V18.5H18.5M6.88 8.56A1.68 1.68 0 0 0 8.56 6.88C8.56 5.95 7.81 5.19 6.88 5.19A1.69 1.69 0 0 0 5.19 6.88C5.19 7.81 5.95 8.56 6.88 8.56M8.27 18.5V10.13H5.5V18.5H8.27Z"/></svg></a>
+                        </div>
+                        <div class="contact-info">
+                            <p><strong>Dyrenes Beskyttelse</strong><br>Buddingevej 308<br>2860 Søborg</p>
+                            <p>CVR-nummer: 21707414<br>EAN-nummer: 5790002755125</p>
+                            <p>Telefon: <a href="tel:+4533287000">+45 33 28 70 00</a></p>
+                            <p>E-mail: <a href="mailto:db@dyrenesbeskyttelse.dk">db@dyrenesbeskyttelse.dk</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center py-3 footer-copyright">
+                     &copy; @DateTime.Now.Year - Dyrenes Beskyttelse
+                </div>
+            </div>
         </div>
     </footer>
 

@@ -15,108 +15,439 @@ html {
 
 /* Color Palette */
 :root {
-  --db-primary-red: #A92028; /* Mørkerød, primær logo farve */
-  --db-support-orange: #E84C3D; /* Klar rød/orange til STØT knap */
-  --db-primary-green: #004c3f; /* Eksisterende mørkegrøn, kan genbruges/justeres */
+  --db-primary-red: #a00000; /* Mørkerød, primær logo farve */
+  --db-hero-red: #7e0d00; /* Ny rød til hero sektion */
+  --db-support-orange: #ff503c; /* Klar rød/orange til STØT knap */
+  --db-primary-green: #404f40; /* Eksisterende mørkegrøn, kan genbruges/justeres */
   --db-dark-green-accent: #3A4F41; /* Mørkegrøn til tekstbokse som "Killingerne" */
-  --db-light-beige-bg: #F8F5F0; /* Lys beige/råhvid baggrund */
+  --db-light-beige-bg: #eee5d4; /* Lys beige/råhvid baggrund */
+  --db-hero-white: #f5f0e6; /* Ny hvid/beige til hero knap og tekst */
   --db-white: #FFFFFF;
   --db-black: #000000;
+  --db-hero-button-text: #141414; /* Ny mørk farve til hero knap tekst */
   --db-text-on-dark: var(--db-white);
   --db-text-on-light-primary: #333333; /* Primær tekstfarve på lys baggrund */
   --db-text-on-light-secondary: #555555; /* Sekundær tekstfarve */
   --db-link-color: var(--db-primary-red); /* Standard link farve */
   --db-border-color: #E0E0E0; /* Lidt lysere border color */
-  --db-navbar-bg: var(--db-light-beige-bg); /* Baggrundsfarve for navbar */
-  --db-navbar-link-color: var(--db-text-on-light-primary); /* Link farve i navbar */
-  --db-navbar-link-hover-color: var(--db-primary-red); /* Link hover farve i navbar */
+  --db-navbar-bg: var(--db-light-beige-bg);
+  --db-navbar-link-color: var(--db-text-on-light-primary);
+  --db-navbar-link-hover-color: var(--db-primary-red);
   --db-navbar-brand-color: var(--db-primary-red); /* Farve på SVG logo */
 }
 
+/* Global site settings and resets (if any, otherwise start with header) */
 body {
-  margin-bottom: 0; /* Fjern margin hvis footer ikke er sticky i bunden af viewport */
-  background-color: var(--db-light-beige-bg);
-  color: var(--db-text-on-light-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+    padding-top: 70px; /* Default fallback, adjust based on final header height */
+    font-family: var(--chat-font, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol");
+    background-color: var(--color-theme-back, #ffffff); /* Note: --color-theme-back er fra chat snippet, overvej at bruge --db-light-beige-bg for konsistens */
+    color: var(--db-text-on-light-primary, #333);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .content-wrapper {
     flex: 1 0 auto;
 }
 
-/* Navbar styling */
-.navbar-db {
-  background-color: var(--db-navbar-bg);
-  border-bottom: 1px solid var(--db-border-color) !important; 
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  width: 100%; 
-  min-height: 70px; /* Sikrer en minimumshøjde for navbaren */
+/* Header Styles */
+.header-adapt {
+    background-color: var(--db-navbar-bg, #F8F5F0); /* Using existing variable or fallback */
+    border-bottom: 1px solid var(--db-border-color, #E0E0E0);
+    /* fixed-top is applied in HTML */
+    min-height: 70px; /* Default height, ensure body padding-top matches this */
 }
 
-/* Skjul toggler på ALLE skærmstørrelser */
-.navbar-db .navbar-toggler {
-    display: none !important;
+
+.container-adapt {
+    /* Standard container behavior, can be fluid or fixed width */
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Skjul collapse-elementet (hvor menupunkter normalt er) på ALLE skærmstørrelser */
-.navbar-db .navbar-collapse {
-    display: none !important;
+.header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px; /* Match .header-adapt min-height */
 }
 
-.navbar-db .container {
-    width: auto; /* Juster så containeren ikke nødvendigvis fylder 100% hvis det er det der driller */
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    flex-grow: 1; /* Tillad container at vokse hvis nødvendigt for centrering */
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    flex: 1;
 }
 
-.navbar-db .navbar-brand {
-  color: var(--db-navbar-brand-color);
-  margin-right: 0; 
-  padding-top: 0;
-  padding-bottom: 0;
-  display: inline-flex; 
-  align-items: center;
+.header-left {
+    justify-content: flex-start;
 }
 
-.navbar-db .navbar-brand svg {
-    height: 50px; /* Juster efter behov for at matche billedet */
-    width: auto; /* Bevar aspect ratio */
-    vertical-align: middle;
+.header-right {
+    justify-content: flex-end;
 }
 
-.navbar-db .nav-link {
-  color: var(--db-navbar-link-color);
+.header-left-mobile .button.stot.small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+}
+
+.desktop-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.desktop-menu ul li {
+    margin-right: 1rem; /* Spacing between desktop menu items */
+}
+
+.desktop-menu ul li:last-child {
+    margin-right: 0;
+}
+
+.desktop-menu .nav-link {
+    color: var(--db-navbar-link-color, #333);
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.desktop-menu .nav-link:hover,
+.desktop-menu .nav-link:focus {
+    color: var(--db-navbar-link-hover-color, #A92028);
+}
+
+.header-logo {
+    flex: 0 1 auto; /* Allow logo to take its content size */
+    padding: 0; /* Reset any padding if needed */
+    margin: 0 1rem; /* Consistent margin around logo */
+}
+
+.header-logo svg {
+    height: 35px; /* As per _LogoPartial.cshtml */
+    display: block;
+}
+
+.header-right-desktop .nav-link svg path {
+    stroke: var(--db-navbar-link-color, #333); /* Color for search icon */
+}
+
+.header-right-desktop .nav-link:hover svg path,
+.header-right-desktop .nav-link:focus svg path {
+    stroke: var(--db-navbar-link-hover-color, #A92028);
+}
+
+.button.stot {
+  background-color: var(--db-support-orange, #ff503c);
+  color: var(--db-white, #FFFFFF);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  font-weight: 600; /* Lidt federe for at matche billede */
-  padding-left: 0.75rem !important;
-  padding-right: 0.75rem !important;
-  font-size: 0.9rem; /* Lidt mindre font for at matche billede */
+  line-height: 1.5;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 0.25rem; /* Optional: add some rounded corners */
 }
 
-.navbar-db .nav-link:hover,
-.navbar-db .nav-link:focus,
-.navbar-db .nav-link.active { /* Tilføj .active for at style aktivt link */
-  color: var(--db-navbar-link-hover-color);
+.button.stot:hover {
+  background-color: color-mix(in srgb, var(--db-support-orange, #E84C3D) 85%, black);
+  color: var(--db-white, #FFFFFF);
 }
 
-/* Support Button */
+.navbar-lang-switch a,
+.navbar-lang-switch span {
+    font-size: 0.85rem;
+    color: var(--db-text-on-light-secondary, #555);
+    text-decoration: none;
+}
+
+.navbar-lang-switch a:hover {
+    color: var(--db-primary-red, #A92028);
+    text-decoration: underline;
+}
+
+.navbar-lang-switch .lang-active {
+    font-weight: bold;
+    color: var(--db-text-on-light-primary, #333);
+}
+
+/* Mobile Menu Toggle Button */
+.navbar-toggler {
+    border: none;
+    padding: 0.25rem 0.5rem;
+    background-color: transparent;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    width: 1.2em;
+    height: 1.2em;
+}
+
+/* Mobile Collapsible Menu */
+.mobile-menu-container-adapt {
+    background-color: var(--db-navbar-bg, #F8F5F0); /* Match header background */
+    border-top: 1px solid var(--db-border-color, #E0E0E0); /* Separator line */
+}
+
+
+.mobile-menu-adapt .nav-link {
+    color: var(--db-navbar-link-color, #333);
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 0.75rem 1rem; /* More padding for touch targets */
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--db-border-color, #E0E0E0); /* Separator for items */
+}
+
+.mobile-menu-adapt .nav-link:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu-adapt .nav-link:hover,
+.mobile-menu-adapt .nav-link:focus {
+    color: var(--db-navbar-link-hover-color, #A92028);
+    background-color: rgba(0,0,0,0.05);
+}
+
+
+/* Footer Styles */
+.footer {
+    background-color: var(--db-primary-red, #A92028); /* Main footer background */
+    color: var(--db-text-on-dark, #FFFFFF);
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+}
+
+.footer-top {
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between grid items */
+}
+
+.footer-icon-emblem {
+    /* Style for a small emblem/logo in footer */
+    flex-basis: 100px; /* Example size */
+    margin-right: 20px;
+}
+
+.footer-newsletter {
+    flex: 1;
+}
+
+.footer-newsletter h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--db-white, #FFFFFF);
+}
+
+.footer-newsletter p {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.footer-newsletter .button.secondary {
+    background-color: var(--db-white, #FFFFFF);
+    color: var(--db-primary-red, #A92028);
+    padding: 0.6rem 1.2rem;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+}
+.footer-newsletter .button.secondary:hover {
+    background-color: var(--db-light-beige-bg, #F8F5F0);
+}
+
+.footer-bottom .footer-grid {
+    justify-content: space-between;
+}
+
+.footer-menu {
+    flex-basis: 60%; /* Takes more space for nav links */
+    display: flex; 
+}
+
+.footer-nav {
+    display: flex;
+    width: 100%;
+    justify-content: space-between; /* Distribute nav items */
+    flex-wrap: wrap;
+}
+
+.footer-nav-item {
+    margin-bottom: 1.5rem;
+    flex: 1; /* Allow flex items to grow and shrink */
+    min-width: 150px; /* Minimum width before wrapping */
+}
+
+.footer-nav-item h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    color: var(--db-white, #FFFFFF);
+}
+
+.footer-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-nav-list li a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.85rem;
+    line-height: 1.8;
+}
+
+.footer-nav-list li a:hover {
+    color: var(--db-white, #FFFFFF);
+    text-decoration: underline;
+}
+
+.footer-contacts {
+    flex-basis: 35%; /* Remaining space */
+    min-width: 250px;
+}
+
+.social-buttons {
+    margin-bottom: 1rem;
+}
+
+.social-buttons a {
+    margin-right: 0.75rem;
+    color: var(--db-white, #FFFFFF);
+    text-decoration: none;
+}
+
+.social-buttons a svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.social-buttons a:hover {
+    color: rgba(255,255,255,0.7);
+}
+
+.contact-info p {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.contact-info strong {
+    color: var(--db-white, #FFFFFF);
+}
+
+.contact-info a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    color: var(--db-white, #FFFFFF);
+    text-decoration: underline;
+}
+
+.footer-copyright {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    margin-top: 1rem;
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 991.98px) { /* Bootstrap lg breakpoint */
+    .header-wrapper {
+        height: auto; /* Allow height to adjust for mobile */
+        min-height: 60px;
+    }
+    body {
+        padding-top: 60px; /* Adjust for potentially smaller mobile header */
+    }
+    .header-logo {
+        margin: 0; /* Remove horizontal margin to maximize space */
+        position: absolute; /* Centering technique for mobile logo */
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .mobile-menu-container-adapt {
+        /* Styles for the container of the collapsed menu */
+        position: absolute;
+        top: 100%; /* Position below the header-bg */
+        left: 0;
+        right: 0;
+        z-index: 1020; /* Below navbar fixed-top (1030) but above content */
+    }
+}
+
+
+/* Responsive adjustments for footer */
+@media (max-width: 767.98px) { /* Bootstrap md breakpoint */
+    .footer-grid {
+        flex-direction: column;
+    }
+    .footer-menu {
+        flex-basis: 100%;
+        order: 2;
+    }
+    .footer-nav {
+        flex-direction: column;
+    }
+    .footer-contacts {
+        flex-basis: 100%;
+        order: 1; /* Show contacts before menu on small screens */
+        margin-bottom: 2rem;
+    }
+    .footer-top .footer-grid {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .footer-icon-emblem {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+
+/* STØT Button - .btn-db-support bibeholdes her, hvis den bruges andre steder end header */
+/* De fleste .button.stot styles er allerede defineret ovenfor */
 .btn-db-support {
   background-color: var(--db-support-orange);
   color: var(--db-white);
   border: none;
-  padding: 0.6rem 1.2rem; /* Justeret padding */
-  font-weight: 700; /* Federe tekst for STØT */
-  font-size: 0.9rem; /* Matcher nav links */
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
   text-transform: uppercase;
+  line-height: 1.5; 
 }
 
 .btn-db-support:hover {
@@ -124,46 +455,31 @@ body {
   color: var(--db-white);
 }
 
-/* Navbar utility text - "Ring 1812" */
-.navbar-utility-text {
-    font-size: 0.85rem;
-    color: var(--db-text-on-light-secondary);
-    padding-left: 0.75rem; /* Lidt afstand */
-    display: flex;
-    align-items: center; /* Vertikal centrering med knappen */
-}
-
-/* Language Switcher - antager det er en simpel tekst eller link */
-.navbar-lang-switch {
-    font-size: 0.85rem; /* Samme som utility text */
-    padding-left: 0.5rem; /* Lidt afstand */
+/* Sprogvælger - .navbar-lang-switch-site hvis den bruges andre steder end header */
+/* De fleste .navbar-lang-switch styles er allerede defineret ovenfor */
+.navbar-lang-switch-site {
+    font-size: 0.85rem; 
+    padding-left: 0.5rem; 
     padding-right: 0.5rem;
     color: var(--db-text-on-light-secondary);
     display: flex;
     align-items: center;
 }
 
-.navbar-lang-switch a,
-.navbar-lang-switch span { /* Hvis det er links eller bare spans */
+.navbar-lang-switch-site a,
+.navbar-lang-switch-site span { 
     color: var(--db-text-on-light-secondary);
     text-decoration: none;
 }
 
-.navbar-lang-switch a:hover {
+.navbar-lang-switch-site a:hover {
     color: var(--db-primary-red);
     text-decoration: underline;
 }
 
-.navbar-lang-switch .lang-active {
-    font-weight: bold; /* Fremhæv aktivt sprog */
+.navbar-lang-switch-site .lang-active {
+    font-weight: bold; 
     color: var(--db-text-on-light-primary);
-}
-
-/* Justering for at få "Ring 1812" og DK/EN på samme linje som STØT på større skærme */
-@media (min-width: 992px) { /* lg breakpoint for Bootstrap navbar collapse */
-    .navbar-db .navbar-nav.ms-auto { /* Eller hvad end der bruges til at højrejustere */
-        align-items: center; /* Vertikal centrering af elementer i højre side */
-    }
 }
 
 /* Override Bootstrap danger buttons to use our primary red */
@@ -190,26 +506,6 @@ body {
     color: var(--db-white);
 }
 
-/* Footer styling */
-.footer-db {
-  background-color: var(--db-primary-red); /* Ny footer farve */
-  color: var(--db-text-on-dark);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  position: relative; /* Ændret fra absolute for at se om det løser overlap */
-  bottom: 0;
-  width: 100%;
-  line-height: 40px; /* Matcher margin-bottom på body for sticky footer */
-}
-
-.footer-db a {
-    color: var(--db-text-on-dark);
-    text-decoration: underline;
-}
-.footer-db a:hover {
-    color: #dddddd; /* Lidt lysere ved hover */
-}
-
 /* General button styling for arrows (example) */
 .btn-arrow::after {
     content: ' →';
@@ -218,64 +514,49 @@ body {
 
 /* Placeholder for hero text box */
 .hero-text-box {
-    /* Farver og padding styres primært inline i Index.cshtml for fleksibilitet med forskellige hero-bokse */
-    /* Men vi kan sikre nogle defaults her, hvis det er nødvendigt */
-    /* background-color: var(--db-primary-red); Standard, kan overskrives */
-    /* color: var(--db-white); Standard, kan overskrives */
-    padding: 2rem; /* Standard padding, kan justeres inline */
-    height: 100%; /* Sørger for at boksen fylder højden af sin kolonne */
+    padding: 2rem; 
+    height: 100%; 
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
 .hero-text-box h1 {
-    font-size: 2.2rem; /* Justeret størrelse */
+    font-size: 2.2rem; 
     font-weight: bold;
     margin-bottom: 1rem;
 }
 
 .hero-text-box p.lead {
-    font-size: 1.1rem; /* Justeret størrelse for lead paragraf */
+    font-size: 1.1rem; 
     margin-bottom: 1.5rem;
 }
 
 .hero-text-box .btn {
-    font-size: 0.9rem; /* Justeret knaptekst størrelse */
-    padding: 0.6rem 1.2rem; /* Justeret knap padding */
+    font-size: 0.9rem; 
+    padding: 0.6rem 1.2rem; 
     text-transform: uppercase;
 }
 
-/* Knap i hero-sektion (specifik styling for lys knap på mørk baggrund) */
 .hero-text-box .btn.btn-light {
     background-color: var(--db-white);
-    color: var(--db-primary-red); /* Mørkerød tekst */
-    border: 2px solid var(--db-white); /* Hvid kant, kan fjernes hvis unødvendigt */ 
+    color: var(--db-primary-red); 
+    border: 2px solid var(--db-white); 
 }
 
 .hero-text-box .btn.btn-light:hover {
-    background-color: var(--db-light-beige-bg); /* Let beige hover */
+    background-color: var(--db-light-beige-bg); 
     color: var(--db-primary-red);
     border-color: var(--db-light-beige-bg);
 }
 
-/* General button styling for arrows */
-.btn-arrow::after {
-    content: ' →';
-    font-weight: bold; /* Gør pilen lidt tydeligere */
-    display: inline-block; /* Sikrer korrekt linjering og plads */
-    margin-left: 0.3em;
-}
-
 /* Card Customization */
 .card {
-    border: 1px solid var(--db-border-color); /* Subtil border */
-    /* Potentielt fjerne shadow hvis designet er fladere */
-    /* box-shadow: none !important; */
+    border: 1px solid var(--db-border-color); 
 }
 
 .card-title {
-    color: var(--db-primary-red); /* Gør titler i kort røde for at matche design */
+    color: var(--db-primary-red); 
 }
 
 /* Links generelt */
@@ -291,7 +572,6 @@ a:hover {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-/* Nedenstående er fra den oprindelige site.css, bevaret for en sikkerheds skyld, men kan måske ryddes op */
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
@@ -304,15 +584,156 @@ a:hover {
 .hero-image-col {
     background-size: cover;
     background-position: center;
-    min-height: 300px; /* Minimumshøjde for små skærme */
+    min-height: 300px; 
 }
 
-@media (min-width: 768px) { /* md breakpoint og op */
+@media (min-width: 768px) { 
     .hero-image-col {
-        min-height: 500px; /* Større minimumshøjde for større skærme */
+        min-height: 500px; 
     }
 
     .hero-text-box {
-        padding: 3rem; /* Større padding for tekstboks på md og op */
+        padding: 3rem; 
     }
 }
+
+/* Super Hero Section CSS - Based on original reference */
+@media screen {
+  .super-hero {
+    display:flex;
+    flex-direction:column;
+    /* Removed width:100vw and margin-left, assuming _Layout.cshtml handles full width via RenderSection */
+  }
+  .super-hero .image {
+    position:relative;
+    display: flex;
+    align-items: flex-start;
+  }
+  .super-hero .image .image-sizer {
+    position:relative;
+    height:0;
+    padding-bottom:100%; /* from ripoff for mobile - bestemmer højde baseret på bredde */
+    width: 100%;
+  }
+  .super-hero .image .image-sizer img {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100% !important;
+    -o-object-fit:cover;
+    object-fit:cover;
+  }
+  .super-hero .text {
+    display:flex;
+    flex-direction:column;
+    padding:30px 15px;
+    background-color: var(--db-hero-red); /* Themed */
+    color: var(--db-hero-white); /* Themed */
+    justify-content: center; /* Themed - for vertical centering of content block */
+  }
+  .super-hero .text h1 {
+    flex:none;
+    font-size:clamp(32px,3vw,46px);
+    margin-top:0;
+    margin-bottom:30px; /* from ripoff (original had 1rem then 30px, using 30px) */
+    font-weight: bold; /* Themed */
+    color: var(--db-hero-white); /* Themed */
+    line-height: 1.2; /* Our existing, ripoff doesn't specify */
+    text-transform: uppercase; /* Themed */
+  }
+  /* If .super-hero .text h2 styling is needed from ripoff, it can be added here */
+  /* .super-hero .text h2 { margin-top:0; margin-bottom:30px; } */
+  .super-hero .text .body {
+    display:flex;
+    align-items:flex-end;
+    flex:1 1 auto;
+  }
+   .super-hero .text .body .content { /* Kept for button spacing consistency */
+      width: 100%;
+  }
+  .super-hero .text .body .content > div:first-child { /* Kept for button spacing consistency */
+      margin-bottom: 2rem; 
+  }
+  .super-hero .text .body .content .button-list {
+    margin-top:1.5rem;
+  }
+}
+
+@media screen and (min-width:768px) {
+  .super-hero {
+    flex-direction:row-reverse;
+    min-height: calc(100vh - 70px);
+  }
+  .super-hero.image-left {
+    flex-direction:row;
+  }
+  .super-hero .image {
+    flex:0 0 60%;
+  }
+  .super-hero .image .image-sizer {
+    height: 100%;
+    padding-bottom: 0;
+  }
+  .super-hero .text {
+    flex:0 0 40%;
+    padding:40px 20px;
+  }
+}
+
+@media screen and (min-width:1200px) {
+  .super-hero .text {
+    padding:40px;
+  }
+}
+
+@media screen and (min-width:1536px) {
+  .super-hero .image .image-sizer {
+    /* height:680.4px; Fjernet for at matche tekstens højde dynamisk */
+    /* min-height:100%; Fjernet, da height:100% fra 768px-regel arves */
+    /* padding-bottom:0; Arves fra 768px-regel */
+    /* Denne regel kan evt. fjernes helt, hvis 768px-reglen er tilstrækkelig */
+  }
+  .super-hero .text {
+    max-width:619.8px;
+    padding:60px;
+  }
+}
+
+/* Knap styling for Hero Sektion */
+.button.hero-button {
+    background-color: var(--db-hero-white);
+    color: var(--db-hero-button-text);
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border: 2px solid var(--db-hero-white);
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.button.hero-button:hover {
+    background-color: color-mix(in srgb, var(--db-hero-white) 90%, var(--db-black) 10%); /* Let mørkere på hover */
+    color: var(--db-hero-button-text);
+    border-color: color-mix(in srgb, var(--db-hero-white) 90%, var(--db-black) 10%); /* Kant matcher hover baggrund */
+}
+
+
+.button .icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+.button .icon svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+
+/* Nedenstående er generelle styles der var der før, og som ikke bør fjernes ukritisk */
