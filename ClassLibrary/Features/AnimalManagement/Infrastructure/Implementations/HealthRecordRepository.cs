@@ -6,14 +6,13 @@ using ClassLibrary.Features.AnimalManagement.Core.Models;
 using ClassLibrary.Features.AnimalManagement.Infrastructure.Abstractions;
 using ClassLibrary.SharedKernel.Persistence.Implementations;
 using ClassLibrary.SharedKernel.Exceptions; // For RepositoryException, hvis nødvendigt
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 
 namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
 {
     public class HealthRecordRepository : Repository<HealthRecord>, IHealthRecordRepository
     {
-        private const string FilePath = "Data/Json/healthrecords.json";
-
-        public HealthRecordRepository() : base(FilePath) { }
+        public HealthRecordRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "healthrecords.json")) { }
 
         public override async Task<HealthRecord> AddAsync(HealthRecord entity)
         {

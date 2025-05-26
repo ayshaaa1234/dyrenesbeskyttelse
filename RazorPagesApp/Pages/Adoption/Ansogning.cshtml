@@ -1,0 +1,84 @@
+@page
+@model RazorPagesApp.Pages.Adoption.AnsogningModel
+@using ClassLibrary.Features.AnimalManagement.Core.Enums
+
+@{ ViewData["Title"] = $"Adoptionsansøgning for {Model.Input.AnimalName ?? "et dyr"}"; }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="text-center mb-4">
+                <h1>@ViewData["Title"]</h1>
+                @if (!string.IsNullOrEmpty(Model.Input.AnimalName))
+                {
+                    <p class="lead">Du er ved at starte en adoptionsansøgning for <strong>@Model.Input.AnimalName</strong>. Udfyld venligst nedenstående oplysninger.</p>
+                }
+                else
+                {
+                     <p class="lead">Udfyld venligst nedenstående oplysninger for at starte din adoptionsansøgning.</p>
+                }
+            </div>
+
+            <div class="card shadow-sm" style="background-color: var(--db-white);">
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Input.AnimalId" />
+                        <input type="hidden" asp-for="Input.AnimalName" /> 
+
+                        <h4>Dine oplysninger</h4>
+                        <hr class="mb-3">
+
+                        <div class="mb-3">
+                            <label asp-for="Input.CustomerName" class="form-label">Fulde Navn</label>
+                            <input asp-for="Input.CustomerName" class="form-control" />
+                            <span asp-validation-for="Input.CustomerName" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.CustomerEmail" class="form-label">Email</label>
+                                <input asp-for="Input.CustomerEmail" class="form-control" />
+                                <span asp-validation-for="Input.CustomerEmail" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.CustomerPhone" class="form-label">Telefonnummer</label>
+                                <input asp-for="Input.CustomerPhone" class="form-control" />
+                                <span asp-validation-for="Input.CustomerPhone" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mt-4">Motivation og Bemærkninger</h4>
+                        <hr class="mb-3">
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Notes" class="form-label">Fortæl os lidt om dig selv, dit hjem, og hvorfor du ønsker at adoptere. (Valgfrit)</label>
+                            <textarea asp-for="Input.Notes" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Input.Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" value="" id="confirmInformation" required>
+                            <label class="form-check-label" for="confirmInformation">
+                                Jeg bekræfter, at de indtastede oplysninger er korrekte, og at jeg har læst <a href="/Privacy" target="_blank">privatlivspolitikken</a>.
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a asp-page="/Adoption/Detaljer" asp-route-id="@Model.Input.AnimalId" class="btn btn-outline-secondary btn-arrow-left">Tilbage til @Model.Input.AnimalName</a>
+                            <button type="submit" class="btn btn-danger btn-lg btn-arrow">Send Ansøgning</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    Efter du har sendt din ansøgning, vil vi gennemgå den og kontakte dig indenfor 3-5 hverdage. <br />
+                    At sende en ansøgning er ikke en garanti for adoption, da vi altid prioriterer det bedste match for dyret.
+                </small>
+            </div>
+
+        </div>
+    </div>
+</div> 

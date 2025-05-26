@@ -1,0 +1,133 @@
+@page "{id:int}"
+@model RazorPagesApp.Pages.Adoption.DetaljerModel
+@using ClassLibrary.Features.AnimalManagement.Core.Enums
+
+@{ ViewData["Title"] = Model.Animal != null ? $"Detaljer for {Model.Animal.Name}" : "Dyredetaljer"; }
+
+<div class="container mt-5">
+    @if (Model.Animal != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>@Model.Animal.Name</h1>
+                <p class="text-muted">@Model.Animal.Species / @Model.Animal.Breed</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a asp-page="/Adoption/Index" class="btn btn-outline-secondary btn-arrow-left">Tilbage til oversigt</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Animal Info Column -->
+            <div class="col-lg-7 mb-4">
+                <div class="card shadow-sm" style="background-color: var(--db-white);">
+                    <div class="row g-0">
+                        <div class="col-md-5">
+                            @if (!string.IsNullOrEmpty(Model.Animal.PictureUrl))
+                            {
+                                <img src="@Model.Animal.PictureUrl" class="img-fluid rounded-start w-100"
+                                     alt="Billede af @Model.Animal.Name" style="object-fit: cover; aspect-ratio: 1/1;">
+                            }
+                            else
+                            {
+                                <img src="https://placehold.co/400x400/eeeeee/999999?text=Billede+mangler"
+                                     class="img-fluid rounded-start w-100" alt="Billede mangler" style="object-fit: cover; aspect-ratio: 1/1;">
+                            }
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card-body">
+                                <h5 class="card-title">Information</h5>
+                                <ul class="list-unstyled">
+                                    <li><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(Model.Animal.Status)">@GetTranslatedAnimalStatus(Model.Animal.Status)</span></li>
+                                    <li><strong>Køn:</strong> @Model.Animal.Gender</li>
+                                    <li><strong>Alder:</strong> @Model.Animal.GetFormattedAge()</li>
+                                    <li><strong>Race:</strong> @Model.Animal.Breed</li>
+                                    <li><strong>Indtagelsesdato:</strong> @Model.Animal.IntakeDate.ToString("dd. MMMM yyyy")</li>
+                                    @if (Model.Animal.Weight > 0)
+                                    {
+                                        <li><strong>Vægt:</strong> @Model.Animal.Weight kg</li>
+                                    }
+                                </ul>
+                                <h5 class="card-title mt-3">Beskrivelse</h5>
+                                <p class="card-text text-break">@Model.Animal.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adoption Action & Extra Info Column -->
+            <div class="col-lg-5 mb-4">
+                @if (Model.Animal.Status == AnimalStatus.Available)
+                {
+                    <div class="card shadow-sm mb-4 p-4 text-center" style="background-color: var(--db-primary-red-accent);">
+                        <h4 style="color: var(--db-primary-red);">Interesseret i @Model.Animal.Name?</h4>
+                        <p>Hvis du tror, at @Model.Animal.Name kunne være det rette match for dig, så start din adoptionsansøgning her.</p>
+                        <a asp-page="/Adoption/Ansogning" asp-route-dyrId="@Model.Animal.Id" class="btn btn-danger btn-lg btn-arrow">Start Adoptionsansøgning</a>
+                        <small class="text-muted mt-2">At starte en ansøgning er uforpligtende.</small>
+                    </div>
+                }
+                else if (Model.Animal.Status == AnimalStatus.Reserved)
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Reserveret:</strong> @Model.Animal.Name er i øjeblikket reserveret. Kontakt os for mere information.
+                    </div>
+                }
+                else if (Model.Animal.Status == AnimalStatus.Adopted)
+                {
+                    <div class="alert alert-success" role="alert">
+                        <strong>Adopteret:</strong> @Model.Animal.Name har allerede fundet et nyt hjem!
+                    </div>
+                }
+
+                 <div class="card shadow-sm" style="background-color: var(--db-white);">
+                    <div class="card-body">
+                        <h5 class="card-title">Overvejelser før adoption</h5>
+                        <p>At adoptere et dyr er en stor beslutning. Overvej følgende:</p>
+                        <ul>
+                            <li>Har du tid og ressourcer til et dyr?</li>
+                            <li>Passer dyrets race og temperament til din livsstil?</li>
+                            <li>Er dit hjem egnet til dyret?</li>
+                        </ul>
+                        <a href="https://www.dyrenesbeskyttelse.dk/adopter-et-dyr" target="_blank" class="btn btn-sm btn-outline-secondary">Læs mere om adoption</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            Dyret blev ikke fundet.
+        </div>
+    }
+</div>
+
+@functions {
+    string GetStatusBadgeClass(AnimalStatus status)
+    {
+        return status switch
+        {
+            AnimalStatus.Available => "bg-success",
+            AnimalStatus.Adopted => "bg-secondary",
+            AnimalStatus.Reserved => "bg-warning text-dark",
+            AnimalStatus.InTreatment => "bg-info text-dark",
+            AnimalStatus.Deceased => "bg-danger",
+            _ => "bg-light text-dark",
+        };
+    }
+
+    string GetTranslatedAnimalStatus(AnimalStatus status)
+    {
+        return status switch
+        {
+            AnimalStatus.Available => "Ledig for adoption",
+            AnimalStatus.Adopted => "Adopteret",
+            AnimalStatus.Reserved => "Reserveret",
+            AnimalStatus.InTreatment => "I behandling",
+            AnimalStatus.Deceased => "Afgået",
+            _ => status.ToString(), // Fallback hvis en status mangler oversættelse
+        };
+    }
+} 
+} 

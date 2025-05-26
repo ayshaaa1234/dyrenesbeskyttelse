@@ -7,14 +7,13 @@ using ClassLibrary.Features.Memberships.Core.Enums;
 using ClassLibrary.Features.Memberships.Infrastructure.Abstractions;
 using ClassLibrary.SharedKernel.Persistence.Implementations;
 using ClassLibrary.SharedKernel.Exceptions;
+using ClassLibrary.Infrastructure.DataInitialization;
 
 namespace ClassLibrary.Features.Memberships.Infrastructure.Implementations
 {
     public class CustomerMembershipRepository : Repository<CustomerMembership>, ICustomerMembershipRepository
     {
-        private const string FilePath = "Data/Json/customermemberships.json";
-
-        public CustomerMembershipRepository() : base(FilePath) { }
+        public CustomerMembershipRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "customermemberships.json")) { }
 
         public override async Task<CustomerMembership> AddAsync(CustomerMembership entity)
         {

@@ -9,6 +9,7 @@ using ClassLibrary.Features.Adoptions.Core.Enums; // For AdoptionStatus
 using ClassLibrary.Features.Customers.Infrastructure.Abstractions; // Opdateret for ICustomerRepository
 using ClassLibrary.SharedKernel.Persistence.Implementations; // For Repository<T>
 using ClassLibrary.SharedKernel.Exceptions; // For RepositoryException, hvis nødvendigt
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 
 namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opdateret namespace
 {
@@ -17,14 +18,12 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
     /// </summary>
     public class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
-        private const string FilePath = "Data/Json/customers.json";
-
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
         // Simpelt regex for dansk telefonnummer (kan være mere avanceret)
         private static readonly Regex PhoneRegex = new Regex(@"^(\+45\s?)?\d{8}$", RegexOptions.Compiled); 
         private static readonly Regex PostalCodeRegex = new Regex(@"^\d{4}$", RegexOptions.Compiled);
 
-        public CustomerRepository() : base(FilePath)
+        public CustomerRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "customers.json"))
         {
         }
 

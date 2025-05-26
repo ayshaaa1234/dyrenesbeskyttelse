@@ -6,6 +6,7 @@ using ClassLibrary.Features.AnimalManagement.Core.Models;
 using ClassLibrary.Features.AnimalManagement.Core.Enums;
 using ClassLibrary.Features.AnimalManagement.Infrastructure.Abstractions;
 using ClassLibrary.SharedKernel.Persistence.Implementations;
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 // using ClassLibrary.SharedKernel.Domain.Abstractions; // Ikke længere nødvendig direkte her
 
 namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
@@ -13,10 +14,10 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
     public class AnimalRepository : Repository<Animal>, IAnimalRepository
     {
         private readonly IHealthRecordRepository _healthRecordRepository;
-        // Definer filstien. Dette kan senere centraliseres.
-        private const string FilePath = "Data/Json/animals.json";
+        // Fjernet: private const string FilePath = "Data/Json/animals.json";
 
-        public AnimalRepository(IHealthRecordRepository healthRecordRepository) : base(FilePath)
+        public AnimalRepository(IHealthRecordRepository healthRecordRepository) 
+            : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "animals.json"))
         {
             _healthRecordRepository = healthRecordRepository ?? throw new ArgumentNullException(nameof(healthRecordRepository));
         }

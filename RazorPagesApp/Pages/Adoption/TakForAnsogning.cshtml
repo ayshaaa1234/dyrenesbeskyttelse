@@ -1,0 +1,43 @@
+@page
+@model RazorPagesApp.Pages.Adoption.TakForAnsogningModel
+
+@{ ViewData["Title"] = "Ansøgning Modtaget"; }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            @if (Model.AdoptionId.HasValue && !string.IsNullOrEmpty(Model.AnimalName))
+            {
+                <div class="alert alert-success p-5 shadow-sm" role="alert">
+                    <h2 class="alert-heading">🎉 Tak for din ansøgning! 🎉</h2>
+                    <p class="lead">
+                        Din ansøgning om at adoptere <strong>@Model.AnimalName</strong> er nu modtaget.
+                    </p>
+                    <p>
+                        Dit ansøgningsnummer er: <strong>@Model.AdoptionId</strong>.
+                         Gem dette nummer, hvis du skal henvise til din ansøgning senere.
+                    </p>
+                    <hr>
+                    <p class="mb-0">
+                        Vi vil gennemgå din ansøgning hurtigst muligt og kontakter dig inden for 3-5 hverdage med næste skridt.
+                        Vi glæder os til at høre fra dig!
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <div class="d-grid gap-2 d-sm-inline-flex justify-content-sm-center">
+                        <a asp-page="/Index" class="btn btn-danger btn-lg btn-arrow mb-2 mb-sm-0 me-sm-2">Tilbage til Forsiden</a>
+                        <a asp-page="./Index" class="btn btn-outline-secondary btn-lg">Se andre dyr til adoption</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Dette bør ikke ske, da OnGet omdirigerer hvis TempData mangler -->
+                <div class="alert alert-warning" role="alert">
+                    Der opstod en fejl, eller din session er udløbet. Gå venligst tilbage til <a asp-page="./Index" class="alert-link">adoptionssiden</a>.
+                </div>
+            }
+        </div>
+    </div>
+</div> 

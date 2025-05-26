@@ -20,6 +20,7 @@ html {
   --db-support-orange: #ff503c; /* Klar rød/orange til STØT knap */
   --db-primary-green: #404f40; /* Eksisterende mørkegrøn, kan genbruges/justeres */
   --db-dark-green-accent: #3A4F41; /* Mørkegrøn til tekstbokse som "Killingerne" */
+  --db-primary-red-accent: #fdf2f2; /* NY: Lys rødlig accentfarve */
   --db-light-beige-bg: #eee5d4; /* Lys beige/råhvid baggrund */
   --db-hero-white: #f5f0e6; /* Ny hvid/beige til hero knap og tekst */
   --db-white: #FFFFFF;
@@ -386,6 +387,9 @@ body {
     .header-wrapper {
         height: auto; /* Allow height to adjust for mobile */
         min-height: 60px;
+        width: 100%; /* Ensure wrapper does not exceed container */
+        max-width: 100%; /* Ensure wrapper does not exceed container */
+        overflow: hidden; /* Prevent content from breaking out */
     }
     body {
         padding-top: 60px; /* Adjust for potentially smaller mobile header */
@@ -395,6 +399,16 @@ body {
         position: absolute; /* Centering technique for mobile logo */
         left: 50%;
         transform: translateX(-50%);
+        max-width: calc(100% - 100px); /* Provide space for buttons on either side */
+        overflow: hidden; /* Prevent a very wide logo from causing issues */
+        /* text-overflow: ellipsis; */ /* Optional: if logo text needs to be truncated */
+        /* white-space: nowrap; */ /* Optional: if logo text needs to be truncated */
+    }
+
+    .header-left, .header-right {
+        flex-basis: auto; /* Allow them to take the space their content requires */
+        flex-grow: 0;   /* Do not let them grow unnecessarily */
+        flex-shrink: 1; /* Allow them to shrink if needed */
     }
 
     .mobile-menu-container-adapt {
@@ -404,6 +418,9 @@ body {
         left: 0;
         right: 0;
         z-index: 1020; /* Below navbar fixed-top (1030) but above content */
+        width: 100%; /* Ensure dropdown is not wider than screen */
+        max-width: 100vw; /* Ensure dropdown is not wider than screen */
+        box-sizing: border-box; /* Important if padding is applied */
     }
 }
 

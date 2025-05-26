@@ -7,19 +7,20 @@ using ClassLibrary.Features.Employees.Core.Models; // For Employee
 using ClassLibrary.Features.Employees.Infrastructure.Abstractions; // For IEmployeeRepository
 using ClassLibrary.SharedKernel.Persistence.Implementations; // For Repository<T>
 using ClassLibrary.SharedKernel.Exceptions; // For RepositoryException
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 
 namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opdateret namespace
 {
     public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     {
-        private const string FilePath = "Data/Json/employees.json";
+        // Fjernet: private const string FilePath = "Data/Json/employees.json";
 
         // Regex fra BaseUser kan bruges hvis de er protected static, ellers definer dem her.
         // For nu antager vi, at de er tilgængelige eller gen-defineres efter behov.
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
         private static readonly Regex PhoneRegex = new Regex(@"^(\+45\s?)?\d{8}$", RegexOptions.Compiled);
 
-        public EmployeeRepository() : base(FilePath) { }
+        public EmployeeRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "employees.json")) { }
 
         protected override void ValidateEntity(Employee entity)
         {

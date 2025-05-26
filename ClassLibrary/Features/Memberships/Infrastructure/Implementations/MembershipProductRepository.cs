@@ -6,14 +6,13 @@ using ClassLibrary.Features.Memberships.Core.Models;
 using ClassLibrary.Features.Memberships.Core.Enums;
 using ClassLibrary.Features.Memberships.Infrastructure.Abstractions;
 using ClassLibrary.SharedKernel.Persistence.Implementations;
+using ClassLibrary.Infrastructure.DataInitialization;
 
 namespace ClassLibrary.Features.Memberships.Infrastructure.Implementations
 {
     public class MembershipProductRepository : Repository<MembershipProduct>, IMembershipProductRepository
     {
-        private const string FilePath = "Data/Json/membershipproducts.json";
-
-        public MembershipProductRepository() : base(FilePath) { }
+        public MembershipProductRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "membershipproducts.json")) { }
 
         public override async Task<MembershipProduct> AddAsync(MembershipProduct entity)
         {

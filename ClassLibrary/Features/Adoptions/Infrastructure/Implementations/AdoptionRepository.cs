@@ -9,7 +9,7 @@ using ClassLibrary.SharedKernel.Persistence.Implementations; // For Repository<T
 using ClassLibrary.Features.AnimalManagement.Core.Models; // For Animal
 using ClassLibrary.Features.AnimalManagement.Core.Enums; // For Species
 using ClassLibrary.SharedKernel.Exceptions; // For KeyNotFoundException
-// using ClassLibrary.Features.AnimalManagement.Core.Models; // For Animal, Species - tilføjes senere
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 
 namespace ClassLibrary.Features.Adoptions.Infrastructure.Implementations
 {
@@ -18,9 +18,7 @@ namespace ClassLibrary.Features.Adoptions.Infrastructure.Implementations
     /// </summary>
     public class AdoptionRepository : Repository<Adoption>, IAdoptionRepository
     {
-        private const string FilePath = "Data/Json/adoptions.json";
-
-        public AdoptionRepository() : base(FilePath) { }
+        public AdoptionRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "adoptions.json")) { }
 
         // Override AddAsync for at håndtere specifik ID-generering
         public override async Task<Adoption> AddAsync(Adoption entity)

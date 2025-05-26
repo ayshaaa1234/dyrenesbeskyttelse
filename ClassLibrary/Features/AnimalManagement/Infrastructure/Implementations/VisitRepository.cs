@@ -7,14 +7,13 @@ using ClassLibrary.Features.AnimalManagement.Core.Enums;
 using ClassLibrary.Features.AnimalManagement.Infrastructure.Abstractions;
 using ClassLibrary.SharedKernel.Persistence.Implementations;
 using ClassLibrary.SharedKernel.Exceptions;
+using ClassLibrary.Infrastructure.DataInitialization;
 
 namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
 {
     public class VisitRepository : Repository<Visit>, IVisitRepository
     {
-        private const string FilePath = "Data/Json/visits.json";
-
-        public VisitRepository() : base(FilePath) { }
+        public VisitRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "visits.json")) { }
 
         public override async Task<Visit> AddAsync(Visit entity)
         {
