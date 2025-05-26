@@ -10,11 +10,9 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RazorPagesApp.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
     <style>
-        /* Admin specifikke styles kan tilføjes her om nødvendigt */
-        .admin-header-adapt {
-            /* Du kan tilføje specifikke styles for admin headeren her, hvis den skal afvige mere */
-        }
+
         .admin-badge {
             font-size: 0.8rem;
             padding: 0.2em 0.5em;
@@ -61,7 +59,7 @@
                          <!-- Desktop Right Items -->
                         <div class="header-right-desktop d-none d-xxl-flex align-items-center">
                             <a class="nav-link text-dark" asp-page="/Index">Tilbage til Hovedsiden</a>
-                            @* Overvej Login/Logout Partial her senere *@
+                            @* Login/Logout Partial her senere *@
                         </div>
                     </div>
                 </div>

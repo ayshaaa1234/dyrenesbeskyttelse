@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ClassLibrary.Features.Adoptions.Application.Abstractions;
-using ClassLibrary.Features.Adoptions.Core.Models;
 using ClassLibrary.Features.Adoptions.Core.Enums;
 using ClassLibrary.Features.AnimalManagement.Application.Abstractions;
 using ClassLibrary.Features.Customers.Application.Abstractions;
@@ -11,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ClassLibrary.SharedKernel.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RazorPagesApp.Pages.Admin.Adoptions
 {
@@ -60,6 +59,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
         // Bruges til at cache navne for at undgå gentagne DB-kald i loop
         private Dictionary<int, string> _animalNamesCache = new Dictionary<int, string>();
         private Dictionary<int, string> _customerNamesCache = new Dictionary<int, string>();
+        private Dictionary<int, string> _employeeNamesCache = new Dictionary<int, string>();
 
         /// <summary>
         /// Besked til brugeren, typisk efter en handling (f.eks. succes eller fejl).
@@ -115,17 +115,29 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
 
                 // Pre-load animal and customer names for display and potential search
                 // Dette gøres bedst FØR filtrering på navne, for at cachen er populær
-                foreach (var adoption in filteredAdoptions) // Brug filteredAdoptions her, hvis det skal være dynamisk
+                var allAnimalIds = adoptionsFromService.Select(a => a.AnimalId).Distinct();
+                var allCustomerIds = adoptionsFromService.Select(a => a.CustomerId).Distinct();
+                var allEmployeeIds = adoptionsFromService.Where(a => a.EmployeeId.HasValue).Select(a => a.EmployeeId!.Value).Distinct();
+
+                foreach (var id in allAnimalIds)
                 {
-                    if (!_animalNamesCache.ContainsKey(adoption.AnimalId))
+                    if (!_animalNamesCache.ContainsKey(id))
                     {
-                        var animal = await _animalService.GetAnimalByIdAsync(adoption.AnimalId);
-                        _animalNamesCache[adoption.AnimalId] = animal?.Name ?? "Ukendt Dyr";
+                        _animalNamesCache[id] = await GetAnimalNameFromServiceAsync(id);
                     }
-                    if (!_customerNamesCache.ContainsKey(adoption.CustomerId))
+                }
+                foreach (var id in allCustomerIds)
+                {
+                    if (!_customerNamesCache.ContainsKey(id))
                     {
-                        var customer = await _customerService.GetByIdAsync(adoption.CustomerId);
-                        _customerNamesCache[adoption.CustomerId] = customer != null ? $"{customer.FirstName} {customer.LastName}" : "Ukendt Kunde";
+                        _customerNamesCache[id] = await GetCustomerNameFromServiceAsync(id);
+                    }
+                }
+                foreach (var id in allEmployeeIds)
+                {
+                    if (!_employeeNamesCache.ContainsKey(id))
+                    {
+                        _employeeNamesCache[id] = await GetEmployeeNameFromServiceAsync(id);
                     }
                 }
 
@@ -135,6 +147,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
                     filteredAdoptions = filteredAdoptions.Where(a => 
                         (_animalNamesCache.TryGetValue(a.AnimalId, out var animalName) && animalName.ToLowerInvariant().Contains(lowerSearchTerm)) ||
                         (_customerNamesCache.TryGetValue(a.CustomerId, out var customerName) && customerName.ToLowerInvariant().Contains(lowerSearchTerm)) ||
+                        (a.EmployeeId.HasValue && _employeeNamesCache.TryGetValue(a.EmployeeId.Value, out var empName) && empName.ToLowerInvariant().Contains(lowerSearchTerm)) ||
                         (a.Id.ToString().Contains(lowerSearchTerm)) // Søg også på Adoptions ID
                     );
                 }
@@ -156,7 +169,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
         /// <returns>Dyrets navn eller en standardtekst hvis ikke fundet.</returns>
         public string GetAnimalName(int animalId)
         {
-            return _animalNamesCache.TryGetValue(animalId, out var name) ? name : "Henter...";
+            return _animalNamesCache.TryGetValue(animalId, out var name) ? name : "Laster...";
         }
 
         /// <summary>
@@ -166,7 +179,37 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
         /// <returns>Kundens navn eller en standardtekst hvis ikke fundet.</returns>
         public string GetCustomerName(int customerId)
         {
-            return _customerNamesCache.TryGetValue(customerId, out var name) ? name : "Henter...";
+            return _customerNamesCache.TryGetValue(customerId, out var name) ? name : "Laster...";
+        }
+
+        /// <summary>
+        /// Henter navnet på en medarbejder baseret på dets ID. Bruger en intern cache.
+        /// Returnerer "Ikke tildelt" hvis employeeId er null.
+        /// </summary>
+        /// <param name="employeeId">ID på medarbejderen (nullable).</param>
+        /// <returns>Medarbejderens navn, "Ikke tildelt", eller en standardtekst hvis ID er sat men navn ikke fundet.</returns>
+        public string GetEmployeeName(int? employeeId)
+        {
+            if (!employeeId.HasValue) return "Ikke tildelt";
+            return _employeeNamesCache.TryGetValue(employeeId.Value, out var name) ? name : "Laster...";
+        }
+
+        /// <summary>
+        /// Bestemmer CSS-klassen for et status-badge baseret på adoptionsstatus.
+        /// </summary>
+        /// <param name="status">Adoptionens status.</param>
+        /// <returns>En streng med CSS-klassen (f.eks. "success", "warning text-dark").</returns>
+        public string GetStatusBadgeClass(AdoptionStatus status)
+        {
+            return status switch
+            {
+                AdoptionStatus.Pending => "warning text-dark",
+                AdoptionStatus.Approved => "info text-dark",
+                AdoptionStatus.Completed => "success",
+                AdoptionStatus.Rejected => "danger",
+                AdoptionStatus.Cancelled => "secondary",
+                _ => "light text-dark" // Fallback
+            };
         }
 
         // --- Handlers for AJAX status updates --- 
@@ -186,14 +229,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             try
             {
                 await _adoptionService.ApproveAdoptionAsync(adoptionId, employeeIdToAssign);
-                var updatedAdoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
-                return new JsonResult(new { 
-                    success = true, 
-                    message = "Adoption godkendt!", 
-                    adoptionId = adoptionId, 
-                    newStatus = updatedAdoption.Status.GetDisplayName(), 
-                    employeeId = updatedAdoption.EmployeeId 
-                });
+                return await CreateStatusUpdateSuccessResponse(adoptionId, "Adoption godkendt!");
             }
             catch (System.Exception ex)
             {
@@ -213,14 +249,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             try
             {
                 await _adoptionService.RejectAdoptionAsync(adoptionId, employeeIdToAssign);
-                var updatedAdoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
-                return new JsonResult(new { 
-                    success = true, 
-                    message = "Adoption afvist.", 
-                    adoptionId = adoptionId, 
-                    newStatus = updatedAdoption.Status.GetDisplayName(), 
-                    employeeId = updatedAdoption.EmployeeId 
-                });
+                return await CreateStatusUpdateSuccessResponse(adoptionId, "Adoption afvist.");
             }
             catch (System.Exception ex)
             {
@@ -238,13 +267,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             try
             {
                 await _adoptionService.CompleteAdoptionAsync(adoptionId);
-                var updatedAdoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
-                return new JsonResult(new { 
-                    success = true, 
-                    message = "Adoption gennemført!", 
-                    adoptionId = adoptionId, 
-                    newStatus = updatedAdoption.Status.GetDisplayName() 
-                });
+                return await CreateStatusUpdateSuccessResponse(adoptionId, "Adoption gennemført!");
             }
             catch (System.Exception ex)
             {
@@ -266,14 +289,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             try
             {
                 await _adoptionService.CancelAdoptionAsync(adoptionId, employeeIdToAssign, reason); 
-                var updatedAdoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
-                 return new JsonResult(new { 
-                    success = true, 
-                    message = "Adoption annulleret.", 
-                    adoptionId = adoptionId, 
-                    newStatus = updatedAdoption.Status.GetDisplayName(),
-                    employeeId = updatedAdoption.EmployeeId // Send medarbejder ID tilbage til UI
-                });
+                return await CreateStatusUpdateSuccessResponse(adoptionId, "Adoption annulleret.");
             }
             catch (System.Exception ex)
             {
@@ -303,6 +319,7 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             ViewData["CustomerName"] = customer != null ? $"{customer.FirstName} {customer.LastName}" : "N/A";
             var employee = adoption.EmployeeId.HasValue ? await _employeeService.GetByIdAsync(adoption.EmployeeId.Value) : null;
             ViewData["EmployeeName"] = employee != null ? $"{employee.FirstName} {employee.LastName}" : "Ikke tildelt";
+            ViewData["StatusBadgeClass"] = GetStatusBadgeClass(adoption.Status);
             
             return Partial("_AdoptionDetailsPartial", adoption); 
         }
@@ -354,5 +371,26 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
                 return Partial("_AdoptionFormFields", Adoption); 
             }
         }
+
+        private async Task<JsonResult> CreateStatusUpdateSuccessResponse(int adoptionId, string message)
+        {
+            var updatedAdoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
+            if (updatedAdoption == null) return new JsonResult(new { success = false, message = "Adoption ikke fundet efter opdatering." });
+
+            return new JsonResult(new
+            {
+                success = true,
+                message = message,
+                adoptionId = adoptionId,
+                newStatusValue = (int)updatedAdoption.Status,
+                newStatusDisplay = updatedAdoption.Status.GetDisplayName(),
+                employeeId = updatedAdoption.EmployeeId,
+                employeeName = updatedAdoption.EmployeeId.HasValue ? await GetEmployeeNameFromServiceAsync(updatedAdoption.EmployeeId.Value) : "Ikke tildelt"
+            });
+        }
+
+        private async Task<string> GetAnimalNameFromServiceAsync(int animalId) => (await _animalService.GetAnimalByIdAsync(animalId))?.Name ?? "N/A";
+        private async Task<string> GetCustomerNameFromServiceAsync(int customerId) { var c = await _customerService.GetByIdAsync(customerId); return c != null ? $"{c.FirstName} {c.LastName}" : "N/A"; }
+        private async Task<string> GetEmployeeNameFromServiceAsync(int employeeId) => (await _employeeService.GetByIdAsync(employeeId))?.FullName ?? "N/A";
     }
 } 

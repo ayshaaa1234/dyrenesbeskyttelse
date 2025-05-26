@@ -86,7 +86,7 @@ $(document).ready(function () {
     $('#btnAddHealthRecord').click(function () {
         const localAnimalId = $(this).data('animalid'); // Hent animalId fra knappen
         currentHealthRecordId = null;
-        $('#healthRecordModalLabel').text('Tilføj Sundhedsnotat');
+        $('#healthRecordModalLabel').text('Tilføj sundhedsnotat');
         $('#healthRecordModalBody').load('?handler=CreateHealthRecordForm&animalId=' + localAnimalId, function () {
             $.validator.unobtrusive.parse($('#healthRecordModalBody form'));
             if(healthRecordModal) healthRecordModal.show();
@@ -306,7 +306,7 @@ $(document).ready(function () {
     $('#btnAddVisit').click(function () {
         const localAnimalId = $(this).data('animalid'); 
         currentVisitId = null;
-        $('#visitModalLabel').text('Registrer Besøg');
+        $('#visitModalLabel').text('Registrer besøg');
         $('#visitModalBody').load('?handler=CreateVisitForm&animalId=' + localAnimalId, function () {
             $.validator.unobtrusive.parse($('#visitModalBody form'));
             if(visitModal) visitModal.show();

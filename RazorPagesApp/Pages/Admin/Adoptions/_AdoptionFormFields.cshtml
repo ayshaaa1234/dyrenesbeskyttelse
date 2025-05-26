@@ -1,66 +1,84 @@
 @model ClassLibrary.Features.Adoptions.Core.Models.Adoption
-@* @using ClassLibrary.Features.Adoptions.Core.Enums - Hvis enums skal bruges direkte her *@
 
-@* Denne partial view indeholder formularfelterne til oprettelse eller redigering af en adoption. *@
-<form id="adoptionFormPartial" method="post">
-    @* Viser en opsummering af valideringsfejl for hele modellen. *@
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-    @* Skjult felt for adoptionens ID. Nødvendigt ved redigering. *@
-    <input type="hidden" asp-for="Id" />
-    @* Skjulte felter for data, der ikke direkte redigeres i denne form, men som skal sendes med tilbage for at bevare dataintegritet.
-       AnimalId og CustomerId bør ikke ændres her, da de typisk er faste efter oprettelse.
-       Status, ApprovalDate, RejectionDate, CompletionDate håndteres typisk af separate handlinger/processer og ikke direkte i denne generelle redigeringsform. *@
-    <input type="hidden" asp-for="AnimalId" />
-    <input type="hidden" asp-for="CustomerId" />
-    <input type="hidden" asp-for="Status" />
-    <input type="hidden" asp-for="ApprovalDate" /> 
-    <input type="hidden" asp-for="RejectionDate" /> 
-    <input type="hidden" asp-for="CompletionDate" /> 
+@* 
+    Denne partial view indeholder de genanvendelige formularfelter
+    for redigering af en eksisterende adoption. Den anvender
+    Bootstrap 5's "floating labels" for et moderne og brugervenligt layout.
+    Bemærk: Oprettelse af adoptioner sker typisk gennem en anden proces,
+    potentielt initieret fra en dyre- eller kundeprofil.
+*@
 
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            @* Label og inputfelt for ansøgningsdato. *@
-            <label asp-for="ApplicationDate" class="form-label"></label>
-            <input asp-for="ApplicationDate" class="form-control" type="datetime-local" />
-            @* Viser valideringsfejl specifikt for ApplicationDate. *@
-            <span asp-validation-for="ApplicationDate" class="text-danger"></span>
+@* Viser en opsummering af valideringsfejl for hele modellen. Giver brugeren et overblik over eventuelle fejl. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+@* 
+    Skjulte felter for ID og andre ikke-redigerbare, men nødvendige, data.
+    Disse sikrer, at vigtige identifikatorer og statusser bevares under post-back.
+*@
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="AnimalId" />
+<input type="hidden" asp-for="CustomerId" />
+<input type="hidden" asp-for="Status" /> @* Status ændres via separate handlinger, ikke direkte i denne form. *@
+<input type="hidden" asp-for="ApprovalDate" />
+<input type="hidden" asp-for="RejectionDate" />
+<input type="hidden" asp-for="CompletionDate" />
+
+@* Række- og kolonnestruktur for at organisere formularfelter. `g-3` giver afstand mellem kolonner. *@
+<div class="row g-3">
+    @* --- Ansøgnings- og Adoptionsdato --- *@
+    <div class="col-md-6">
+        <div class="form-floating mb-3">
+            @* Inputfelt for ansøgningsdato. `type="datetime-local"` giver en passende datovælger. *@
+            <input asp-for="ApplicationDate" class="form-control" type="datetime-local" placeholder="Ansøgningsdato" />
+            <label asp-for="ApplicationDate">Ansøgningsdato</label>
+            @* Valideringsbesked specifikt for ApplicationDate. Vises ved klient- eller server-side fejl. *@
+            <span asp-validation-for="ApplicationDate" class="text-danger small"></span>
         </div>
-        <div class="col-md-6 mb-3">
-            @* Label og inputfelt for adoptionsdato. *@
-            <label asp-for="AdoptionDate" class="form-label"></label>
-            <input asp-for="AdoptionDate" class="form-control" type="datetime-local" />
-            @* Viser valideringsfejl specifikt for AdoptionDate. *@
-            <span asp-validation-for="AdoptionDate" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <div class="form-floating mb-3">
+            @* Inputfelt for adoptionsdato. *@
+            <input asp-for="AdoptionDate" class="form-control" type="datetime-local" placeholder="Adoptionsdato" />
+            <label asp-for="AdoptionDate">Adoptionsdato</label>
+            <span asp-validation-for="AdoptionDate" class="text-danger small"></span>
         </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        @* Label og inputfelt for adoptionstype. *@
-        <label asp-for="AdoptionType" class="form-label"></label>
-        <input asp-for="AdoptionType" class="form-control" />
-        @* Viser valideringsfejl specifikt for AdoptionType. *@
-        <span asp-validation-for="AdoptionType" class="text-danger"></span>
-    </div>
+@* --- Adoptionstype --- *@
+<div class="form-floating mb-3">
+    <input asp-for="AdoptionType" class="form-control" placeholder="Adoptionstype" />
+    <label asp-for="AdoptionType">Adoptionstype</label>
+    <span asp-validation-for="AdoptionType" class="text-danger small"></span>
+</div>
 
-    <div class="mb-3">
-        @* Label og dropdown-liste for valg af tildelt medarbejder. *@
-        <label asp-for="EmployeeId" class="form-label">Tildelt medarbejder</label>
-        @* Dropdown-listen (select) bindes til EmployeeId.
-           Elementerne i listen (asp-items) kommer fra ViewData["EmployeeList"], som forventes at være en SelectList.
-           Null-forgiving operator (!) bruges, da vi forventer, at ViewData["EmployeeList"] altid er sat. *@
-        <select asp-for="EmployeeId" class="form-select" asp-items="@((SelectList)ViewData["EmployeeList"]!)">
-            @* Standardvalg i dropdown-listen. *@
-            <option value="">-- Vælg medarbejder --</option>
-        </select>
-        @* Viser valideringsfejl specifikt for EmployeeId. *@
-        <span asp-validation-for="EmployeeId" class="text-danger"></span>
-    </div>
+@* --- Tildelt Medarbejder --- *@
+<div class="form-floating mb-3">
+    @* 
+        Dropdown (select) til valg af tildelt medarbejder.
+        `asp-items` binder til en SelectList, der forventes at være i ViewData["EmployeeList"].
+        Den indeholder en liste over tilgængelige medarbejdere.
+    *@
+    <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.EmployeeList" placeholder="Tildelt medarbejder">
+        @* Standardvalg, der indikerer, at ingen medarbejder er valgt. Værdien er tom streng. *@
+        <option value="">-- Vælg medarbejder --</option>
+    </select>
+    <label asp-for="EmployeeId">Tildelt medarbejder</label>
+    <span asp-validation-for="EmployeeId" class="text-danger small"></span>
+</div>
 
-    <div class="mb-3">
-        @* Label og tekstområde (textarea) for noter. *@
-        <label asp-for="Notes" class="form-label"></label>
-        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
-        @* Viser valideringsfejl specifikt for Notes. *@
-        <span asp-validation-for="Notes" class="text-danger"></span>
-    </div>
-</form> 
+@* --- Noter --- *@
+<div class="form-floating mb-3">
+    @* Tekstområde (textarea) til noter. `rows="4"` foreslår en passende starthøjde. *@
+    <textarea asp-for="Notes" class="form-control" placeholder="Noter" style="height: 100px"></textarea>
+    <label asp-for="Notes">Noter</label>
+    <span asp-validation-for="Notes" class="text-danger small"></span>
+</div>
+
+@* 
+    Bemærk: Det ydre <form>-tag er bevidst udeladt fra denne partial view.
+    Dette skyldes, at formularen typisk indlæses i en modal eller på en side,
+    der allerede definerer sit eget <form>-tag. Dette forhindrer nestede forms,
+    hvilket er ugyldigt HTML og kan føre til uforudsigelig opførsel.
+    Selve submit-logikken håndteres af JavaScript i den hostende side/modal.
+*@ 

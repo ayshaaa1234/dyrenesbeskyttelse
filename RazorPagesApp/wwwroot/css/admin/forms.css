@@ -1,0 +1,86 @@
+/* Fælles styling for admin forms */
+.card {
+    border-radius: 0.5rem;
+}
+
+.btn-primary {
+    background-color: #404f40;
+    border-color: #404f40;
+}
+
+.btn-primary:hover {
+    background-color: #fafafa;
+    border-color: #404f40;
+    color: #404f40;
+}
+
+.btn-outline-primary {
+    color: #404f40;
+    border-color: #404f40;
+}
+
+.btn-outline-primary:hover {
+    background-color: #404f40;
+    border-color: #404f40;
+    color: #fafafa;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #404f40;
+}
+
+.form-control:focus {
+    border-color: #404f40;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select:focus {
+    border-color: #404f40;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #404f40;
+    border-color: #404f40;
+}
+
+.form-floating > textarea.form-control {
+    height: 100px;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+.table th {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.modal-content {
+    border-radius: 0.5rem;
+}
+
+.modal-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #404f40;
+    border-color: #404f40;
+} 

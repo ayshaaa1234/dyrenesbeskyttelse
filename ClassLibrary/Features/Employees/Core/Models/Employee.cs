@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations; // Tilføjet for Display
 using ClassLibrary.SharedKernel.Domain.Models; // For BaseUser
 using ClassLibrary.Features.AnimalManagement.Core.Models; // For HealthRecord, Visit
@@ -12,6 +10,12 @@ namespace ClassLibrary.Features.Employees.Core.Models // Opdateret namespace
     /// </summary>
     public class Employee : BaseUser 
     {
+        /// <summary>
+        /// Medarbejderens fulde navn (fornavn + efternavn)
+        /// </summary>
+        [Display(Name = "Fulde navn")]
+        public override string FullName => $"{FirstName} {LastName}".Trim();
+
         /// <summary>
         /// Medarbejderens stilling
         /// </summary>

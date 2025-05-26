@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ClassLibrary.Features.Employees.Application.Abstractions;
 using ClassLibrary.Features.Employees.Core.Models;
 using Microsoft.AspNetCore.Mvc;

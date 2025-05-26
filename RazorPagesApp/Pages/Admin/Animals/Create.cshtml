@@ -1,26 +1,50 @@
 @page "/admin/animals/create"
 @model RazorPagesApp.Pages.Admin.Animals.CreateModel
 
-@{   ViewData["Title"] = "Opret nyt dyr";
+@{
+    ViewData["Title"] = "Opret nyt dyr";
     Layout = "/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<h4>Dyreinformation</h4>
-<hr />
-<div class="row">
-    <div class="col-md-8"> @* Justeret bredde for potentielt bredere formularer *@
-        <form method="post">
-            <partial name="_AnimalFormFields" for="Animal" view-data="ViewData" />
-            
-            <div class="form-group mt-3">
-                <input type="submit" value="Opret Dyr" class="btn btn-success" />
-                <a asp-page="Index" class="btn btn-outline-secondary">Tilbage til listen</a>
+@* Container til centrering af indhold *@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            @* Overskrift og navigation *@
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Opret nyt dyr</h1>
+                <a asp-page="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Tilbage til oversigten
+                </a>
             </div>
-        </form>
+
+            @* Formular *@
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" class="needs-validation">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                        @* Inkluder dyreformular *@
+                        <partial name="_AnimalFormFields" model="Model.Animal" />
+
+                        @* Knapper *@
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a asp-page="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Annuller
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Opret Dyr
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" />
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

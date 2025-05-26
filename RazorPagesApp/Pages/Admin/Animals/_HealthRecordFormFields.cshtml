@@ -1,0 +1,118 @@
+@model ClassLibrary.Features.AnimalManagement.Core.Models.HealthRecord
+
+@* Formular til oprettelse/redigering af sundhedsjournal *@
+<form id="healthRecordFormPartial" method="post" class="needs-validation">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                @* Dato og dyrlæge *@
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="RecordDate" class="form-control" type="date" placeholder="Dato for notat" />
+                        <label asp-for="RecordDate">Dato for notat</label>
+                        <span asp-validation-for="RecordDate" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="VeterinarianName" class="form-control" placeholder="Dyrlæge" />
+                        <label asp-for="VeterinarianName">Dyrlæge</label>
+                        <span asp-validation-for="VeterinarianName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Diagnose og behandling *@
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Diagnosis" class="form-control" placeholder="Diagnose" style="height: 100px"></textarea>
+                        <label asp-for="Diagnosis">Diagnose</label>
+                        <span asp-validation-for="Diagnosis" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Treatment" class="form-control" placeholder="Behandling" style="height: 100px"></textarea>
+                        <label asp-for="Treatment">Behandling</label>
+                        <span asp-validation-for="Treatment" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Medicin og vægt *@
+                <div class="col-md-8">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Medication" class="form-control" placeholder="Medicin" />
+                        <label asp-for="Medication">Medicin</label>
+                        <span asp-validation-for="Medication" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Weight" class="form-control" type="number" step="0.01" placeholder="Vægt" />
+                        <label asp-for="Weight">Vægt (kg)</label>
+                        <span asp-validation-for="Weight" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Noter *@
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Notes" class="form-control" placeholder="Noter" style="height: 100px"></textarea>
+                        <label asp-for="Notes">Noter</label>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Vaccination *@
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsVaccinated" class="form-check-input" type="checkbox" role="switch" />
+                                        <label asp-for="IsVaccinated" class="form-check-label">Vaccineret</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input asp-for="NextVaccinationDate" class="form-control" type="date" placeholder="Dato for næste vaccination" />
+                                        <label asp-for="NextVaccinationDate">Dato for næste vaccination</label>
+                                        <span asp-validation-for="NextVaccinationDate" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" />
+
+<style>
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: #404f40;
+    }
+    
+    .form-control:focus {
+        border-color: #404f40;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #404f40;
+        border-color: #404f40;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+    }
+    
+    .form-floating > textarea.form-control {
+        height: 100px;
+    }
+</style> 

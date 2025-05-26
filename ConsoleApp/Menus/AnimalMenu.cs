@@ -36,8 +36,8 @@ namespace ConsoleApp.Menus
                 Console.Write("Tag et valg: ");
 
                 string? choice = Console.ReadLine();
-
                 switch (choice)
+
                 {
                     case "1":
                         await ListAllAnimalsAsync();

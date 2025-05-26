@@ -1,43 +1,88 @@
 @page "/admin/animals/delete/{id:int}"
 @model RazorPagesApp.Pages.Admin.Animals.DeleteModel
+@using ClassLibrary.Features.AnimalManagement.Core.Enums
 
-@{   ViewData["Title"] = "Slet dyr";
+@{
+    ViewData["Title"] = "Slet dyr";
     Layout = "/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
+@* Container til centrering af indhold *@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @* Overskrift og navigation *@
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Slet dyr</h1>
+                <a asp-page="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Tilbage til oversigten
+                </a>
+            </div>
 
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger" role="alert">
-        @Model.ErrorMessage
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @* Bekræftelsesformular *@
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Er du sikker på, at du vil slette dette dyr? Denne handling kan ikke fortrydes.
+                    </div>
+
+                    <form method="post">
+                        @* Dyreinformation *@
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>Navn</th>
+                                        <td>@Model.Animal.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Art</th>
+                                        <td>@Model.Animal.Species</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Race</th>
+                                        <td>@Model.Animal.Breed</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fødselsdato</th>
+                                        <td>@(Model.Animal.BirthDate?.ToString("dd-MM-yyyy") ?? "-")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Status</th>
+                                        <td>
+                                            <span class="badge bg-@(Model.Animal.Status == AnimalStatus.Available ? "success" : "warning")">
+                                                @Model.Animal.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @* Knapper *@
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a asp-page="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Annuller
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Slet Dyr
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-}
+</div>
 
-<h3>Er du sikker på, at du vil slette dette dyr?</h3>
-<div>
-    <h4>@Model.Animal.Name (ID: @Model.Animal.Id)</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Name)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Name)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Species)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Species)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Breed)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Breed)</dd>
-        
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.BirthDate)</dt>
-        <dd class="col-sm-9">@Model.Animal.BirthDate?.ToString("dd-MM-yyyy")</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Status)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Status)</dd>
-    </dl>
-    
-    <form method="post">
-        <input type="hidden" asp-for="Animal.Id" />
-        <input type="submit" value="Slet Dyr" class="btn btn-danger" /> |
-        <a asp-page="./Index" class="btn btn-outline-secondary">Annuller</a>
-    </form>
-</div> 
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" /> 

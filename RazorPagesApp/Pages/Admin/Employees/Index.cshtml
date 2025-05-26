@@ -1,7 +1,6 @@
 @page "/admin/employees"
 @model RazorPagesApp.Pages.Admin.Employees.IndexModel
 @using ClassLibrary.SharedKernel.Extensions 
-@* Genskab using for Employee model, hvis den fjernes af modellen nedenfor *@
 
 @{    ViewData["Title"] = "Administrer ansatte";
     Layout = "/Pages/Shared/_AdminLayout.cshtml"; // Angiver, at denne side bruger admin-layoutet.
@@ -11,7 +10,7 @@
 
 <p>
     @* Knap til at åbne modalen for oprettelse af en ny medarbejder. *@
-    <button type="button" class="btn btn-success" id="btnAddEmployee">Opret Ny Medarbejder</button>
+    <button type="button" class="btn btn-success" id="btnAddEmployee">Opret ny medarbejder</button>
 </p>
 
 @* Formular til at søge efter medarbejdere. Bruger GET-metoden, så søgetermer vises i URL'en. *@
@@ -97,7 +96,8 @@
         </div>
     </div>
 </div>
-
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" />
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} @* Inkluderer standard valideringsscripts. *@
     <script>

@@ -3,261 +3,235 @@
 @using ClassLibrary.SharedKernel.Extensions
 @using ClassLibrary.Features.Adoptions.Core.Enums
 
-@{    ViewData["Title"] = "Administrer adoptioner og ansøgninger";
+@{
+    ViewData["Title"] = "Adoptionsoversigt";
     Layout = "/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
+@* Container til centrering af sidens indhold på større skærme. *@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
 
-@* Viser en statusmeddelelse (f.eks. succes eller fejl) til brugeren, hvis Model.Message er sat. *@
-@if (!string.IsNullOrEmpty(Model.Message))
-{
-    <div class="alert alert-@Model.MessageType" role="alert">
-        @Model.Message
-    </div>
-}
-
-@* Formular til søgning og filtrering af adoptioner. Bruger GET-metoden. *@
-<form method="get" class="mb-3">
-    <div class="row g-2 align-items-end">
-        <div class="col-sm-6 col-md-4">
-            @* Skjult label for søgeterm-inputfeltet af hensyn til skærmlæsere. *@
-            <label asp-for="SearchTerm" class="form-label visually-hidden">Søgeterm</label>
-            <input type="text" asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Søg på dyr, kunde, ID..." />
-        </div>
-        <div class="col-sm-4 col-md-3">
-            @* Skjult label for statusfilter-dropdown af hensyn til skærmlæsere. *@
-            <label asp-for="FilterStatus" class="form-label visually-hidden">Status</label>
-            @* Dropdown til filtrering på status. `asp-items="Model.StatusOptions"` binder til en SelectList i PageModel. *@
-            <select asp-for="FilterStatus" asp-items="Model.StatusOptions" class="form-select form-select-sm">
-                <option value="">Alle statusser</option>
-            </select>
-        </div>
-        <div class="col-sm-2 col-md-auto">
-            <button type="submit" class="btn btn-sm btn-primary">Filtrer/Søg</button>
-            @* Knappen "Nulstil" vises kun, hvis der er aktive filtre (SearchTerm eller FilterStatus). *@
-            @if(!string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.FilterStatus.HasValue)
-            {
-                <a asp-page="Index" class="btn btn-sm btn-outline-secondary ms-1">Nulstil</a>
-            }
-        </div>
-    </div>
-</form>
-
-@* TODO: Tilføj filtreringsmuligheder her (f.eks. på status) - Dette er allerede delvist implementeret ovenfor. *@
-
-<table class="table table-striped table-hover" id="adoptionsTable">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Dyr (ID)</th> @* Overvej at vise dyrenavn via opslag i stedet for kun ID. Dette gøres nu med GetAnimalName. *@
-            <th>Kunde (ID)</th> @* Overvej at vise kundenavn via opslag. Dette gøres nu med GetCustomerName. *@
-            <th>Ansøgt Dato</th>
-            <th>Status</th>
-            <th>Adoptionsdato</th>
-            <th>Håndteret Af (ID)</th>
-            <th>Handlinger</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* Tjekker om der er nogen adoptioner at vise. *@
-        @if (Model.Adoptions == null || !Model.Adoptions.Any())
-        {
-            <tr>
-                <td colspan="8" class="text-center">Ingen adoptioner eller ansøgninger fundet.</td>
-            </tr>
-        }
-        else
-        {
-            @* Gennemløber alle adoptioner og viser dem i tabellen. Sorterer efter ansøgningsdato (nyeste først). *@
-            @foreach (var adoption in Model.Adoptions.OrderByDescending(a => a.ApplicationDate))
-            {
-                @* `data-adoption-id` bruges af JavaScript til at identificere rækken. *@
-                <tr data-adoption-id="@adoption.Id">
-                    <td>@adoption.Id</td>
-                    @* Viser dyrets ID og navn (hentet via Model.GetAnimalName). *@
-                    <td>@adoption.AnimalId (@(Model.GetAnimalName(adoption.AnimalId)))</td>
-                    @* Viser kundens ID og navn (hentet via Model.GetCustomerName). *@
-                    <td>@adoption.CustomerId (@(Model.GetCustomerName(adoption.CustomerId)))</td>
-                    <td>@adoption.ApplicationDate.ToString("dd-MM-yyyy")</td>
-                    @* `adoption-status` klasse bruges af JavaScript til at opdatere status dynamisk. *@
-                    <td class="adoption-status">@adoption.Status.GetDisplayName()</td>
-                    <td>@adoption.AdoptionDate.ToString("dd-MM-yyyy")</td>
-                    <td>@adoption.EmployeeId?.ToString()</td>
-                    @* `adoption-actions` klasse bruges af JavaScript til at opdatere handlingsknapper dynamisk. *@
-                    <td class="adoption-actions">
-                        <button type="button" class="btn btn-sm btn-outline-info btnViewAdoptionDetails" data-adoptionid="@adoption.Id">Detaljer</button>
-                        @* Knapper til statusændring tilføjes dynamisk baseret på nuværende status. *@
-                        @if (adoption.Status == AdoptionStatus.Pending)
-                        {
-                            <button type="button" class="btn btn-sm btn-outline-success btnApproveAdoption ms-1" data-adoptionid="@adoption.Id">Godkend</button>
-                            <button type="button" class="btn btn-sm btn-outline-warning btnRejectAdoption ms-1" data-adoptionid="@adoption.Id">Afvis</button>
-                        }
-                        else if (adoption.Status == AdoptionStatus.Approved)
-                        {
-                            <button type="button" class="btn btn-sm btn-success btnCompleteAdoption ms-1" data-adoptionid="@adoption.Id">Gennemfør</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger btnCancelAdoption ms-1" data-adoptionid="@adoption.Id">Annuller Godkendelse</button>
-                        }
-                        @* Flere statusser kan håndteres her med yderligere else if blokke. *@
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
-
-<!-- Modal for Adoption Detaljer/Status Ændring -->
-<div class="modal fade" id="adoptionModal" tabindex="-1" role="dialog" aria-labelledby="adoptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="adoptionModalLabel">Adoptionsdetaljer</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            @* Sidens hovedoverskrift og eventuel opret-knap (hvis relevant for adoptioner). *@
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                @* <a asp-page="Create" class="btn btn-primary"> Opret Adoptionsansøgning <i class="fas fa-plus"></i></a> *@
+                @* Overvej om en "Opret" knap er relevant her, eller om adoptioner altid startes fra en dyreprofil e.l. *@
             </div>
-            <div class="modal-body" id="adoptionModalBody">
-                <!-- Indhold (typisk _AdoptionDetailsPartial) indlæses her via JavaScript. -->
+
+            @* Statusmeddelelser (f.eks. efter en handling). *@
+            @if (!string.IsNullOrEmpty(Model.Message))
+            {
+                <div class="alert alert-@Model.MessageType alert-dismissible fade show shadow-sm rounded-3 mb-4" role="alert">
+                    @Model.Message
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @* Søge- og filtreringsformular, indkapslet i et card for et moderne look. *@
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        @* Søgefelt med floating label. *@
+                        <div class="col-md-5">
+                            <div class="form-floating">
+                                <input type="text" asp-for="SearchTerm" class="form-control" placeholder="Søg på dyr, ansøger, ID..." />
+                                <label asp-for="SearchTerm">Søg på dyr, ansøger, ID...</label>
+                            </div>
+                        </div>
+                        @* Statusfilter dropdown med floating label. *@
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select asp-for="FilterStatus" asp-items="Model.StatusOptions" class="form-select">
+                                    <option value="">Alle statusser</option>
+                                </select>
+                                <label asp-for="FilterStatus">Status</label>
+                            </div>
+                        </div>
+                        @* Knapper til at anvende filter/søgning og nulstille. *@
+                        <div class="col-md-3 d-flex align-items-stretch">
+                            <div class="d-grid gap-2 w-100">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search me-1"></i> Søg/Filtrer
+                                </button>
+                                @if(!string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.FilterStatus.HasValue)
+                                {
+                                    <a asp-page="Index" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i> Nulstil
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="modal-footer" id="adoptionModalFooter">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
-                @* Knapper til handlinger (f.eks. Gem Noter) kan tilføjes her dynamisk via JavaScript. *@
+
+            @* Tabel med adoptionsresultater, indkapslet i et card. *@
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (Model.Adoptions == null || !Model.Adoptions.Any())
+                    {
+                        @* Vises hvis der ingen adoptioner matcher søgningen/filtrene. *@
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Ingen adoptioner eller ansøgninger fundet.
+                        </div>
+                    }
+                    else
+                    {
+                        @* Responsiv tabel til visning af adoptioner. *@
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="adoptionsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Dyr (ID)</th>
+                                        <th>Ansøger (ID)</th>
+                                        <th>Ansøgt Dato</th>
+                                        <th>Status</th>
+                                        <th>Adoptionsdato</th>
+                                        <th>Håndteret Af</th>
+                                        <th class="text-end">Handlinger</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @* Itererer gennem hver adoption og viser dens data i en tabelrække. *@
+                                    @foreach (var adoption in Model.Adoptions)
+                                    {
+                                        <tr data-adoption-id="@adoption.Id">
+                                            <td>@adoption.Id</td>
+                                            <td>
+                                                @* Viser dyrets navn og ID. Navn hentes fra PageModel. *@
+                                                @Model.GetAnimalName(adoption.AnimalId)
+                                                <small class="text-muted d-block">ID: @adoption.AnimalId</small>
+                                            </td>
+                                            <td>
+                                                @* Viser kundens navn og ID. Navn hentes fra PageModel. *@
+                                                @Model.GetCustomerName(adoption.CustomerId)
+                                                <small class="text-muted d-block">ID: @adoption.CustomerId</small>
+                                            </td>
+                                            <td>@adoption.ApplicationDate.ToString("dd-MM-yyyy")</td>
+                                            @* Status vises med et badge for tydelighed. *@
+                                            <td class="adoption-status">
+                                                <span class="badge bg-@(GetStatusBadgeClass(adoption.Status))">
+                                                    @adoption.Status.GetDisplayName()
+                                                </span>
+                                            </td>
+                                            <td>@(adoption.AdoptionDate.Year > 1 ? adoption.AdoptionDate.ToString("dd-MM-yyyy") : "-")</td>
+                                            <td class="adoption-employee">@(Model.GetEmployeeName(adoption.EmployeeId))</td>
+                                            @* Handlingsknapper for hver adoption. Opdateres dynamisk via JavaScript. *@
+                                            <td class="text-end adoption-actions">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-info btnViewAdoptionDetails" data-adoptionid="@adoption.Id" title="Se detaljer">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-primary btnEditAdoption" data-adoptionid="@adoption.Id" title="Rediger adoption">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </div>
+                                                @* Statusændringsknapper tilføjes herunder, baseret på nuværende status. *@
+                                                @if (adoption.Status == AdoptionStatus.Pending)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-success btnApproveAdoption ms-1" data-adoptionid="@adoption.Id" title="Godkend adoption"><i class="fas fa-check"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning btnRejectAdoption ms-1" data-adoptionid="@adoption.Id" title="Afvis adoption"><i class="fas fa-times"></i></button>
+                                                }
+                                                else if (adoption.Status == AdoptionStatus.Approved)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-success btnCompleteAdoption ms-1" data-adoptionid="@adoption.Id" title="Marker som gennemført"><i class="fas fa-flag-checkered"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btnCancelAdoption ms-1" data-adoptionid="@adoption.Id" title="Annuller godkendelse"><i class="fas fa-ban"></i></button>
+                                                }
+                                                else if (adoption.Status == AdoptionStatus.Completed || adoption.Status == AdoptionStatus.Rejected || adoption.Status == AdoptionStatus.Cancelled)
+                                                {
+                                                    @* For afsluttende statusser kan man overveje en "Genåbn" eller lignende knap, hvis forretningslogikken tillader det. *@
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@* Modal til visning af adoptionsdetaljer og redigering af adoption. *@
+<div class="modal fade" id="adoptionModal" tabindex="-1" aria-labelledby="adoptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> @* Større modal for bedre plads til detaljer/formular. *@
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="adoptionModalLabel">Adoptionsdetaljer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="adoptionModalBody">
+                @* Indhold (enten _AdoptionDetailsPartial eller _AdoptionFormFields) indlæses her via JavaScript. *@
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Henter...</span>
+                    </div>
+                    <p class="mt-2">Henter data...</p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light" id="adoptionModalFooter">
+                 @* Knappen "Gem" tilføjes her af JavaScript, når _AdoptionFormFields er loaded. *@
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+                @* Yderligere handlingsknapper kan tilføjes her dynamisk. *@
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Toast container til notifikationer. Bør placeres et centralt sted i _AdminLayout.cshtml for global genbrug. *@
+@* <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056"></div> *@
+
+@* Funktion til at bestemme badge-farve baseret på status. *@
+@functions {
+    private string GetStatusBadgeClass(AdoptionStatus status)
+    {
+        return status switch
+        {
+            AdoptionStatus.Pending => "warning text-dark",
+            AdoptionStatus.Approved => "info text-dark",
+            AdoptionStatus.Completed => "success",
+            AdoptionStatus.Rejected => "danger",
+            AdoptionStatus.Cancelled => "secondary",
+            _ => "light text-dark"
+        };
+    }
+}
+
+@section Styles {
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" />    
+<style>
+        .table th {
+            font-weight: 600; /* Lidt stærkere font for tabel headers */
+        }
+        .badge {
+            font-size: 0.85em; /* Lidt større badges for bedre læsbarhed */
+        }
+        .form-control, .form-select {
+             border-radius: 0.375rem; /* Standard Bootstrap border-radius */
+        }
+    </style>
+}
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} 
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/admin/adoption-management.js" asp-append-version="true"></script>
     <script>
-        $(document).ready(function () {
-            var adoptionModal = new bootstrap.Modal(document.getElementById('adoptionModal'));
-
-            // --- Toast Helper Function --- 
-            // Funktion til at vise toast-notifikationer. Denne funktion bør overvejes globaliseret for genbrug på tværs af sider.
-            function showToast(message, type = 'info') {
-                // Genererer et unikt ID for toasten for at undgå konflikter.
-                var toastId = 'toast-' + new Date().getTime();
-                // Definerer HTML-strukturen for toasten. Typen ('error', 'success', 'info') bestemmer baggrundsfarven.
-                var toastHTML = `
-                    <div id="${toastId}" class="toast align-items-center text-white ${type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary') } border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                ${message}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>`;
-                // Tilføjer toasten til en container (forventer et element med ID 'toastContainer' på siden).
-                $('#toastContainer').append(toastHTML);
-                var toastElement = new bootstrap.Toast(document.getElementById(toastId));
-                toastElement.show(); // Viser toasten.
-                // Sørger for at fjerne toasten fra DOM'en efter den er skjult for at undgå ophobning.
-                document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
-                    this.remove();
-                });
-            }
-
-            // Event listener for klik på 'Detaljer'-knapper i tabellen.
-            $('#adoptionsTable').on('click', '.btnViewAdoptionDetails', function () {
-                var adoptionId = $(this).data('adoptionid'); // Henter adoptionId fra data-attributten.
-                $('#adoptionModalLabel').text('Detaljer for Adoption ID: ' + adoptionId); // Sætter titlen på modalen.
-                $('#adoptionModalBody').html('<p class="text-center"><em>Henter detaljer...</em></p>'); // Viser en loading-besked.
-                $('#adoptionModalFooter').find('.btn-primary').remove(); // Fjerner eventuelle gamle handlingsknapper fra footeren.
-                adoptionModal.show(); // Viser modalen.
-
-                // Indlæser indholdet af _AdoptionDetailsPartial.cshtml ind i modal-body.
-                $('#adoptionModalBody').load('?handler=AdoptionDetailsPartial&adoptionId=' + adoptionId, function(response, status, xhr) {
-                    if (status == "error") {
-                        // Viser en fejlmeddelelse i modalen, hvis indlæsningen fejler.
-                        $('#adoptionModalBody').html('<p class="text-danger">Kunne ikke hente detaljer: ' + xhr.status + " " + xhr.statusText + '</p>');
-                    }
-                    // Her kan man tilføje dynamiske knapper til footeren baseret på adoptionens status (f.eks. for at redigere noter).
-                });
-            });
-
-            // Funktion til at opdatere en række i tabellen efter en statusændring.
-            function updateAdoptionRowStatus(adoptionId, newStatusDisplay, employeeId) {
-                const row = $(`#adoptionsTable tr[data-adoption-id="${adoptionId}"]`);
-                row.find('.adoption-status').text(newStatusDisplay); // Opdaterer status-teksten.
-                if (employeeId) {
-                     row.find('td:nth-child(7)').text(employeeId); // Opdaterer 'Håndteret Af' kolonnen.
+        // Sikrer at TempData beskeder fjernes efter et stykke tid for bedre UX.
+        // Denne funktionalitet kunne også centraliseres i admin-common.js.
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function() {
+                let alert = document.querySelector('.alert-dismissible');
+                if (alert) {
+                    new bootstrap.Alert(alert).close();
                 }
-                // Genopbygger handlingsknapperne baseret på den nye status.
-                // Dette er en forenklet implementering. En mere robust løsning ville være at gen-render knap-delen via en partial view eller bygge dem mere detaljeret i JavaScript.
-                const actionsCell = row.find('.adoption-actions');
-                actionsCell.html(''); // Rydder eksisterende knapper.
-                actionsCell.append(`<button type="button" class="btn btn-sm btn-outline-info btnViewAdoptionDetails" data-adoptionid="${adoptionId}">Detaljer</button>`);
-                
-                // Tilføjer nye status-specifikke knapper. Dette baseres på DisplayName, hvilket ikke er ideelt for robusthed.
-                // Det ville være bedre at basere dette på den faktiske enum-værdi, hvis den returneres fra serveren.
-                if (newStatusDisplay === '@AdoptionStatus.Pending.GetDisplayName()') {
-                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-success btnApproveAdoption ms-1" data-adoptionid="${adoptionId}">Godkend</button>`);
-                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-warning btnRejectAdoption ms-1" data-adoptionid="${adoptionId}">Afvis</button>`);
-                } else if (newStatusDisplay === '@AdoptionStatus.Approved.GetDisplayName()') {
-                    actionsCell.append(` <button type="button" class="btn btn-sm btn-success btnCompleteAdoption ms-1" data-adoptionid="${adoptionId}">Gennemfør</button>`);
-                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-danger btnCancelAdoption ms-1" data-adoptionid="${adoptionId}">Annuller Godkendelse</button>`);
-                }
-                 // ... tilføj logik for andre statusser hvis nødvendigt (f.eks. Completed, Cancelled)...
-            }
-
-            // Event listener for klik på statusændringsknapper.
-            $('#adoptionsTable').on('click', '.btnApproveAdoption, .btnRejectAdoption, .btnCompleteAdoption, .btnCancelAdoption', function () {
-                var button = $(this);
-                var adoptionId = button.data('adoptionid');
-                var handlerUrl = '';
-                var confirmMessage = 'Er du sikker?';
-                var employeeIdToAssign = 1; // TODO: Dette skal erstattes med den aktuelle admin/medarbejders ID eller et inputfelt for valg af medarbejder.
-
-                // Bestemmer URL og bekræftelsesmeddelelse baseret på hvilken knap der blev trykket.
-                if (button.hasClass('btnApproveAdoption')) {
-                    handlerUrl = `?handler=ApproveAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}`;
-                    confirmMessage = 'Er du sikker på, du vil godkende denne adoption?';
-                } else if (button.hasClass('btnRejectAdoption')) {
-                    handlerUrl = `?handler=RejectAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}`;
-                    confirmMessage = 'Er du sikker på, du vil afvise denne adoption?';
-                } else if (button.hasClass('btnCompleteAdoption')) {
-                    handlerUrl = `?handler=CompleteAdoption&adoptionId=${adoptionId}`;
-                    confirmMessage = 'Er du sikker på, du vil markere denne adoption som gennemført?';
-                } else if (button.hasClass('btnCancelAdoption')) {
-                    // For annullering, kan man prompte for en årsag.
-                    let reason = prompt("Angiv årsag til annullering (valgfri):");
-                    if(reason === null) return; // Bruger annullerede prompten.
-                    // Tilføjer årsagen til URL'en. `encodeURIComponent` sikrer korrekt URL-kodning.
-                    handlerUrl = `?handler=CancelAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}&reason=${encodeURIComponent(reason || 'Annulleret af administrator')}`;
-                    confirmMessage = 'Er du sikker på, du vil annullere denne adoption/godkendelse?';
-                }
-
-                if (!handlerUrl) return; // Afbryd hvis ingen handler URL er sat.
-
-                // Viser en bekræftelsesdialog før handlingen udføres.
-                if (confirm(confirmMessage)) {
-                    $.ajax({
-                        type: 'POST', // Bruger POST til handlinger der ændrer data.
-                        url: handlerUrl,
-                        headers: {
-                            // Inkluderer AntiForgeryToken for at beskytte mod CSRF-angreb.
-                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                        },
-                        success: function (response) {
-                            if (response.success) {
-                                showToast(response.message, 'success');
-                                // Opdaterer rækken i tabellen med den nye status og evt. medarbejder ID.
-                                updateAdoptionRowStatus(response.adoptionId, response.newStatus, response.employeeId);
-                            } else {
-                                showToast('Fejl: ' + (response.message || 'Ukendt serverfejl.'), 'error');
-                            }
-                        },
-                        error: function (xhr) {
-                            showToast('Serverfejl: ' + xhr.status + ' ' + xhr.statusText, 'error');
-                        }
-                    });
-                }
-            });
-
-            // Event listener for når modalen lukkes. Rydder indholdet af modal-body.
-            document.getElementById('adoptionModal').addEventListener('hidden.bs.modal', function () {
-                $('#adoptionModalBody').html(''); 
-            });
-
+            }, 7000); // Lidt længere tid for at brugeren kan nå at læse beskeden.
         });
     </script>
-} 
+}

@@ -1,0 +1,64 @@
+@model ClassLibrary.Features.AnimalManagement.Core.Models.Visit
+@using ClassLibrary.Features.AnimalManagement.Core.Enums
+
+@* Formular til oprettelse/redigering af besøg *@
+<form id="visitFormPartial" method="post" class="needs-validation">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                @* Besøgsdetaljer *@
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="PlannedDate" class="form-control" type="datetime-local" placeholder="Dato og tid" />
+                        <label asp-for="PlannedDate">Dato og tid</label>
+                        <span asp-validation-for="PlannedDate" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Type" class="form-control" placeholder="Besøgstype" />
+                        <label asp-for="Type">Besøgstype</label>
+                        <span asp-validation-for="Type" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Besøgende og beskrivelse *@
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Visitor" class="form-control" placeholder="Besøgende" />
+                        <label asp-for="Visitor">Besøgende</label>
+                        <span asp-validation-for="Visitor" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Description" class="form-control" placeholder="Beskrivelse" style="height: 100px"></textarea>
+                        <label asp-for="Description">Beskrivelse</label>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                @* Status og noter *@
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<VisitStatus>()">
+                            <option value="">Vælg status</option>
+                        </select>
+                        <label asp-for="Status">Status</label>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Notes" class="form-control" placeholder="Noter" style="height: 100px"></textarea>
+                        <label asp-for="Notes">Noter</label>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@* Inkluder fælles CSS *@
+<link rel="stylesheet" href="~/css/admin/forms.css" /> 

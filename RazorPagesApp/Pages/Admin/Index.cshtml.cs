@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ClassLibrary.Features.AnimalManagement.Application.Abstractions;
 using ClassLibrary.Features.AnimalManagement.Core.Models;
 using ClassLibrary.Features.AnimalManagement.Core.Enums;

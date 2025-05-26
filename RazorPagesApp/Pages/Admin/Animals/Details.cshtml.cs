@@ -1,36 +1,65 @@
-using System.Threading.Tasks;
 using ClassLibrary.Features.AnimalManagement.Application.Abstractions;
 using ClassLibrary.Features.AnimalManagement.Core.Models;
-using ClassLibrary.Features.AnimalManagement.Core.Enums; // Tilføjet for VisitStatus direkte brug
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic; // For ICollection in Animal
-using System.Linq; // Tilføjet for FirstOrDefault og lignende
+using ClassLibrary.SharedKernel.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System;
-using ClassLibrary.SharedKernel.Extensions; // Tilføjet for GetDisplayName
 
 namespace RazorPagesApp.Pages.Admin.Animals
 {
+    /// <summary>
+    /// PageModel for visning af detaljer for et specifikt dyr, inklusiv sundhedsjournaler og besøg.
+    /// Håndterer også AJAX-anmodninger for oprettelse, redigering og sletning af sundhedsjournaler og besøg.
+    /// </summary>
     // TODO: Tilføj [Authorize(Roles = "Administrator")]
     public class DetailsModel : PageModel
     {
         private readonly IAnimalManagementService _animalService;
 
+        /// <summary>
+        /// Initialiserer en ny instans af <see cref="DetailsModel"/> klassen.
+        /// </summary>
+        /// <param name="animalService">Servicen til håndtering af dyredata.</param>
         public DetailsModel(IAnimalManagementService animalService)
         {
             _animalService = animalService;
         }
 
+        /// <summary>
+        /// Henter eller sætter det dyr, hvis detaljer vises.
+        /// </summary>
         public Animal Animal { get; set; } = default!;
+
+        /// <summary>
+        /// Henter eller sætter listen af sundhedsjournaler for det aktuelle dyr.
+        /// </summary>
         public IList<HealthRecord> HealthRecords { get; set; } = new List<HealthRecord>();
+
+        /// <summary>
+        /// Henter eller sætter listen af besøg for det aktuelle dyr.
+        /// </summary>
         public IList<Visit> Visits { get; set; } = new List<Visit>();
 
+        /// <summary>
+        /// Henter eller sætter en sundhedsjournal, der bindes ved oprettelse/redigering via modal.
+        /// </summary>
         [BindProperty]
         public HealthRecord HealthRecord { get; set; } = default!;
 
+        /// <summary>
+        /// Henter eller sætter et besøg, der bindes ved oprettelse/redigering via modal.
+        /// </summary>
         [BindProperty]
         public Visit Visit { get; set; } = default!;
 
+        /// <summary>
+        /// Håndterer HTTP GET-anmodningen for at vise detaljer for et dyr.
+        /// </summary>
+        /// <param name="id">ID'et på det dyr, hvis detaljer skal vises.</param>
+        /// <returns>En <see cref="IActionResult"/> der repræsenterer resultatet af operationen.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -54,63 +83,74 @@ namespace RazorPagesApp.Pages.Admin.Animals
             return Page();
         }
 
+        // --- HealthRecord Handlers --- 
+
+        /// <summary>
+        /// Håndterer GET-anmodning for at hente partial view for oprettelse af en ny sundhedsjournal.
+        /// Bruges til at indlæse formularen i en modal.
+        /// </summary>
+        /// <param name="animalId">ID'et på det dyr, som sundhedsjournalen tilhører.</param>
+        /// <returns>En <see cref="PartialViewResult"/> med formularen.</returns>
         public IActionResult OnGetCreateHealthRecordForm(int animalId)
         {
-            // Sikrer at Animal property er sat, hvis den bruges i partial view'en, f.eks. til en titel
-            // For _HealthRecordFormFields forventer vi dog kun HealthRecord modellen
             HealthRecord = new HealthRecord { AnimalId = animalId, RecordDate = System.DateTime.Today };
             return Partial("_HealthRecordFormFields", HealthRecord);
         }
 
+        /// <summary>
+        /// Håndterer GET-anmodning for at hente partial view for redigering af en eksisterende sundhedsjournal.
+        /// Bruges til at indlæse formularen i en modal.
+        /// </summary>
+        /// <param name="recordId">ID'et på sundhedsjournalen, der skal redigeres.</param>
+        /// <param name="animalId">ID'et på det dyr, som sundhedsjournalen tilhører (for validering).</param>
+        /// <returns>En <see cref="IActionResult"/>; enten en <see cref="PartialViewResult"/> med formularen eller <see cref="NotFoundResult"/>.</returns>
         public async Task<IActionResult> OnGetEditHealthRecordFormAsync(int recordId, int animalId)
         {
-            // animalId er med for kontekst og routing, men recordId er nøglen her
             var record = await _animalService.GetHealthRecordByIdAsync(recordId);
             if (record == null || record.AnimalId != animalId)
             {
-                return NotFound(); // Eller en anden fejlhåndtering
+                return NotFound();
             }
             HealthRecord = record;
             return Partial("_HealthRecordFormFields", HealthRecord);
         }
         
+        /// <summary>
+        /// Håndterer POST-anmodning for at oprette en ny sundhedsjournal (AJAX).
+        /// </summary>
+        /// <param name="animalId">ID'et på det dyr, som sundhedsjournalen tilhører.</param>
+        /// <returns>En <see cref="JsonResult"/> der indikerer succes/fejl og returnerer den oprettede data.</returns>
         public async Task<IActionResult> OnPostCreateHealthRecordAsync(int animalId)
         {
-            // Sørg for at Animal property er sat, hvis det skal bruges, f.eks. til en titel eller redirect.
-            // For nu fokuserer vi på at gemme HealthRecord.
-            // Animal = await _animalService.GetAnimalByIdAsync(animalId); 
-            // if (Animal == null) return NotFound();
-
             if (!ModelState.IsValid)
             {
-                // Returner formularen med valideringsfejl. Klienten skal håndtere dette.
                 return Partial("_HealthRecordFormFields", HealthRecord); 
             }
 
             try
             {
-                HealthRecord.AnimalId = animalId; // Sørg for at AnimalId er korrekt sat
-                HealthRecord.CreatedAt = System.DateTime.UtcNow; // Sæt oprettelsesdato
+                HealthRecord.AnimalId = animalId;
+                HealthRecord.CreatedAt = System.DateTime.UtcNow;
                 var createdRecord = await _animalService.AddHealthRecordAsync(animalId, HealthRecord);
                 return new JsonResult(new { success = true, message = "Sundhedsnotat oprettet.", data = createdRecord });
             }
             catch (System.Exception ex)
             {
-                // Log fejlen
-                // Overvej at returnere en mere specifik fejlmeddelelse eller statuskode
                 ModelState.AddModelError(string.Empty, $"Der opstod en fejl under oprettelse af sundhedsnotatet: {ex.Message}");
-                return Partial("_HealthRecordFormFields", HealthRecord); // Returner form med fejl
+                return Partial("_HealthRecordFormFields", HealthRecord);
             }
         }
 
+        /// <summary>
+        /// Håndterer POST-anmodning for at redigere en eksisterende sundhedsjournal (AJAX).
+        /// </summary>
+        /// <param name="animalId">ID'et på det dyr, som sundhedsjournalen tilhører.</param>
+        /// <param name="recordId">ID'et på sundhedsjournalen der redigeres.</param>
+        /// <returns>En <see cref="JsonResult"/> der indikerer succes/fejl og returnerer den opdaterede data.</returns>
         public async Task<IActionResult> OnPostEditHealthRecordAsync(int animalId, int recordId) 
         {
-            // Animal = await _animalService.GetAnimalByIdAsync(animalId);
-            // if (Animal == null) return NotFound();
-
             if (recordId != HealthRecord.Id || animalId != HealthRecord.AnimalId)
             {
-                // Sikkerhedstjek eller dataintegritet
                 return BadRequest(new { message = "Data mismatch." });
             }
 
@@ -121,36 +161,34 @@ namespace RazorPagesApp.Pages.Admin.Animals
 
             try
             {
-                // CreatedAt bør ikke ændres ved redigering, så hent den oprindelige værdi hvis nødvendigt
-                // Hvis _HealthRecordFormFields ikke poster CreatedAt, og HealthRecord objektet er hentet
-                // korrekt i OnGetEditHealthRecordFormAsync, så skulle den eksisterende CreatedAt være bevaret.
-                // For en sikkerheds skyld, hent den eksisterende record for at bevare CreatedAt
                 var existingRecord = await _animalService.GetHealthRecordByIdAsync(recordId);
                 if (existingRecord == null) return NotFound();
-                HealthRecord.CreatedAt = existingRecord.CreatedAt; // Bevar oprindelig oprettelsesdato
+                HealthRecord.CreatedAt = existingRecord.CreatedAt;
 
                 var updatedRecord = await _animalService.UpdateHealthRecordAsync(HealthRecord);
                 return new JsonResult(new { success = true, message = "Sundhedsnotat opdateret.", data = updatedRecord });
             }
             catch (System.Exception ex)
             {
-                // Log fejlen
                 ModelState.AddModelError(string.Empty, $"Der opstod en fejl under opdatering af sundhedsnotatet: {ex.Message}");
-                return Partial("_HealthRecordFormFields", HealthRecord); // Returner form med fejl
+                return Partial("_HealthRecordFormFields", HealthRecord);
             }
         }
 
+        /// <summary>
+        /// Håndterer POST-anmodning for at slette en sundhedsjournal (AJAX).
+        /// </summary>
+        /// <param name="recordId">ID'et på sundhedsjournalen der skal slettes.</param>
+        /// <param name="animalId">ID'et på det dyr, som sundhedsjournalen tilhører.</param>
+        /// <returns>En <see cref="JsonResult"/> der indikerer succes/fejl.</returns>
         public async Task<IActionResult> OnPostDeleteHealthRecordAsync(int recordId, int animalId)
         {
-            // Sørg for at Animal er loaded for at kunne returnere til den korrekte side/kontekst, hvis nødvendigt,
-            // eller hvis du vil genindlæse Animal data efter sletning.
-            // For en ren API-agtig tilgang er det måske ikke nødvendigt at hente Animal her.
             var animal = await _animalService.GetAnimalByIdAsync(animalId);
             if (animal == null)
             {
                 return new JsonResult(new { success = false, message = "Dyr ikke fundet." });
             }
-            Animal = animal; // Sæt Animal property for evt. brug efterfølgende
+            Animal = animal;
 
             var recordToDelete = await _animalService.GetHealthRecordByIdAsync(recordId);
             if (recordToDelete == null || recordToDelete.AnimalId != animalId)
@@ -161,30 +199,21 @@ namespace RazorPagesApp.Pages.Admin.Animals
             try
             {
                 await _animalService.DeleteHealthRecordAsync(recordId);
-                // Efter sletning, hent den opdaterede liste af sundhedsjournaler
                 var updatedHealthRecords = await _animalService.GetHealthRecordsByAnimalIdAsync(animalId);
                 HealthRecords = new List<HealthRecord>(updatedHealthRecords.OrderByDescending(hr => hr.RecordDate));
                 
-                // I stedet for at returnere en hel partial view med tabellen,
-                // er det ofte bedre kun at signalere succes og lade client-side JS håndtere DOM-opdatering.
-                // Men for nu, kan vi prøve at returnere en partial view, der indeholder selve listen/tabellen.
-                // Dette kræver, at vi har en partial view specifikt for HealthRecord-tabellen.
-                // Alternativt, returner blot succes og lad klienten genindlæse hele Details-siden eller kun HealthRecord-sektionen.
                 return new JsonResult(new { success = true, message = "Sundhedsnotat slettet." });
             }
             catch (System.Exception ex)
             {
-                // Log fejlen
                 return new JsonResult(new { success = false, message = $"Fejl under sletning: {ex.Message}" });
             }
         }
 
-        // --- Handlers for Visits ---
+        // --- Visit Handlers (tilsvarende kommentarer som for HealthRecord Handlers kan tilføjes) ---
         public IActionResult OnGetCreateVisitForm(int animalId)
         {
             Visit = new Visit { AnimalId = animalId, PlannedDate = System.DateTime.Now };
-            // ViewData["VisitStatusOptions"] = new SelectList(Enum.GetValues(typeof(ClassLibrary.Features.AnimalManagement.Core.Enums.VisitStatus)));
-            // ^ Dette er ikke nødvendigt, da vi bruger Html.GetEnumSelectList<VisitStatus>() i partial view
             return Partial("Animals/Visits/_VisitFormFields", Visit);
         }
 
@@ -243,7 +272,7 @@ namespace RazorPagesApp.Pages.Admin.Animals
 
         public async Task<IActionResult> OnPostDeleteVisitAsync(int visitId, int animalId)
         {
-            var animal = await _animalService.GetAnimalByIdAsync(animalId); // For kontekst
+            var animal = await _animalService.GetAnimalByIdAsync(animalId);
             if (animal == null) return new JsonResult(new { success = false, message = "Dyr ikke fundet." });
             Animal = animal;
 
@@ -263,7 +292,11 @@ namespace RazorPagesApp.Pages.Admin.Animals
             }
         }
 
-        // Nye handlers for Visit Status opdatering
+        // --- Visit Status Update Handlers ---
+
+        /// <summary>
+        /// Bekræfter et planlagt besøg (AJAX).
+        /// </summary>
         public async Task<IActionResult> OnPostConfirmVisitAsync(int visitId, int animalId)
         {
             if (visitId <= 0 || animalId <= 0) 
@@ -302,6 +335,9 @@ namespace RazorPagesApp.Pages.Admin.Animals
             }
         }
 
+        /// <summary>
+        /// Annullerer et planlagt eller bekræftet besøg (AJAX).
+        /// </summary>
         public async Task<IActionResult> OnPostCancelVisitAsync(int visitId, int animalId)
         {
              if (visitId <= 0 || animalId <= 0) 
@@ -340,6 +376,9 @@ namespace RazorPagesApp.Pages.Admin.Animals
             }
         }
 
+        /// <summary>
+        /// Markerer et besøg som fuldført (AJAX).
+        /// </summary>
         public async Task<IActionResult> OnPostCompleteVisitAsync(int visitId, int animalId)
         {
             if (visitId <= 0 || animalId <= 0) 

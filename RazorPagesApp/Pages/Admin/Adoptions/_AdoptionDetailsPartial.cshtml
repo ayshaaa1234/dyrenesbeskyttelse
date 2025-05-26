@@ -2,73 +2,126 @@
 @using ClassLibrary.SharedKernel.Extensions
 @using ClassLibrary.Features.Adoptions.Core.Enums
 
-@* Denne partial view viser detaljerne for en specifik adoption. *@
-<div id="adoptionDetailsContent">
-    <h4>Detaljer for Adoption ID: @Model.Id</h4>
-    <hr />
-    <dl class="row">
-        @* Viser navnet på dyret og dets ID. ViewData["AnimalName"] forventes at blive sat i controlleren/PageModel. *@
-        <dt class="col-sm-4">Dyr</dt>
-        <dd class="col-sm-8">@ViewData["AnimalName"] (ID: @Model.AnimalId)</dd>
+@* 
+    Denne partial view er designet til at vise detaljerne for en specifik adoption.
+    Den præsenterer informationen i et læsevenligt format ved hjælp af en description list (dl).
+    ViewData bruges til at vise navne på relaterede entiteter (dyr, kunde, medarbejder),
+    samt status badge klassen, som forventes at være sat i PageModel-handleren, der kalder denne partial.
+*@
 
-        @* Viser navnet på kunden og dens ID. ViewData["CustomerName"] forventes at blive sat i controlleren/PageModel. *@
-        <dt class="col-sm-4">Ansøger</dt>
-        <dd class="col-sm-8">@ViewData["CustomerName"] (ID: @Model.CustomerId)</dd>
+@* En overskrift der tydeligt identificerer den viste adoption. Kan styles yderligere efter behov. *@
+<h5 class="mb-3">Detaljer for Adoption ID: @Model.Id</h5>
+<hr class="mt-0 mb-3">
 
-        <dt class="col-sm-4">Ansøgningsdato</dt>
-        <dd class="col-sm-8">@Model.ApplicationDate.ToString("dd-MM-yyyy HH:mm")</dd>
+@* Description list (dl) bruges til at parre termer (dt) med deres beskrivelser (dd). 
+   Bootstrap klasser som `row` på `dl` og `col-sm-4`/`col-sm-8` på `dt`/`dd` kan bruges for horisontalt layout.
+   Her bruges en mere semantisk tilgang med styling for klarhed. *@
+<dl class="row details-list">
+    @* --- Grundlæggende Adoptionsinformation --- *@
+    <dt class="col-sm-4">Status:</dt>
+    <dd class="col-sm-8">
+        @* Viser status med et badge. Badge-klassen leveres via ViewData["StatusBadgeClass"]. *@
+        <span class="badge bg-@(ViewData["StatusBadgeClass"] ?? "light text-dark")">
+            @Model.Status.GetDisplayName()
+        </span>
+    </dd>
 
-        <dt class="col-sm-4">Status</dt>
-        @* Bruger GetDisplayName() extension method til at vise en brugervenlig status. *@
-        <dd class="col-sm-8">@Model.Status.GetDisplayName()</dd>
+    <dt class="col-sm-4">Ansøgningsdato:</dt>
+    <dd class="col-sm-8">@Model.ApplicationDate.ToString("dd-MM-yyyy HH:mm")</dd>
 
-        <dt class="col-sm-4">Adoptionsdato</dt>
-        @* Viser adoptionsdatoen, hvis den er sat og ikke er standardværdien for DateTime. Ellers vises "Ikke sat". *@
-        <dd class="col-sm-8">@(Model.AdoptionDate != default(DateTime) && Model.AdoptionDate.Year > 1 ? Model.AdoptionDate.ToString("dd-MM-yyyy") : "Ikke sat")</dd>
+    <dt class="col-sm-4">Adoptionstype:</dt>
+    <dd class="col-sm-8">@(!string.IsNullOrWhiteSpace(Model.AdoptionType) ? Model.AdoptionType : "<em class=\"text-muted\">Ikke specificeret</em>")</dd>
 
-        <dt class="col-sm-4">Håndteret af Medarbejder ID</dt>
-        @* Viser medarbejderens ID, hvis det er tildelt. Ellers vises "Ikke tildelt". *@
-        <dd class="col-sm-8">@(Model.EmployeeId?.ToString() ?? "Ikke tildelt")</dd>
-        
-        <dt class="col-sm-4">Medarbejder</dt>
-        @* Viser navnet på medarbejderen. ViewData["EmployeeName"] forventes at blive sat i controlleren/PageModel, hvis EmployeeId er sat. *@
-        <dd class="col-sm-8">@ViewData["EmployeeName"]</dd>
-        
-        <dt class="col-sm-4">Adoptionstype</dt>
-        @* Viser adoptionstypen, hvis den er angivet. Ellers vises "N/A". *@
-        <dd class="col-sm-8">@(!string.IsNullOrWhiteSpace(Model.AdoptionType) ? Model.AdoptionType : "N/A")</dd>
+    @* --- Involverede Parter --- *@
+    <dt class="col-sm-4">Dyr:</dt>
+    <dd class="col-sm-8">
+        @ViewData["AnimalName"]
+        <small class="text-muted d-block">ID: @Model.AnimalId</small>
+    </dd>
 
-        <dt class="col-sm-4">Noter</dt>
-        @* Viser noter, hvis de er angivet. Ellers vises "Ingen noter". `white-space: pre-wrap;` bevarer formatering som linjeskift. *@
-        <dd class="col-sm-8" style="white-space: pre-wrap;">@(!string.IsNullOrWhiteSpace(Model.Notes) ? Model.Notes : "Ingen noter")</dd>
+    <dt class="col-sm-4">Ansøger:</dt>
+    <dd class="col-sm-8">
+        @ViewData["CustomerName"]
+        <small class="text-muted d-block">ID: @Model.CustomerId</small>
+    </dd>
 
-        @* Betinget visning af godkendelsesdato, hvis den findes. *@
-        @if(Model.ApprovalDate.HasValue)
+    <dt class="col-sm-4">Håndteret af:</dt>
+    <dd class="col-sm-8">
+        @(!string.IsNullOrWhiteSpace(ViewData["EmployeeName"]?.ToString()) ? ViewData["EmployeeName"] : "<em class=\"text-muted\">Ikke tildelt</em>")
+        @if(Model.EmployeeId.HasValue)
         {
-            <dt class="col-sm-4">Godkendelsesdato</dt>
-            <dd class="col-sm-8">@Model.ApprovalDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
+            <small class="text-muted d-block">ID: @Model.EmployeeId.Value</small>
         }
-        @* Betinget visning af afvisningsdato, hvis den findes. *@
-        @if(Model.RejectionDate.HasValue)
-        {
-            <dt class="col-sm-4">Afvisningsdato</dt>
-            <dd class="col-sm-8">@Model.RejectionDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
-        }
-        @* Betinget visning af gennemførselsdato, hvis den findes. *@
-        @if(Model.CompletionDate.HasValue)
-        {
-            <dt class="col-sm-4">Gennemførselsdato</dt>
-            <dd class="col-sm-8">@Model.CompletionDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
-        }
-    </dl>
+    </dd>
 
-    @* TODO: Tilføj sektion for at redigere noter eller tildele medarbejder, hvis relevant *@ 
-    @* Eksempel på mulige handlingsfelter, som er udkommenteret.
-    <hr />
-    <h5>Handlinger</h5>
-    <div class="mb-3">
-        <label for="adoptionNotesModal" class="form-label">Opdater Noter:</label>
-        <textarea id="adoptionNotesModal" class="form-control" rows="3">@Model.Notes</textarea>
-    </div> *@
+    @* --- Vigtige Datoer --- *@
+    @* Tjekker om AdoptionDate er sat (ikke default DateTime-værdi) før visning. *@
+    @if (Model.AdoptionDate != default(DateTime) && Model.AdoptionDate.Year > 1) 
+    {
+        <dt class="col-sm-4">Adoptionsdato:</dt>
+        <dd class="col-sm-8">@Model.AdoptionDate.ToString("dd-MM-yyyy HH:mm")</dd>
+    }
 
-</div> 
+    @if(Model.ApprovalDate.HasValue)
+    {
+        <dt class="col-sm-4">Godkendelsesdato:</dt>
+        <dd class="col-sm-8">@Model.ApprovalDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
+    }
+
+    @if(Model.RejectionDate.HasValue)
+    {
+        <dt class="col-sm-4">Afvisningsdato:</dt>
+        <dd class="col-sm-8">@Model.RejectionDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
+    }
+
+    @if(Model.CompletionDate.HasValue)
+    {
+        <dt class="col-sm-4">Gennemførselsdato:</dt>
+        <dd class="col-sm-8">@Model.CompletionDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
+    }
+
+    @* --- Noter --- *@
+    <dt class="col-sm-4">Noter:</dt>
+    <dd class="col-sm-8">
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <div class="notes-display">@Model.Notes</div> @* `white-space: pre-wrap;` kan tilføjes via CSS for denne klasse *@
+        }
+        else
+        {
+            <em class="text-muted">Ingen noter.</em>
+        }
+    </dd>
+</dl>
+
+@* 
+    CSS for .details-list og .notes-display kan defineres i en centraliseret admin CSS-fil 
+    eller i en <style> blok i den Razor Page, der hoster denne partial (f.eks. Index.cshtml),
+    hvis stilarterne er specifikke for adoptionsdetaljer.
+    Eksempel:
+    .details-list dt {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .details-list dd {
+        margin-bottom: 0.75rem;
+        padding-left: 0.5rem; 
+    }
+    .notes-display {
+        white-space: pre-wrap;
+        background-color: #f8f9fa; 
+        padding: 10px;
+        border-radius: 0.25rem;
+        max-height: 200px; /* Eksempel på max højde for noter */
+        overflow-y: auto;
+    }
+*@
+
+@* TODO: Tilføj sektion for at redigere noter eller tildele medarbejder, hvis relevant *@ 
+@* Eksempel på mulige handlingsfelter, som er udkommenteret.
+<hr />
+<h5>Handlinger</h5>
+<div class="mb-3">
+    <label for="adoptionNotesModal" class="form-label">Opdater Noter:</label>
+    <textarea id="adoptionNotesModal" class="form-control" rows="3">@Model.Notes</textarea>
+</div> *@
