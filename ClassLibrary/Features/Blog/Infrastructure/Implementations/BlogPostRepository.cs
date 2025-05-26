@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ClassLibrary.Features.Blog.Core.Models; // Opdateret
 using ClassLibrary.Features.Blog.Infrastructure.Abstractions; // Opdateret
 using ClassLibrary.SharedKernel.Persistence.Implementations; // For Repository<T>
+using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataInitializer
 // using ClassLibrary.SharedKernel.Persistence.Abstractions; // Ikke længere nødvendig direkte her
 
 namespace ClassLibrary.Features.Blog.Infrastructure.Implementations
@@ -14,9 +15,7 @@ namespace ClassLibrary.Features.Blog.Infrastructure.Implementations
     /// </summary>
     public class BlogPostRepository : Repository<BlogPost>, IBlogPostRepository
     {
-        private const string FilePath = "Data/Json/blogposts.json";
-
-        public BlogPostRepository() : base(FilePath)
+        public BlogPostRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "blogposts.json"))
         {
         }
 

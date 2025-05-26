@@ -19,6 +19,8 @@ namespace ClassLibrary.Infrastructure.DataInitialization
 {
     public static class JsonDataInitializer
     {
+        public static string CalculatedWorkspaceRoot { get; private set; } = string.Empty;
+
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -41,15 +43,25 @@ namespace ClassLibrary.Infrastructure.DataInitialization
 
         public static async Task InitializeAsync()
         {
-            Console.WriteLine("Starting JSON data initialization...");
+            Console.WriteLine($"JsonDataInitializer: AppContext.BaseDirectory = {AppContext.BaseDirectory}");
             // Bestem workspace-roden ved at gå fire niveauer op fra output-mappen
             // Dette antager en standard projektstruktur: [WorkspaceRoD]/[ProjektNavn]/bin/[Konfiguration]/[Framework]/
             string workspaceRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+            CalculatedWorkspaceRoot = workspaceRoot;
+            Console.WriteLine($"JsonDataInitializer: Calculated Workspace Root = {CalculatedWorkspaceRoot}");
+
+            string targetJsonDir = Path.Combine(CalculatedWorkspaceRoot, "Data", "Json");
+            Console.WriteLine($"JsonDataInitializer: Target JSON Directory = {targetJsonDir}");
+
+            string blogPostsPath = Path.Combine(targetJsonDir, "blogposts.json");
+            Console.WriteLine($"JsonDataInitializer: Expected blogposts.json path = {blogPostsPath}");
+
+            Console.WriteLine("Starting JSON data initialization...");
 
             foreach (var entry in _dataFilesToInitialize)
             {
                 // Kombiner workspace-roden med den relative sti fra entry.Key (f.eks. "Data/Json/animals.json")
-                var filePath = Path.Combine(workspaceRoot, entry.Key); 
+                var filePath = Path.Combine(CalculatedWorkspaceRoot, entry.Key);
                 var directory = Path.GetDirectoryName(filePath);
 
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))

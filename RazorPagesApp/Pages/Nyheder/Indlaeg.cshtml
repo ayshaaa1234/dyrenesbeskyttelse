@@ -1,0 +1,104 @@
+@page "{id:int}"
+@model RazorPagesApp.Pages.Nyheder.IndlaegModel
+
+@if (Model.BlogPost != null)
+{
+    ViewData["Title"] = Model.BlogPost.Title;
+
+    <div class="container mt-5 blog-post-container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1>@Model.BlogPost.Title</h1>
+                <hr />
+
+                <div class="text-muted mb-3">
+                    <span>Publiceret: @Model.BlogPost.PublishDate.ToString("dd. MMMM yyyy")</span>
+                    @if (!string.IsNullOrEmpty(Model.BlogPost.Author))
+                    {
+                        <span>&nbsp;|&nbsp; Forfatter: @Model.BlogPost.Author</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.BlogPost.Category))
+                    {
+                        <span>&nbsp;|&nbsp; Kategori: @Model.BlogPost.Category</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.BlogPost.PictureUrl))
+                {
+                    <img src="@Model.BlogPost.PictureUrl" class="img-fluid rounded mb-4 blog-post-image" alt="@Model.BlogPost.Title">
+                }
+                
+                <div class="blog-post-content">
+                    @Html.Raw(Model.BlogPost.Content) <!-- Brug Html.Raw hvis Content indeholder HTML -->
+                </div>
+
+                @if (Model.BlogPost.Tags != null && Model.BlogPost.Tags.Any())
+                {
+                    <div class="mt-4 mb-3">
+                        <strong>Tags:</strong>
+                        @foreach (var tag in Model.BlogPost.Tags)
+                        {
+                            <span class="badge bg-secondary me-1">@tag</span>
+                        }
+                    </div>
+                }
+                
+                <hr />
+                <a asp-page="/Nyheder/Index" class="btn btn-outline-secondary btn-arrow-left">Tilbage til nyheder</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-5">
+        <div class="alert alert-warning" role="alert">
+            Blogindlægget blev ikke fundet eller er ikke længere tilgængeligt.
+        </div>
+         <a asp-page="/Nyheder/Index" class="btn btn-outline-secondary">Tilbage til nyheder</a>
+    </div>
+}
+
+@section Styles {
+    <style>
+        .blog-post-container {
+            padding-bottom: 3rem; 
+        }
+        .blog-post-image {
+            max-height: 500px; /* Juster efter behov */
+            width: 100%;
+            object-fit: cover;
+            margin-bottom: 2rem;
+        }
+        .blog-post-content h2 {
+            font-size: 1.75rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--db-primary-red);
+        }
+        .blog-post-content h3 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--db-dark-green-accent);
+        }
+        .blog-post-content p {
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .blog-post-content ul, .blog-post-content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        .blog-post-content blockquote {
+            border-left: 4px solid var(--db-light-gray-accent);
+            padding-left: 1rem;
+            margin-left: 0;
+            font-style: italic;
+            color: #555;
+        }
+       .btn-arrow-left::before {
+            content: "← "; 
+        }
+    </style>
+} 

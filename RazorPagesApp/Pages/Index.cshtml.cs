@@ -22,12 +22,8 @@ namespace RazorPagesApp.Pages
         {
             try
             {
-                var allPosts = await _blogPostService.GetAllBlogPostsAsync();
-                LatestBlogPosts = allPosts
-                                   .Where(p => p.IsPublished)
-                                   .OrderByDescending(p => p.PublishDate)
-                                   .Take(3)
-                                   .ToList();
+                // Hent de 3 seneste publicerede blogindlæg
+                LatestBlogPosts = await _blogPostService.GetLatestBlogPostsAsync(3);
             }
             catch (Exception ex)
             {
