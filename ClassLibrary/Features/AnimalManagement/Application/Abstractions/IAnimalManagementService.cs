@@ -61,17 +61,17 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Abstractions // Opd
         /// <summary>
         /// Henter dyr baseret på alder i måneder
         /// </summary>
-        Task<IEnumerable<Animal>> GetAnimalsByAgeInMonthsAsync(int age); // Bør hedde ageInMonths for konsistens
+        Task<IEnumerable<Animal>> GetAnimalsByAgeInMonthsAsync(int ageInMonths); // Matcher service implementering
 
         /// <summary>
         /// Henter dyr baseret på alder i uger
         /// </summary>
-        Task<IEnumerable<Animal>> GetAnimalsByAgeInWeeksAsync(int age); // Bør hedde ageInWeeks for konsistens
+        Task<IEnumerable<Animal>> GetAnimalsByAgeInWeeksAsync(int ageInWeeks); // Matcher service implementering
 
         /// <summary>
         /// Henter dyr baseret på køn
         /// </summary>
-        Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(string gender);
+        Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(Gender gender); // Opdateret til Gender enum
 
         /// <summary>
         /// Henter dyr baseret på vægtinterval

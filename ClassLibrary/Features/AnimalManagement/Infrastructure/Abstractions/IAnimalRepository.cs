@@ -14,8 +14,8 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Abstractions
         Task<IEnumerable<Animal>> GetAnimalsBySpeciesAsync(Species species);
         Task<IEnumerable<Animal>> GetAnimalsByAgeInYearsAsync(int age);
         Task<IEnumerable<Animal>> GetAnimalsByAgeInMonthsAsync(int age);
-        Task<IEnumerable<Animal>> GetAnimalsByAgeInWeeksAsync(int age);
-        Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(string gender);
+        Task<IEnumerable<Animal>> GetAnimalsByAgeInWeeksAsync(int ageInWeeks);
+        Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(Gender gender);
         Task<IEnumerable<Animal>> GetAnimalsByWeightRangeAsync(decimal minWeight, decimal maxWeight);
         Task<IEnumerable<Animal>> GetAnimalsByAgeRangeInYearsAsync(int minAge, int maxAge);
         Task<IEnumerable<Animal>> GetAnimalsByAgeRangeInMonthsAsync(int minAge, int maxAge);

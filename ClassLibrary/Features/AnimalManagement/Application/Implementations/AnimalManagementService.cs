@@ -102,9 +102,8 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Implementations
             return await _animalRepository.GetAnimalsByAgeInWeeksAsync(ageInWeeks);
         }
 
-        public async Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(string gender)
+        public async Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(Gender gender)
         {
-            if (string.IsNullOrWhiteSpace(gender)) throw new ArgumentException("Køn må ikke være tomt.", nameof(gender));
             return await _animalRepository.GetAnimalsByGenderAsync(gender);
         }
 

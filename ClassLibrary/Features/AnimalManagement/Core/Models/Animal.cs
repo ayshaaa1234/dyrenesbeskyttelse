@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ClassLibrary.SharedKernel.Domain.Abstractions; // For IEntity, ISoftDelete
-using ClassLibrary.Features.AnimalManagement.Core.Enums; // For AnimalStatus, Species (senere)
+using ClassLibrary.Features.AnimalManagement.Core.Enums; // For AnimalStatus, Species, Gender
 // using ClassLibrary.Features.AnimalManagement.Core.Models; // For HealthRecord, Visit (selvreference/andre modeller i samme feature)
 
 namespace ClassLibrary.Features.AnimalManagement.Core.Models
@@ -24,7 +24,7 @@ namespace ClassLibrary.Features.AnimalManagement.Core.Models
         /// <summary>
         /// Dyrets art
         /// </summary>
-        public Enums.Species Species { get; set; } // Opdateret type
+        public Species Species { get; set; } // Fjernet Enums. præfiks
 
         /// <summary>
         /// Dyrets race
@@ -39,7 +39,7 @@ namespace ClassLibrary.Features.AnimalManagement.Core.Models
         /// <summary>
         /// Dyrets køn
         /// </summary>
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; }
 
         /// <summary>
         /// Beskrivelse af dyret
@@ -99,7 +99,7 @@ namespace ClassLibrary.Features.AnimalManagement.Core.Models
         /// <summary>
         /// Dyrets status
         /// </summary>
-        public Enums.AnimalStatus Status { get; set; } // Vil bruge Enums.AnimalStatus når enum flyttes
+        public AnimalStatus Status { get; set; } // Fjernet Enums. præfiks
 
         /// <summary>
         /// URL til et billede af dyret

@@ -27,7 +27,7 @@ namespace RazorPagesApp.Pages.Adoption
         public Species? SelectedSpecies { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public string? SelectedGender { get; set; }
+        public Gender? SelectedGender { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int CurrentPage { get; set; } = 1;
@@ -44,23 +44,22 @@ namespace RazorPagesApp.Pages.Adoption
 
         public async Task OnGetAsync()
         {
-            // Populate filter options (kun én gang, eller hvis de er dynamiske)
+            // Populate filter options
             if (!SpeciesOptions.Any())
             {
                 SpeciesOptions = Enum.GetValues(typeof(Species))
                                     .Cast<Species>()
-                                    .Select(s => new SelectListItem { Value = s.ToString(), Text = s.ToString() })
+                                    .Select(s => new SelectListItem { Value = s.ToString(), Text = GetSpeciesDisplayName(s) })
                                     .ToList();
                 SpeciesOptions.Insert(0, new SelectListItem { Value = "", Text = "Alle Arter" });
             }
             if (!GenderOptions.Any())
             {
-                GenderOptions = new List<SelectListItem>
-                {
-                    new SelectListItem { Value = "", Text = "Alle Køn" },
-                    new SelectListItem { Value = "Han", Text = "Han" },
-                    new SelectListItem { Value = "Hun", Text = "Hun" },
-                };
+                GenderOptions = Enum.GetValues(typeof(Gender))
+                                    .Cast<Gender>()
+                                    .Select(g => new SelectListItem { Value = g.ToString(), Text = GetGenderDisplayName(g) })
+                                    .ToList();
+                GenderOptions.Insert(0, new SelectListItem { Value = "", Text = "Alle Køn" });
             }
 
             var allAvailableAnimalsQuery = (await _animalService.GetAvailableAnimalsAsync()).AsQueryable();
@@ -70,9 +69,21 @@ namespace RazorPagesApp.Pages.Adoption
                 allAvailableAnimalsQuery = allAvailableAnimalsQuery.Where(a => a.Species == SelectedSpecies.Value);
             }
 
-            if (!string.IsNullOrEmpty(SelectedGender))
+            if (SelectedGender.HasValue)
             {
-                allAvailableAnimalsQuery = allAvailableAnimalsQuery.Where(a => a.Gender != null && a.Gender.Equals(SelectedGender, StringComparison.OrdinalIgnoreCase));
+                // Antager at 'Ukendt' køn ikke skal med, medmindre det specifikt er valgt.
+                // Hvis SelectedGender er 'Unknown', så inkluder dem.
+                // Ellers, match på det specifikke køn.
+                if (SelectedGender.Value == Gender.Unknown)
+                {
+                     allAvailableAnimalsQuery = allAvailableAnimalsQuery.Where(a => a.Gender == SelectedGender.Value);
+                }
+                else
+                {
+                    // For Male eller Female, inkluder dyr med det specifikke køn.
+                    // Hvis man vil ekskludere Unknown helt når et specifikt køn er valgt, skal det ikke med her.
+                    allAvailableAnimalsQuery = allAvailableAnimalsQuery.Where(a => a.Gender == SelectedGender.Value && a.Gender != Gender.Unknown);
+                }
             }
 
             TotalAnimals = allAvailableAnimalsQuery.Count();
@@ -81,6 +92,24 @@ namespace RazorPagesApp.Pages.Adoption
                                 .Skip((CurrentPage - 1) * PageSize)
                                 .Take(PageSize)
                                 .ToList();
+        }
+
+        // Helper methods for display names (kan flyttes til et mere centralt sted senere)
+        private string GetSpeciesDisplayName(Species species)
+        {
+            // Simpel implementering - kan udvides med [Display(Name="...")] attributter på enum
+            return species.ToString(); 
+        }
+
+        private string GetGenderDisplayName(Gender gender)
+        {
+            return gender switch
+            {
+                Gender.Male => "Han",
+                Gender.Female => "Hun",
+                Gender.Unknown => "Ukendt",
+                _ => gender.ToString()
+            };
         }
     }
 } 

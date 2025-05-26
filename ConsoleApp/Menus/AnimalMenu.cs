@@ -123,9 +123,6 @@ namespace ConsoleApp.Menus
             Console.Write("Race: ");
             string? breed = Console.ReadLine() ?? string.Empty;
 
-            Console.Write("Køn: ");
-            string? gender = Console.ReadLine() ?? string.Empty;
-            
             decimal weight = GetDecimalFromUserInput("Vægt (kg): ");
 
             Console.Write("Sundhedsstatus (tekst): ");
@@ -148,7 +145,7 @@ namespace ConsoleApp.Menus
                 Status = status,
                 PictureUrl = pictureUrl,
                 Breed = breed,
-                Gender = gender,
+                Gender = GetGenderFromUserInput(),
                 Weight = weight,
                 HealthStatus = healthStatusText,
                 IsAdopted = false,
@@ -326,9 +323,11 @@ namespace ConsoleApp.Menus
             string? breed = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(breed)) animalToUpdate.Breed = breed;
 
-            Console.Write($"Køn ({animalToUpdate.Gender}): ");
-            string? gender = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(gender)) animalToUpdate.Gender = gender;
+            Console.WriteLine($"Nuværende køn: {animalToUpdate.Gender}. Ønsker du at ændre? (j/n)");
+            if (Console.ReadLine()?.ToLower() == "j")
+            {
+                animalToUpdate.Gender = GetGenderFromUserInput();
+            }
 
             Console.Write($"Vægt ({animalToUpdate.Weight} kg): ");
             string? weightInput = Console.ReadLine();
@@ -614,6 +613,25 @@ namespace ConsoleApp.Menus
 
             Console.WriteLine("\nTryk på en tast for at fortsætte...");
             Console.ReadKey();
+        }
+
+        private Gender GetGenderFromUserInput()
+        {
+            Console.WriteLine("Vælg køn:");
+            foreach (int i in Enum.GetValues(typeof(Gender)))
+            {
+                Console.WriteLine($"{i}. {Enum.GetName(typeof(Gender), i)}");
+            }
+            Console.Write("Køn: ");
+            string? input = Console.ReadLine();
+            Gender gender;
+            while (string.IsNullOrWhiteSpace(input) || !Enum.TryParse(input.Trim(), true, out gender) || !Enum.IsDefined(typeof(Gender), gender))
+            {
+                Console.WriteLine("Ugyldigt køn. Prøv igen.");
+                Console.Write("Køn: ");
+                input = Console.ReadLine();
+            }
+            return gender;
         }
     }
 } 

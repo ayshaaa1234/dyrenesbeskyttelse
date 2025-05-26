@@ -86,9 +86,9 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
             return await base.FindAsync(a => a.BirthDate.HasValue && (int)((today - a.BirthDate.Value).TotalDays / 7) == ageInWeeks);
         }
 
-        public async Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(string gender)
+        public async Task<IEnumerable<Animal>> GetAnimalsByGenderAsync(Gender gender)
         {
-            return await base.FindAsync(a => !string.IsNullOrWhiteSpace(a.Gender) && string.Equals(a.Gender, gender, StringComparison.OrdinalIgnoreCase));
+            return await base.FindAsync(a => a.Gender == gender);
         }
 
         public async Task<IEnumerable<Animal>> GetAnimalsByWeightRangeAsync(decimal minWeight, decimal maxWeight)
