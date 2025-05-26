@@ -227,6 +227,9 @@ namespace ClassLibrary.Services
 
             if (activity.Price < 0)
                 throw new ArgumentException("Pris kan ikke være negativ");
+
+            if (!Enum.IsDefined(typeof(ActivityStatus), activity.Status))
+                throw new ArgumentException("Ugyldig aktivitetsstatus");
         }
     }
 } 

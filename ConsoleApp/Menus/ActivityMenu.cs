@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 using ClassLibrary.Services;
 using ClassLibrary.Models;
 
@@ -14,7 +15,7 @@ namespace ConsoleApp.Menus
 
         public ActivityMenu(ActivityService activityService)
         {
-            _activityService = activityService;
+            _activityService = activityService ?? throw new ArgumentNullException(nameof(activityService));
         }
 
         public override async Task ShowAsync()
@@ -30,6 +31,7 @@ namespace ConsoleApp.Menus
                 Console.WriteLine("6. Slet aktivitet");
                 Console.WriteLine("7. Søg efter aktiviteter");
                 Console.WriteLine("8. Håndter deltagere");
+                Console.WriteLine("9. Vis aktiviteter for medarbejder");
                 Console.WriteLine("0. Tilbage til hovedmenu");
                 Console.Write("\nVælg en mulighed: ");
 
@@ -63,6 +65,9 @@ namespace ConsoleApp.Menus
                         case "8":
                             await ManageParticipants();
                             break;
+                        case "9":
+                            await ShowActivitiesByEmployee();
+                            break;
                         case "0":
                             return;
                         default:
@@ -74,6 +79,9 @@ namespace ConsoleApp.Menus
                 {
                     HandleException(ex);
                 }
+
+                Console.WriteLine("\nTryk på en tast for at fortsætte...");
+                Console.ReadKey();
             }
         }
 
@@ -98,66 +106,55 @@ namespace ConsoleApp.Menus
             DisplayActivities(activities);
         }
 
-        private async Task AddNewActivity()
+        private async Task ShowActivitiesByEmployee()
         {
-            ShowHeader("Tilføj ny aktivitet");
-
-            Console.Write("Navn: ");
-            var name = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Beskrivelse: ");
-            var description = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Dato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime date))
-            {
-                ShowError("Ugyldig dato");
-                return;
-            }
-
-            Console.Write("Varighed (minutter): ");
-            if (!int.TryParse(Console.ReadLine(), out int duration))
-            {
-                ShowError("Ugyldig varighed");
-                return;
-            }
-
-            Console.Write("Maksimalt antal deltagere: ");
-            if (!int.TryParse(Console.ReadLine(), out int maxParticipants))
-            {
-                ShowError("Ugyldigt antal deltagere");
-                return;
-            }
-
-            Console.Write("Medarbejder ID: ");
+            ShowHeader("Aktiviteter for medarbejder");
+            Console.Write("Indtast medarbejder ID: ");
             if (!int.TryParse(Console.ReadLine(), out int employeeId))
             {
                 ShowError("Ugyldigt medarbejder ID");
                 return;
             }
 
+            var activities = await _activityService.GetActivitiesByEmployeeAsync(employeeId);
+            DisplayActivities(activities);
+        }
+
+        private async Task AddNewActivity()
+        {
+            ShowHeader("Tilføj ny aktivitet");
+
+            var activity = new Activity();
+
+            Console.Write("Navn: ");
+            activity.Name = ReadRequiredString("Navn");
+
+            Console.Write("Beskrivelse: ");
+            activity.Description = ReadRequiredString("Beskrivelse");
+
+            Console.Write("Dato (dd/mm/yyyy): ");
+            activity.ActivityDate = ReadRequiredDateTime("Dato");
+
+            Console.Write("Tidspunkt (hh:mm): ");
+            var time = ReadRequiredTimeSpan("Tidspunkt");
+            activity.ActivityDate = activity.ActivityDate.Date.Add(time);
+
+            Console.Write("Varighed (minutter): ");
+            activity.DurationMinutes = ReadRequiredInt("Varighed", min: 1);
+
+            Console.Write("Maksimalt antal deltagere: ");
+            activity.MaxParticipants = ReadRequiredInt("Maksimalt antal deltagere", min: 1);
+
+            Console.Write("Medarbejder ID: ");
+            activity.EmployeeId = ReadRequiredInt("Medarbejder ID", min: 1);
+
             Console.Write("Lokation: ");
-            var location = Console.ReadLine() ?? string.Empty;
+            activity.Location = ReadRequiredString("Lokation");
 
             Console.Write("Pris: ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal price))
-            {
-                ShowError("Ugyldig pris");
-                return;
-            }
+            activity.Price = ReadRequiredDecimal("Pris", min: 0);
 
-            var activity = new Activity
-            {
-                Name = name,
-                Description = description,
-                ActivityDate = date,
-                DurationMinutes = duration,
-                MaxParticipants = maxParticipants,
-                EmployeeId = employeeId,
-                Location = location,
-                Price = price,
-                Status = ActivityStatus.Planned
-            };
+            activity.Status = ActivityStatus.Planned;
 
             await _activityService.CreateActivityAsync(activity);
             ShowSuccess("Aktivitet tilføjet succesfuldt!");
@@ -200,19 +197,24 @@ namespace ConsoleApp.Menus
             if (!string.IsNullOrWhiteSpace(dateStr) && DateTime.TryParse(dateStr, out DateTime date))
                 activity.ActivityDate = date;
 
+            Console.Write($"Tidspunkt [{activity.ActivityDate:HH:mm}]: ");
+            var timeStr = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(timeStr) && TimeSpan.TryParse(timeStr, out TimeSpan time))
+                activity.ActivityDate = activity.ActivityDate.Date.Add(time);
+
             Console.Write($"Varighed [{activity.DurationMinutes}]: ");
             var durationStr = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(durationStr) && int.TryParse(durationStr, out int duration))
+            if (!string.IsNullOrWhiteSpace(durationStr) && int.TryParse(durationStr, out int duration) && duration > 0)
                 activity.DurationMinutes = duration;
 
             Console.Write($"Maksimalt antal deltagere [{activity.MaxParticipants}]: ");
             var maxParticipantsStr = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(maxParticipantsStr) && int.TryParse(maxParticipantsStr, out int maxParticipants))
+            if (!string.IsNullOrWhiteSpace(maxParticipantsStr) && int.TryParse(maxParticipantsStr, out int maxParticipants) && maxParticipants > 0)
                 activity.MaxParticipants = maxParticipants;
 
             Console.Write($"Medarbejder ID [{activity.EmployeeId}]: ");
             var employeeIdStr = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(employeeIdStr) && int.TryParse(employeeIdStr, out int employeeId))
+            if (!string.IsNullOrWhiteSpace(employeeIdStr) && int.TryParse(employeeIdStr, out int employeeId) && employeeId > 0)
                 activity.EmployeeId = employeeId;
 
             Console.Write($"Lokation [{activity.Location}]: ");
@@ -220,9 +222,9 @@ namespace ConsoleApp.Menus
             if (!string.IsNullOrWhiteSpace(location))
                 activity.Location = location;
 
-            Console.Write($"Pris [{activity.Price}]: ");
+            Console.Write($"Pris [{activity.Price:C}]: ");
             var priceStr = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(priceStr) && decimal.TryParse(priceStr, out decimal price))
+            if (!string.IsNullOrWhiteSpace(priceStr) && decimal.TryParse(priceStr, out decimal price) && price >= 0)
                 activity.Price = price;
 
             Console.WriteLine("\nVælg status:");
@@ -276,8 +278,6 @@ namespace ConsoleApp.Menus
             if (Console.ReadLine()?.ToUpper() != "JA")
             {
                 Console.WriteLine("Sletning annulleret.");
-                Console.WriteLine("\nTryk på en tast for at fortsætte...");
-                Console.ReadKey();
                 return;
             }
 
@@ -517,8 +517,6 @@ namespace ConsoleApp.Menus
 
             var isRegistered = await _activityService.IsParticipantRegisteredAsync(activityId, participantId);
             Console.WriteLine($"\nDeltager er {(isRegistered ? "tilmeldt" : "ikke tilmeldt")} aktiviteten.");
-            Console.WriteLine("\nTryk på en tast for at fortsætte...");
-            Console.ReadKey();
         }
 
         private void DisplayActivities(IEnumerable<Activity> activities)
@@ -535,9 +533,6 @@ namespace ConsoleApp.Menus
                     Console.WriteLine(new string('-', 50));
                 }
             }
-
-            Console.WriteLine("\nTryk på en tast for at fortsætte...");
-            Console.ReadKey();
         }
 
         private void DisplayActivityInfo(Activity activity)
@@ -545,7 +540,7 @@ namespace ConsoleApp.Menus
             Console.WriteLine($"ID: {activity.Id}");
             Console.WriteLine($"Navn: {activity.Name}");
             Console.WriteLine($"Beskrivelse: {activity.Description}");
-            Console.WriteLine($"Dato: {activity.ActivityDate:dd/MM/yyyy}");
+            Console.WriteLine($"Dato og tid: {activity.ActivityDate:dd/MM/yyyy HH:mm}");
             Console.WriteLine($"Varighed: {activity.DurationMinutes} minutter");
             Console.WriteLine($"Maksimalt antal deltagere: {activity.MaxParticipants}");
             Console.WriteLine($"Antal tilmeldte: {activity.ParticipantIds.Count}");
@@ -553,7 +548,70 @@ namespace ConsoleApp.Menus
             Console.WriteLine($"Medarbejder ID: {activity.EmployeeId}");
             Console.WriteLine($"Lokation: {activity.Location}");
             Console.WriteLine($"Pris: {activity.Price:C}");
-            Console.WriteLine($"Status: {activity.Status}");
+            Console.WriteLine($"Status: {GetStatusText(activity.Status)}");
+        }
+
+        private string GetStatusText(ActivityStatus status)
+        {
+            return status switch
+            {
+                ActivityStatus.Planned => "Planlagt",
+                ActivityStatus.InProgress => "I gang",
+                ActivityStatus.Completed => "Afsluttet",
+                ActivityStatus.Cancelled => "Aflyst",
+                _ => "Ukendt"
+            };
+        }
+
+        private string ReadRequiredString(string fieldName)
+        {
+            while (true)
+            {
+                var input = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(input))
+                    return input;
+                ShowError($"{fieldName} kan ikke være tom");
+            }
+        }
+
+        private int ReadRequiredInt(string fieldName, int min = int.MinValue, int max = int.MaxValue)
+        {
+            while (true)
+            {
+                if (int.TryParse(Console.ReadLine(), out int value) && value >= min && value <= max)
+                    return value;
+                ShowError($"Ugyldig {fieldName}. Skal være et heltal mellem {min} og {max}");
+            }
+        }
+
+        private decimal ReadRequiredDecimal(string fieldName, decimal min = decimal.MinValue, decimal max = decimal.MaxValue)
+        {
+            while (true)
+            {
+                if (decimal.TryParse(Console.ReadLine(), out decimal value) && value >= min && value <= max)
+                    return value;
+                ShowError($"Ugyldig {fieldName}. Skal være et tal mellem {min} og {max}");
+            }
+        }
+
+        private DateTime ReadRequiredDateTime(string fieldName)
+        {
+            while (true)
+            {
+                if (DateTime.TryParse(Console.ReadLine(), out DateTime value))
+                    return value;
+                ShowError($"Ugyldig {fieldName}. Brug format dd/mm/yyyy");
+            }
+        }
+
+        private TimeSpan ReadRequiredTimeSpan(string fieldName)
+        {
+            while (true)
+            {
+                if (TimeSpan.TryParse(Console.ReadLine(), out TimeSpan value))
+                    return value;
+                ShowError($"Ugyldig {fieldName}. Brug format hh:mm");
+            }
         }
     }
 } 

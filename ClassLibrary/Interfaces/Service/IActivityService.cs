@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClassLibrary.Models;
 
-namespace ClassLibrary.Services
+namespace ClassLibrary.Interfaces
 {
     /// <summary>
     /// Interface for service til håndtering af aktiviteter

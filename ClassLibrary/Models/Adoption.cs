@@ -70,6 +70,21 @@ namespace ClassLibrary.Models
         public string Notes { get; set; } = string.Empty;
 
         /// <summary>
+        /// Dato for hvornår adoptionen blev godkendt
+        /// </summary>
+        public DateTime? ApprovalDate { get; set; }
+
+        /// <summary>
+        /// Dato for hvornår adoptionen blev afvist
+        /// </summary>
+        public DateTime? RejectionDate { get; set; }
+
+        /// <summary>
+        /// Dato for hvornår adoptionen blev gennemført
+        /// </summary>
+        public DateTime? CompletionDate { get; set; }
+
+        /// <summary>
         /// Angiver om adoptionen er slettet
         /// </summary>
         public bool IsDeleted { get; set; }

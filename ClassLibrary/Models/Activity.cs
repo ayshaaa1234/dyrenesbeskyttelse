@@ -108,6 +108,9 @@ namespace ClassLibrary.Models
         /// </summary>
         public void AddParticipant(int participantId)
         {
+            if (participantId <= 0)
+                throw new ArgumentException("ParticipantId skal være større end 0");
+
             if (IsFullyBooked)
                 throw new InvalidOperationException("Aktiviteten er fuldt booket");
             
@@ -122,6 +125,9 @@ namespace ClassLibrary.Models
         /// </summary>
         public void RemoveParticipant(int participantId)
         {
+            if (participantId <= 0)
+                throw new ArgumentException("ParticipantId skal være større end 0");
+
             if (!IsParticipantRegistered(participantId))
                 throw new InvalidOperationException("Deltageren er ikke tilmeldt");
 

@@ -120,29 +120,60 @@ namespace ConsoleApp.Menus
                     return;
             }
 
-            var adoptions = await _adoptionService.GetAdoptionsByStatusAsync(status);
-            DisplayAdoptions(adoptions);
+            try
+            {
+                var adoptions = await _adoptionService.GetAdoptionsByStatusAsync(status);
+                DisplayAdoptions(adoptions);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
         }
 
         private async Task ShowAdoptionsByDate()
         {
             ShowHeader("Adoptioner efter dato");
-            Console.Write("Indtast startdato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime startDate))
+            
+            DateTime startDate;
+            DateTime endDate;
+
+            while (true)
             {
-                ShowError("Ugyldig startdato");
-                return;
+                Console.Write("Indtast startdato (dd/mm/yyyy): ");
+                if (!DateTime.TryParse(Console.ReadLine(), out startDate))
+                {
+                    ShowError("Ugyldig startdato. Prøv igen.");
+                    continue;
+                }
+                break;
             }
 
-            Console.Write("Indtast slutdato (dd/mm/yyyy): ");
-            if (!DateTime.TryParse(Console.ReadLine(), out DateTime endDate))
+            while (true)
             {
-                ShowError("Ugyldig slutdato");
-                return;
+                Console.Write("Indtast slutdato (dd/mm/yyyy): ");
+                if (!DateTime.TryParse(Console.ReadLine(), out endDate))
+                {
+                    ShowError("Ugyldig slutdato. Prøv igen.");
+                    continue;
+                }
+                if (endDate < startDate)
+                {
+                    ShowError("Slutdato skal være efter startdato. Prøv igen.");
+                    continue;
+                }
+                break;
             }
 
-            var adoptions = await _adoptionService.GetAdoptionsByDateRangeAsync(startDate, endDate);
-            DisplayAdoptions(adoptions);
+            try
+            {
+                var adoptions = await _adoptionService.GetAdoptionsByDateRangeAsync(startDate, endDate);
+                DisplayAdoptions(adoptions);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
         }
 
         private async Task ShowAdoptionsByAnimal()
@@ -177,61 +208,14 @@ namespace ConsoleApp.Menus
         {
             ShowHeader("Opret ny adoption");
 
-            Console.Write("Indtast dyrets ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int animalId))
-            {
-                ShowError("Ugyldigt dyre ID");
-                return;
-            }
-
-            Console.Write("Indtast kunde ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int customerId))
-            {
-                ShowError("Ugyldigt kunde ID");
-                return;
-            }
-
-            Console.Write("Indtast medarbejder ID: ");
-            if (!int.TryParse(Console.ReadLine(), out int employeeId))
-            {
-                ShowError("Ugyldigt medarbejder ID");
-                return;
-            }
-
-            Console.Write("Indtast adoptantens navn: ");
-            var adopterName = Console.ReadLine()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(adopterName))
-            {
-                ShowError("Adoptantens navn kan ikke være tomt");
-                return;
-            }
-
-            Console.Write("Indtast adoptantens email: ");
-            var adopterEmail = Console.ReadLine()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(adopterEmail))
-            {
-                ShowError("Adoptantens email kan ikke være tomt");
-                return;
-            }
-
-            Console.Write("Indtast adoptantens telefonnummer: ");
-            var adopterPhone = Console.ReadLine()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(adopterPhone))
-            {
-                ShowError("Adoptantens telefonnummer kan ikke være tomt");
-                return;
-            }
-
-            Console.Write("Indtast adoptionstype: ");
-            var adoptionType = Console.ReadLine()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(adoptionType))
-            {
-                ShowError("Adoptionstype kan ikke være tomt");
-                return;
-            }
-
-            Console.Write("Indtast noter: ");
-            var notes = Console.ReadLine()?.Trim() ?? string.Empty;
+            var animalId = ReadRequiredInt("Indtast dyrets ID");
+            var customerId = ReadRequiredInt("Indtast kunde ID");
+            var employeeId = ReadRequiredInt("Indtast medarbejder ID");
+            var adopterName = ReadRequiredString("Indtast adoptantens navn");
+            var adopterEmail = ReadRequiredString("Indtast adoptantens email");
+            var adopterPhone = ReadRequiredString("Indtast adoptantens telefonnummer");
+            var adoptionType = ReadRequiredString("Indtast adoptionstype");
+            var notes = ReadOptionalString("Indtast noter (valgfrit)");
 
             var adoption = new Adoption
             {
@@ -254,6 +238,35 @@ namespace ConsoleApp.Menus
             catch (Exception ex)
             {
                 HandleException(ex);
+            }
+        }
+
+        private string ReadRequiredString(string prompt)
+        {
+            while (true)
+            {
+                Console.Write($"{prompt}: ");
+                var input = Console.ReadLine()?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(input))
+                    return input;
+                ShowError("Dette felt er påkrævet. Prøv igen.");
+            }
+        }
+
+        private string ReadOptionalString(string prompt)
+        {
+            Console.Write($"{prompt}: ");
+            return Console.ReadLine()?.Trim() ?? string.Empty;
+        }
+
+        private int ReadRequiredInt(string prompt)
+        {
+            while (true)
+            {
+                Console.Write($"{prompt}: ");
+                if (int.TryParse(Console.ReadLine(), out int result) && result > 0)
+                    return result;
+                ShowError("Indtast venligst et gyldigt positivt tal. Prøv igen.");
             }
         }
 
@@ -428,10 +441,29 @@ namespace ConsoleApp.Menus
             Console.WriteLine($"Adoptant: {adoption.AdopterName}");
             Console.WriteLine($"Email: {adoption.AdopterEmail}");
             Console.WriteLine($"Telefon: {adoption.AdopterPhone}");
-            Console.WriteLine($"Dato: {adoption.AdoptionDate:dd/MM/yyyy}");
-            Console.WriteLine($"Status: {adoption.Status}");
+            Console.WriteLine($"Dato: {adoption.AdoptionDate:dd/MM/yyyy HH:mm}");
+            Console.WriteLine($"Status: {GetStatusInDanish(adoption.Status)}");
             Console.WriteLine($"Type: {adoption.AdoptionType}");
             Console.WriteLine($"Noter: {adoption.Notes}");
+            
+            if (adoption.ApprovalDate.HasValue)
+                Console.WriteLine($"Godkendt: {adoption.ApprovalDate.Value:dd/MM/yyyy HH:mm}");
+            if (adoption.RejectionDate.HasValue)
+                Console.WriteLine($"Afvist: {adoption.RejectionDate.Value:dd/MM/yyyy HH:mm}");
+            if (adoption.CompletionDate.HasValue)
+                Console.WriteLine($"Gennemført: {adoption.CompletionDate.Value:dd/MM/yyyy HH:mm}");
+        }
+
+        private string GetStatusInDanish(AdoptionStatus status)
+        {
+            return status switch
+            {
+                AdoptionStatus.Pending => "Under behandling",
+                AdoptionStatus.Approved => "Godkendt",
+                AdoptionStatus.Rejected => "Afvist",
+                AdoptionStatus.Completed => "Gennemført",
+                _ => status.ToString()
+            };
         }
     }
 } 

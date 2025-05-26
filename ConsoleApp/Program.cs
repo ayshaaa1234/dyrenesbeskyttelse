@@ -29,7 +29,11 @@ namespace ConsoleApp
                 var employeeService = new EmployeeService(employeeRepository);
                 var healthRecordService = new HealthRecordService(healthRecordRepository);
                 var visitLogService = new VisitLogService(visitLogRepository);
-                var adoptionService = new AdoptionService(adoptionRepository);
+                var adoptionService = new AdoptionService(
+                    adoptionRepository,
+                    animalRepository,
+                    customerRepository,
+                    employeeRepository);
                 var bookingService = new BookingService(bookingRepository);
                 var blogPostService = new BlogPostService(blogPostRepository);
                 var activityService = new ActivityService(activityRepository);

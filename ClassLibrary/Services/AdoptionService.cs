@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ClassLibrary.Models;
 using ClassLibrary.Interfaces;
+using ClassLibrary.Models;
 
 namespace ClassLibrary.Services
 {
@@ -12,13 +12,23 @@ namespace ClassLibrary.Services
     public class AdoptionService : IAdoptionService
     {
         private readonly IAdoptionRepository _adoptionRepository;
+        private readonly IAnimalRepository _animalRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
         /// <summary>
         /// Konstruktør
         /// </summary>
-        public AdoptionService(IAdoptionRepository adoptionRepository)
+        public AdoptionService(
+            IAdoptionRepository adoptionRepository,
+            IAnimalRepository animalRepository,
+            ICustomerRepository customerRepository,
+            IEmployeeRepository employeeRepository)
         {
             _adoptionRepository = adoptionRepository ?? throw new ArgumentNullException(nameof(adoptionRepository));
+            _animalRepository = animalRepository ?? throw new ArgumentNullException(nameof(animalRepository));
+            _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+            _employeeRepository = employeeRepository ?? throw new ArgumentNullException(nameof(employeeRepository));
         }
 
         /// <summary>
@@ -35,11 +45,11 @@ namespace ClassLibrary.Services
         public async Task<Adoption> GetAdoptionByIdAsync(int id)
         {
             if (id <= 0)
-                throw new ArgumentException("ID skal være større end 0");
+                throw new ArgumentException("ID skal være større end 0", nameof(id));
 
             var adoption = await _adoptionRepository.GetByIdAsync(id);
             if (adoption == null)
-                throw new KeyNotFoundException($"Ingen adoption fundet med ID: {id}");
+                throw new KeyNotFoundException($"Adoption med ID {id} blev ikke fundet");
 
             return adoption;
         }
@@ -52,7 +62,7 @@ namespace ClassLibrary.Services
             if (adoption == null)
                 throw new ArgumentNullException(nameof(adoption));
 
-            ValidateAdoption(adoption);
+            await ValidateAdoptionAsync(adoption);
             return await _adoptionRepository.AddAsync(adoption);
         }
 
@@ -64,7 +74,7 @@ namespace ClassLibrary.Services
             if (adoption == null)
                 throw new ArgumentNullException(nameof(adoption));
 
-            ValidateAdoption(adoption);
+            await ValidateAdoptionAsync(adoption);
             return await _adoptionRepository.UpdateAsync(adoption);
         }
 
@@ -74,7 +84,7 @@ namespace ClassLibrary.Services
         public async Task DeleteAdoptionAsync(int id)
         {
             if (id <= 0)
-                throw new ArgumentException("ID skal være større end 0");
+                throw new ArgumentException("ID skal være større end 0", nameof(id));
 
             await _adoptionRepository.DeleteAsync(id);
         }
@@ -85,7 +95,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByCustomerAsync(int customerId)
         {
             if (customerId <= 0)
-                throw new ArgumentException("CustomerId skal være større end 0");
+                throw new ArgumentException("Kunde ID skal være større end 0", nameof(customerId));
 
             return await _adoptionRepository.GetByCustomerIdAsync(customerId);
         }
@@ -96,7 +106,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAnimalAsync(int animalId)
         {
             if (animalId <= 0)
-                throw new ArgumentException("AnimalId skal være større end 0");
+                throw new ArgumentException("Dyr ID skal være større end 0", nameof(animalId));
 
             return await _adoptionRepository.GetByAnimalIdAsync(animalId);
         }
@@ -117,6 +127,9 @@ namespace ClassLibrary.Services
         /// </summary>
         public async Task<IEnumerable<Adoption>> GetAdoptionsByStatusAsync(AdoptionStatus status)
         {
+            if (!Enum.IsDefined(typeof(AdoptionStatus), status))
+                throw new ArgumentException("Ugyldig adoptionsstatus", nameof(status));
+
             return await _adoptionRepository.GetByStatusAsync(status);
         }
 
@@ -125,6 +138,9 @@ namespace ClassLibrary.Services
         /// </summary>
         public async Task<IEnumerable<Adoption>> GetAdoptionsBySpeciesAsync(Species species)
         {
+            if (!Enum.IsDefined(typeof(Species), species))
+                throw new ArgumentException("Ugyldig dyreart", nameof(species));
+
             return await _adoptionRepository.GetBySpeciesAsync(species);
         }
 
@@ -134,7 +150,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeInYearsAsync(int years)
         {
             if (years < 0)
-                throw new ArgumentException("Alder kan ikke være negativ");
+                throw new ArgumentException("Alder kan ikke være negativ", nameof(years));
 
             return await _adoptionRepository.GetByAgeInYearsAsync(years);
         }
@@ -145,7 +161,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeInMonthsAsync(int months)
         {
             if (months < 0)
-                throw new ArgumentException("Alder kan ikke være negativ");
+                throw new ArgumentException("Alder kan ikke være negativ", nameof(months));
 
             return await _adoptionRepository.GetByAgeInMonthsAsync(months);
         }
@@ -156,7 +172,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeInWeeksAsync(int weeks)
         {
             if (weeks < 0)
-                throw new ArgumentException("Alder kan ikke være negativ");
+                throw new ArgumentException("Alder kan ikke være negativ", nameof(weeks));
 
             return await _adoptionRepository.GetByAgeInWeeksAsync(weeks);
         }
@@ -167,9 +183,9 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeRangeInYearsAsync(int minYears, int maxYears)
         {
             if (minYears < 0)
-                throw new ArgumentException("Minimumsalder kan ikke være negativ");
+                throw new ArgumentException("Minimumsalder kan ikke være negativ", nameof(minYears));
             if (maxYears < minYears)
-                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder");
+                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder", nameof(maxYears));
 
             return await _adoptionRepository.GetByAgeRangeInYearsAsync(minYears, maxYears);
         }
@@ -180,9 +196,9 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeRangeInMonthsAsync(int minMonths, int maxMonths)
         {
             if (minMonths < 0)
-                throw new ArgumentException("Minimumsalder kan ikke være negativ");
+                throw new ArgumentException("Minimumsalder kan ikke være negativ", nameof(minMonths));
             if (maxMonths < minMonths)
-                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder");
+                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder", nameof(maxMonths));
 
             return await _adoptionRepository.GetByAgeRangeInMonthsAsync(minMonths, maxMonths);
         }
@@ -193,9 +209,9 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAgeRangeInWeeksAsync(int minWeeks, int maxWeeks)
         {
             if (minWeeks < 0)
-                throw new ArgumentException("Minimumsalder kan ikke være negativ");
+                throw new ArgumentException("Minimumsalder kan ikke være negativ", nameof(minWeeks));
             if (maxWeeks < minWeeks)
-                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder");
+                throw new ArgumentException("Maksimumsalder skal være større end minimumsalder", nameof(maxWeeks));
 
             return await _adoptionRepository.GetByAgeRangeInWeeksAsync(minWeeks, maxWeeks);
         }
@@ -206,7 +222,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByTypeAsync(string adoptionType)
         {
             if (string.IsNullOrWhiteSpace(adoptionType))
-                throw new ArgumentException("Adoptionstype kan ikke være tom");
+                throw new ArgumentException("Adoptionstype kan ikke være tom", nameof(adoptionType));
 
             return await _adoptionRepository.GetByAdoptionTypeAsync(adoptionType);
         }
@@ -217,7 +233,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByEmployeeAsync(int employeeId)
         {
             if (employeeId <= 0)
-                throw new ArgumentException("EmployeeId skal være større end 0");
+                throw new ArgumentException("Medarbejder ID skal være større end 0", nameof(employeeId));
 
             return await _adoptionRepository.GetByEmployeeIdAsync(employeeId);
         }
@@ -228,7 +244,7 @@ namespace ClassLibrary.Services
         public async Task<IEnumerable<Adoption>> GetAdoptionsByAdopterEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Email kan ikke være tom");
+                throw new ArgumentException("Email kan ikke være tom", nameof(email));
 
             return await _adoptionRepository.GetByAdopterEmailAsync(email);
         }
@@ -239,7 +255,7 @@ namespace ClassLibrary.Services
         public async Task<Adoption> GetLatestAdoptionForAnimalAsync(int animalId)
         {
             if (animalId <= 0)
-                throw new ArgumentException("AnimalId skal være større end 0");
+                throw new ArgumentException("Dyr ID skal være større end 0", nameof(animalId));
 
             return await _adoptionRepository.GetLatestAdoptionForAnimalAsync(animalId);
         }
@@ -250,10 +266,13 @@ namespace ClassLibrary.Services
         public async Task ApproveAdoptionAsync(int adoptionId)
         {
             var adoption = await GetAdoptionByIdAsync(adoptionId);
+            
             if (adoption.Status != AdoptionStatus.Pending)
                 throw new InvalidOperationException("Kun ventende adoptioner kan godkendes");
 
             adoption.Status = AdoptionStatus.Approved;
+            adoption.ApprovalDate = DateTime.Now;
+            
             await _adoptionRepository.UpdateAsync(adoption);
         }
 
@@ -263,10 +282,13 @@ namespace ClassLibrary.Services
         public async Task RejectAdoptionAsync(int adoptionId)
         {
             var adoption = await GetAdoptionByIdAsync(adoptionId);
+            
             if (adoption.Status != AdoptionStatus.Pending)
                 throw new InvalidOperationException("Kun ventende adoptioner kan afvises");
 
             adoption.Status = AdoptionStatus.Rejected;
+            adoption.RejectionDate = DateTime.Now;
+            
             await _adoptionRepository.UpdateAsync(adoption);
         }
 
@@ -276,26 +298,32 @@ namespace ClassLibrary.Services
         public async Task CompleteAdoptionAsync(int adoptionId)
         {
             var adoption = await GetAdoptionByIdAsync(adoptionId);
+            
             if (adoption.Status != AdoptionStatus.Approved)
                 throw new InvalidOperationException("Kun godkendte adoptioner kan gennemføres");
 
             adoption.Status = AdoptionStatus.Completed;
+            adoption.CompletionDate = DateTime.Now;
+            
             await _adoptionRepository.UpdateAsync(adoption);
         }
 
         /// <summary>
         /// Validerer en adoption
         /// </summary>
-        private void ValidateAdoption(Adoption adoption)
+        private async Task ValidateAdoptionAsync(Adoption adoption)
         {
-            if (adoption.AnimalId <= 0)
-                throw new ArgumentException("AnimalId skal være større end 0");
-
             if (adoption.CustomerId <= 0)
-                throw new ArgumentException("CustomerId skal være større end 0");
+                throw new ArgumentException("Kunde ID skal være større end 0");
+
+            if (adoption.AnimalId <= 0)
+                throw new ArgumentException("Dyr ID skal være større end 0");
 
             if (adoption.EmployeeId <= 0)
-                throw new ArgumentException("EmployeeId skal være større end 0");
+                throw new ArgumentException("Medarbejder ID skal være større end 0");
+
+            if (string.IsNullOrWhiteSpace(adoption.AdoptionType))
+                throw new ArgumentException("Adoptionstype kan ikke være tom");
 
             if (string.IsNullOrWhiteSpace(adoption.AdopterName))
                 throw new ArgumentException("Adoptantens navn kan ikke være tomt");
@@ -306,8 +334,48 @@ namespace ClassLibrary.Services
             if (string.IsNullOrWhiteSpace(adoption.AdopterPhone))
                 throw new ArgumentException("Adoptantens telefonnummer kan ikke være tomt");
 
-            if (string.IsNullOrWhiteSpace(adoption.AdoptionType))
-                throw new ArgumentException("Adoptionstype kan ikke være tom");
+            if (adoption.AdoptionDate > DateTime.Now)
+                throw new ArgumentException("Adoptionsdato kan ikke være i fremtiden");
+
+            if (!Enum.IsDefined(typeof(AdoptionStatus), adoption.Status))
+                throw new ArgumentException("Ugyldig adoptionsstatus");
+
+            // Valider datoer baseret på status
+            switch (adoption.Status)
+            {
+                case AdoptionStatus.Approved:
+                    if (!adoption.ApprovalDate.HasValue)
+                        throw new ArgumentException("Godkendelsesdato mangler for godkendt adoption");
+                    break;
+                case AdoptionStatus.Rejected:
+                    if (!adoption.RejectionDate.HasValue)
+                        throw new ArgumentException("Afvisningsdato mangler for afvist adoption");
+                    break;
+                case AdoptionStatus.Completed:
+                    if (!adoption.CompletionDate.HasValue)
+                        throw new ArgumentException("Gennemførselsdato mangler for gennemført adoption");
+                    break;
+            }
+
+            // Tjek om kunden eksisterer
+            var customer = await _customerRepository.GetByIdAsync(adoption.CustomerId);
+            if (customer == null)
+                throw new KeyNotFoundException($"Kunde med ID {adoption.CustomerId} blev ikke fundet");
+
+            // Tjek om dyret eksisterer
+            var animal = await _animalRepository.GetByIdAsync(adoption.AnimalId);
+            if (animal == null)
+                throw new KeyNotFoundException($"Dyr med ID {adoption.AnimalId} blev ikke fundet");
+
+            // Tjek om medarbejderen eksisterer
+            var employee = await _employeeRepository.GetByIdAsync(adoption.EmployeeId);
+            if (employee == null)
+                throw new KeyNotFoundException($"Medarbejder med ID {adoption.EmployeeId} blev ikke fundet");
+
+            // Tjek om dyret allerede er adopteret
+            var existingAdoption = await _adoptionRepository.GetLatestAdoptionForAnimalAsync(adoption.AnimalId);
+            if (existingAdoption != null && existingAdoption.Status == AdoptionStatus.Completed)
+                throw new InvalidOperationException("Dette dyr er allerede adopteret");
         }
     }
 } 
