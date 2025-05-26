@@ -3,15 +3,18 @@
 @using ClassLibrary.SharedKernel.Extensions 
 @using ClassLibrary.Features.AnimalManagement.Core.Enums
 
-@{    ViewData["Title"] = "Overblik";
-    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+@{    ViewData["Title"] = "Overblik"; // Sætter sidens titel, som vises i browserfanen og potentielt andre steder.
+    Layout = "/Pages/Shared/_AdminLayout.cshtml"; // Angiver, at denne side skal bruge _AdminLayout.cshtml som master-layout.
 }
 
+<!-- Hovedcontainer for sidens indhold -->
 <div class="container-fluid">
     <h1 class="mt-4">@ViewData["Title"]</h1>
     <hr />
 
+    <!-- Række med statuskort (widgets) -->
     <div class="row">
+        <!-- Kort: Antal dyr i alt -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -22,13 +25,14 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalAnimals</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-paw fa-2x text-gray-300"></i>
+                            <i class="fas fa-paw fa-2x text-gray-300"></i> <!-- Ikon for pote -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Kort: Dyr klar til adoption -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
@@ -39,13 +43,14 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.AnimalsReadyForAdoption</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-home fa-2x text-gray-300"></i>
+                            <i class="fas fa-home fa-2x text-gray-300"></i> <!-- Ikon for hjem (adoption) -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- Kort: Dyr der trænger til vaccination -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
@@ -54,22 +59,22 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Dyr der trænger til vaccination</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @if (Model.AnimalsNeedingVaccination == -1)
+                                @if (Model.AnimalsNeedingVaccination == -1) // Tjekker om funktionen er implementeret
                                 {
                                     <small><em>(Funktion ikke klar)</em></small>
                                 }
-                                else if (Model.AnimalsNeedingVaccination == -2)
+                                else if (Model.AnimalsNeedingVaccination == -2) // Tjekker for fejl ved hentning
                                 {
                                     <small><em>(Fejl ved hentning)</em></small>
                                 }
-                                else
+                                else // Viser antallet hvis data er hentet korrekt
                                 {
                                     @Model.AnimalsNeedingVaccination
                                 }
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-syringe fa-2x text-gray-300"></i>
+                            <i class="fas fa-syringe fa-2x text-gray-300"></i> <!-- Ikon for sprøjte (vaccination) -->
                         </div>
                     </div>
                 </div>
@@ -81,25 +86,27 @@
 
     </div>
 
+    <!-- Række med lister: Nyligt tilføjede dyr og kommende besøg -->
     <div class="row mt-4">
+        <!-- Kolonne: Nyligt tilføjede dyr -->
         <div class="col-lg-7 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Nyligt tilføjede dyr</h6>
                 </div>
                 <div class="card-body">
-                    @if (Model.RecentlyAddedAnimals.Any())
+                    @if (Model.RecentlyAddedAnimals.Any()) // Tjekker om der er nyligt tilføjede dyr
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var animal in Model.RecentlyAddedAnimals)
+                            @foreach (var animal in Model.RecentlyAddedAnimals) // Gennemløber listen af nyligt tilføjede dyr
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
-                                        @if (!string.IsNullOrEmpty(animal.PictureUrl))
+                                        @if (!string.IsNullOrEmpty(animal.PictureUrl)) // Viser billede hvis URL findes
                                         {
                                             <img src="@animal.PictureUrl" alt="@animal.Name" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin-right: 10px;" />
                                         }
-                                        else
+                                        else // Viser placeholder hvis intet billede
                                         {
                                             <span style="display: inline-block; width: 40px; height: 40px; background-color: #eee; border-radius: 50%; margin-right: 10px; text-align: center; line-height: 40px;">?</span>
                                         }
@@ -110,7 +117,7 @@
                             }
                         </ul>
                     }
-                    else
+                    else // Vises hvis ingen dyr er tilføjet nyligt
                     {
                         <p>Ingen nyligt tilføjede dyr.</p>
                     }
@@ -118,16 +125,17 @@
             </div>
         </div>
 
+        <!-- Kolonne: Kommende planlagte besøg -->
         <div class="col-lg-5 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Kommende planlagte besøg</h6>
                 </div>
                 <div class="card-body">
-                     @if (Model.UpcomingVisits.Any())
+                     @if (Model.UpcomingVisits.Any()) // Tjekker om der er kommende besøg
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var visit in Model.UpcomingVisits)
+                            @foreach (var visit in Model.UpcomingVisits) // Gennemløber listen af kommende besøg
                             {
                                 <li class="list-group-item">
                                     <strong>@visit.Animal?.Name (@visit.Animal?.Species):</strong> @visit.Purpose <br />
@@ -138,7 +146,7 @@
                             }
                         </ul>
                     }
-                    else
+                    else // Vises hvis ingen kommende besøg er planlagt
                     {
                         <p>Ingen kommende planlagte besøg.</p>
                     }
@@ -149,8 +157,8 @@
 
 </div>
 
-@section Scripts {
+@section Scripts { // Sektion for side-specifikke scripts (her primært en kommentar om FontAwesome)
     @* For at få ikonerne vist kan FontAwesome CDN inkluderes her eller globalt i _Layout.cshtml
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     *@
-} 
+}

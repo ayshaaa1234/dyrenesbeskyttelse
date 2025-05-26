@@ -1,11 +1,12 @@
 @page "{id:int}"
+@* Definerer routen for siden. {id:int} betyder, at siden forventer et heltal 'id' i URL'en. *@
 @model RazorPagesApp.Pages.Adoption.DetaljerModel
-@using ClassLibrary.Features.AnimalManagement.Core.Enums
+@using ClassLibrary.Features.AnimalManagement.Core.Enums // Importerer enums for dyrestatus.
 
-@{ ViewData["Title"] = Model.Animal != null ? $"Detaljer for {Model.Animal.Name}" : "Dyredetaljer"; }
+@{ ViewData["Title"] = Model.Animal != null ? $"Detaljer for {Model.Animal.Name}" : "Dyredetaljer"; } // Sætter sidens titel dynamisk.
 
 <div class="container mt-5">
-    @if (Model.Animal != null)
+    @if (Model.Animal != null) // Tjekker om dyret blev fundet og indlæst i modellen.
     {
         <div class="row mb-4">
             <div class="col-md-8">
@@ -13,22 +14,23 @@
                 <p class="text-muted">@Model.Animal.Species / @Model.Animal.Breed</p>
             </div>
             <div class="col-md-4 text-md-end">
+                @* Knap til at navigere tilbage til oversigten over dyr til adoption. *@
                 <a asp-page="/Adoption/Index" class="btn btn-outline-secondary btn-arrow-left">Tilbage til oversigt</a>
             </div>
         </div>
 
         <div class="row">
-            <!-- Animal Info Column -->
+            <!-- Kolonne for dyreinformation -->
             <div class="col-lg-7 mb-4">
                 <div class="card shadow-sm" style="background-color: var(--db-white);">
                     <div class="row g-0">
                         <div class="col-md-5">
-                            @if (!string.IsNullOrEmpty(Model.Animal.PictureUrl))
+                            @if (!string.IsNullOrEmpty(Model.Animal.PictureUrl)) // Viser billede hvis URL findes.
                             {
                                 <img src="@Model.Animal.PictureUrl" class="img-fluid rounded-start w-100"
                                      alt="Billede af @Model.Animal.Name" style="object-fit: cover; aspect-ratio: 1/1;">
                             }
-                            else
+                            else // Viser placeholder billede hvis URL mangler.
                             {
                                 <img src="https://placehold.co/400x400/eeeeee/999999?text=Billede+mangler"
                                      class="img-fluid rounded-start w-100" alt="Billede mangler" style="object-fit: cover; aspect-ratio: 1/1;">
@@ -38,48 +40,51 @@
                             <div class="card-body">
                                 <h5 class="card-title">Information</h5>
                                 <ul class="list-unstyled">
+                                    @* Viser dyrets status med en farvekodet badge. *@
                                     <li><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(Model.Animal.Status)">@GetTranslatedAnimalStatus(Model.Animal.Status)</span></li>
                                     <li><strong>Køn:</strong> @Model.Animal.Gender</li>
-                                    <li><strong>Alder:</strong> @Model.Animal.GetFormattedAge()</li>
+                                    <li><strong>Alder:</strong> @Model.Animal.GetFormattedAge()</li> @* Bruger en metode i Animal modellen til at formatere alder. *@
                                     <li><strong>Race:</strong> @Model.Animal.Breed</li>
                                     <li><strong>Indtagelsesdato:</strong> @Model.Animal.IntakeDate.ToString("dd. MMMM yyyy")</li>
-                                    @if (Model.Animal.Weight > 0)
+                                    @if (Model.Animal.Weight > 0) // Viser vægt kun hvis den er angivet (>0).
                                     {
                                         <li><strong>Vægt:</strong> @Model.Animal.Weight kg</li>
                                     }
                                 </ul>
                                 <h5 class="card-title mt-3">Beskrivelse</h5>
-                                <p class="card-text text-break">@Model.Animal.Description</p>
+                                <p class="card-text text-break">@Model.Animal.Description</p> @* `text-break` tillader lange ord at bryde for at undgå overflow. *@
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Adoption Action & Extra Info Column -->
+            <!-- Kolonne for adoptionshandling og ekstra info -->
             <div class="col-lg-5 mb-4">
-                @if (Model.Animal.Status == AnimalStatus.Available)
+                @if (Model.Animal.Status == AnimalStatus.Available) // Viser adoptionsknap hvis dyret er tilgængeligt.
                 {
                     <div class="card shadow-sm mb-4 p-4 text-center" style="background-color: var(--db-primary-red-accent);">
                         <h4 style="color: var(--db-primary-red);">Interesseret i @Model.Animal.Name?</h4>
                         <p>Hvis du tror, at @Model.Animal.Name kunne være det rette match for dig, så start din adoptionsansøgning her.</p>
+                        @* Link til ansøgningssiden, sender dyrets ID med. *@
                         <a asp-page="/Adoption/Ansogning" asp-route-dyrId="@Model.Animal.Id" class="btn btn-danger btn-lg btn-arrow">Start Adoptionsansøgning</a>
                         <small class="text-muted mt-2">At starte en ansøgning er uforpligtende.</small>
                     </div>
                 }
-                else if (Model.Animal.Status == AnimalStatus.Reserved)
+                else if (Model.Animal.Status == AnimalStatus.Reserved) // Viser besked hvis dyret er reserveret.
                 {
                     <div class="alert alert-warning" role="alert">
                         <strong>Reserveret:</strong> @Model.Animal.Name er i øjeblikket reserveret. Kontakt os for mere information.
                     </div>
                 }
-                else if (Model.Animal.Status == AnimalStatus.Adopted)
+                else if (Model.Animal.Status == AnimalStatus.Adopted) // Viser besked hvis dyret er adopteret.
                 {
                     <div class="alert alert-success" role="alert">
                         <strong>Adopteret:</strong> @Model.Animal.Name har allerede fundet et nyt hjem!
                     </div>
                 }
 
+                 @* Kort med generelle overvejelser før adoption. *@
                  <div class="card shadow-sm" style="background-color: var(--db-white);">
                     <div class="card-body">
                         <h5 class="card-title">Overvejelser før adoption</h5>
@@ -95,7 +100,7 @@
             </div>
         </div>
     }
-    else
+    else // Vises hvis dyret ikke blev fundet (Model.Animal er null).
     {
         <div class="alert alert-warning" role="alert">
             Dyret blev ikke fundet.
@@ -103,20 +108,22 @@
     }
 </div>
 
-@functions {
+@functions { // Razor @functions blok til C# helper metoder direkte i .cshtml filen.
+    // Metode til at returnere en CSS klasse for status-badge baseret på dyrets status.
     string GetStatusBadgeClass(AnimalStatus status)
     {
-        return status switch
+        return status switch // Bruger switch expression for at matche status.
         {
             AnimalStatus.Available => "bg-success",
             AnimalStatus.Adopted => "bg-secondary",
             AnimalStatus.Reserved => "bg-warning text-dark",
             AnimalStatus.InTreatment => "bg-info text-dark",
             AnimalStatus.Deceased => "bg-danger",
-            _ => "bg-light text-dark",
+            _ => "bg-light text-dark", // Default badge klasse.
         };
     }
 
+    // Metode til at returnere en oversat streng for dyrets status.
     string GetTranslatedAnimalStatus(AnimalStatus status)
     {
         return status switch
@@ -126,8 +133,7 @@
             AnimalStatus.Reserved => "Reserveret",
             AnimalStatus.InTreatment => "I behandling",
             AnimalStatus.Deceased => "Afgået",
-            _ => status.ToString(), // Fallback hvis en status mangler oversættelse
+            _ => status.ToString(), // Fallback hvis en status mangler oversættelse, viser enum'ens navn.
         };
     }
-} 
 } 

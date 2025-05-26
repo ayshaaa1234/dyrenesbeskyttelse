@@ -66,8 +66,8 @@ Biblioteket er organiseret omkring følgende features, hver med deres primære s
     *   Inkluderer CRUD, specifikke søgninger, og håndtering af medarbejderdata som stilling og specialiseringer.
 
 5.  **Blog** (`BlogPostService`)
-    *   Håndterer blogindlæg (`BlogPost`).
-    *   Inkluderer CRUD, publicering/afpublicering, og håndtering af tags og likes.
+    *   Håndterer den fulde livscyklus for blogindlæg (`BlogPost`), herunder alle aspekter fra oprettelse til sletning (CRUD).
+    *   Dette inkluderer administration af centrale datafelter såsom titel, indhold, resumé, `PictureUrl`, forfatter, kategori, publiceringsdato (`PublishDate`) og status (`IsPublished`), samt håndtering af `Tags` og `Likes`.
 
 6.  **Memberships** (`MembershipService`)
     *   Håndterer medlemskabsprodukter (`MembershipProduct`) og kundemedlemskaber (`CustomerMembership`).

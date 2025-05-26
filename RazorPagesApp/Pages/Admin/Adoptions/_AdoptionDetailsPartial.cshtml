@@ -2,13 +2,16 @@
 @using ClassLibrary.SharedKernel.Extensions
 @using ClassLibrary.Features.Adoptions.Core.Enums
 
+@* Denne partial view viser detaljerne for en specifik adoption. *@
 <div id="adoptionDetailsContent">
     <h4>Detaljer for Adoption ID: @Model.Id</h4>
     <hr />
     <dl class="row">
+        @* Viser navnet på dyret og dets ID. ViewData["AnimalName"] forventes at blive sat i controlleren/PageModel. *@
         <dt class="col-sm-4">Dyr</dt>
         <dd class="col-sm-8">@ViewData["AnimalName"] (ID: @Model.AnimalId)</dd>
 
+        @* Viser navnet på kunden og dens ID. ViewData["CustomerName"] forventes at blive sat i controlleren/PageModel. *@
         <dt class="col-sm-4">Ansøger</dt>
         <dd class="col-sm-8">@ViewData["CustomerName"] (ID: @Model.CustomerId)</dd>
 
@@ -16,33 +19,42 @@
         <dd class="col-sm-8">@Model.ApplicationDate.ToString("dd-MM-yyyy HH:mm")</dd>
 
         <dt class="col-sm-4">Status</dt>
+        @* Bruger GetDisplayName() extension method til at vise en brugervenlig status. *@
         <dd class="col-sm-8">@Model.Status.GetDisplayName()</dd>
 
         <dt class="col-sm-4">Adoptionsdato</dt>
+        @* Viser adoptionsdatoen, hvis den er sat og ikke er standardværdien for DateTime. Ellers vises "Ikke sat". *@
         <dd class="col-sm-8">@(Model.AdoptionDate != default(DateTime) && Model.AdoptionDate.Year > 1 ? Model.AdoptionDate.ToString("dd-MM-yyyy") : "Ikke sat")</dd>
 
         <dt class="col-sm-4">Håndteret af Medarbejder ID</dt>
+        @* Viser medarbejderens ID, hvis det er tildelt. Ellers vises "Ikke tildelt". *@
         <dd class="col-sm-8">@(Model.EmployeeId?.ToString() ?? "Ikke tildelt")</dd>
         
         <dt class="col-sm-4">Medarbejder</dt>
+        @* Viser navnet på medarbejderen. ViewData["EmployeeName"] forventes at blive sat i controlleren/PageModel, hvis EmployeeId er sat. *@
         <dd class="col-sm-8">@ViewData["EmployeeName"]</dd>
         
         <dt class="col-sm-4">Adoptionstype</dt>
+        @* Viser adoptionstypen, hvis den er angivet. Ellers vises "N/A". *@
         <dd class="col-sm-8">@(!string.IsNullOrWhiteSpace(Model.AdoptionType) ? Model.AdoptionType : "N/A")</dd>
 
         <dt class="col-sm-4">Noter</dt>
+        @* Viser noter, hvis de er angivet. Ellers vises "Ingen noter". `white-space: pre-wrap;` bevarer formatering som linjeskift. *@
         <dd class="col-sm-8" style="white-space: pre-wrap;">@(!string.IsNullOrWhiteSpace(Model.Notes) ? Model.Notes : "Ingen noter")</dd>
 
+        @* Betinget visning af godkendelsesdato, hvis den findes. *@
         @if(Model.ApprovalDate.HasValue)
         {
             <dt class="col-sm-4">Godkendelsesdato</dt>
             <dd class="col-sm-8">@Model.ApprovalDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
         }
+        @* Betinget visning af afvisningsdato, hvis den findes. *@
         @if(Model.RejectionDate.HasValue)
         {
             <dt class="col-sm-4">Afvisningsdato</dt>
             <dd class="col-sm-8">@Model.RejectionDate.Value.ToString("dd-MM-yyyy HH:mm")</dd>
         }
+        @* Betinget visning af gennemførselsdato, hvis den findes. *@
         @if(Model.CompletionDate.HasValue)
         {
             <dt class="col-sm-4">Gennemførselsdato</dt>
@@ -51,7 +63,8 @@
     </dl>
 
     @* TODO: Tilføj sektion for at redigere noter eller tildele medarbejder, hvis relevant *@ 
-    @* <hr />
+    @* Eksempel på mulige handlingsfelter, som er udkommenteret.
+    <hr />
     <h5>Handlinger</h5>
     <div class="mb-3">
         <label for="adoptionNotesModal" class="form-label">Opdater Noter:</label>

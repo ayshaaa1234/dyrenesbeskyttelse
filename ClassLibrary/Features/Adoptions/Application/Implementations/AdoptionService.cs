@@ -185,10 +185,17 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             var animalIds = animalsOfSpecies.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync(); 
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
 
+        /// <summary>
+        /// Beregner alder i hele år baseret på fødselsdato og en given dato.
+        /// </summary>
+        /// <param name="birthDate">Fødselsdatoen.</param>
+        /// <param name="onDate">Datoen alderen skal beregnes på.</param>
+        /// <returns>Alder i hele år.</returns>
         private int CalculateAgeInYears(DateTime birthDate, DateTime onDate)
         {
             var age = onDate.Year - birthDate.Year;
@@ -196,6 +203,12 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             return age;
         }
         
+        /// <summary>
+        /// Beregner alder i hele måneder baseret på fødselsdato og en given dato.
+        /// </summary>
+        /// <param name="birthDate">Fødselsdatoen.</param>
+        /// <param name="onDate">Datoen alderen skal beregnes på.</param>
+        /// <returns>Alder i hele måneder.</returns>
         private int CalculateAgeInMonths(DateTime birthDate, DateTime onDate)
         {
             var months = ((onDate.Year - birthDate.Year) * 12) + onDate.Month - birthDate.Month;
@@ -206,6 +219,12 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             return months;
         }
 
+        /// <summary>
+        /// Beregner alder i hele uger baseret på fødselsdato og en given dato.
+        /// </summary>
+        /// <param name="birthDate">Fødselsdatoen.</param>
+        /// <param name="onDate">Datoen alderen skal beregnes på.</param>
+        /// <returns>Alder i hele uger. Returnerer 0 hvis fødselsdato er efter den givne dato.</returns>
         private int CalculateAgeInWeeks(DateTime birthDate, DateTime onDate)
         {
             if (birthDate > onDate) return 0; // Eller kast exception
@@ -220,12 +239,14 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
             
+            // Find dyr indenfor den specificerede alder i år
             var animalsInAgeRange = allAnimals.Where(a => a.BirthDate.HasValue && CalculateAgeInYears(a.BirthDate.Value, today) == years).ToList();
             if (!animalsInAgeRange.Any()) return Enumerable.Empty<Adoption>();
 
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -238,12 +259,14 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
 
+            // Find dyr indenfor den specificerede alder i måneder
             var animalsInAgeRange = allAnimals.Where(a => a.BirthDate.HasValue && CalculateAgeInMonths(a.BirthDate.Value, today) == months).ToList();
             if (!animalsInAgeRange.Any()) return Enumerable.Empty<Adoption>();
 
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -256,12 +279,14 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
 
+            // Find dyr indenfor den specificerede alder i uger
             var animalsInAgeRange = allAnimals.Where(a => a.BirthDate.HasValue && CalculateAgeInWeeks(a.BirthDate.Value, today) == weeks).ToList();
             if (!animalsInAgeRange.Any()) return Enumerable.Empty<Adoption>();
 
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -275,6 +300,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
             
+            // Find dyr indenfor det specificerede aldersinterval i år
             var animalsInAgeRange = allAnimals.Where(a => 
                 a.BirthDate.HasValue && 
                 CalculateAgeInYears(a.BirthDate.Value, today) >= minYears &&
@@ -285,6 +311,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -298,6 +325,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
 
+            // Find dyr indenfor det specificerede aldersinterval i måneder
             var animalsInAgeRange = allAnimals.Where(a => 
                 a.BirthDate.HasValue &&
                 CalculateAgeInMonths(a.BirthDate.Value, today) >= minMonths &&
@@ -308,6 +336,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -321,6 +350,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             if(allAnimals == null || !allAnimals.Any()) return Enumerable.Empty<Adoption>();
             var today = DateTime.UtcNow;
             
+            // Find dyr indenfor det specificerede aldersinterval i uger
             var animalsInAgeRange = allAnimals.Where(a => 
                 a.BirthDate.HasValue &&
                 CalculateAgeInWeeks(a.BirthDate.Value, today) >= minWeeks &&
@@ -331,6 +361,7 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             var animalIds = animalsInAgeRange.Select(a => a.Id).Distinct().ToList();
             if (!animalIds.Any()) return Enumerable.Empty<Adoption>();
 
+            // Hent alle adoptioner og filtrer dem derefter baseret på dyrenes ID'er
             var allAdoptions = await _adoptionRepository.GetAllAsync();
             return allAdoptions.Where(ad => animalIds.Contains(ad.AnimalId));
         }
@@ -494,6 +525,16 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             await _adoptionRepository.UpdateAsync(adoption);
         }
 
+        /// <summary>
+        /// Validerer en adoption før oprettelse eller opdatering.
+        /// Kaster exceptions hvis validering fejler.
+        /// </summary>
+        /// <param name="adoption">Adoptionsobjektet der skal valideres.</param>
+        /// <param name="isNew">Angiver om det er en ny adoption (true) eller en opdatering (false).</param>
+        /// <exception cref="ArgumentException">Kastes hvis Kunde ID, Dyr ID, Medarbejder ID (hvis angivet), Adoptionstype, Adoptionsdato eller Status er ugyldig.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis Adoptionsdato er for langt ude i fremtiden.</exception>
+        /// <exception cref="InvalidOperationException">Kastes hvis dyret ikke er ledigt for adoption (ved ny adoption),
+        /// eller hvis dyret allerede har en aktiv adoption (ved ny adoption).</exception>
         private async Task ValidateAdoptionAsync(Adoption adoption, bool isNew)
         {
             if (adoption.CustomerId <= 0 || await _customerRepository.GetByIdAsync(adoption.CustomerId) == null)

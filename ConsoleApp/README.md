@@ -20,7 +20,7 @@ ConsoleApp/
 │   ├───CustomerMenu.cs        # Menu for håndtering af kunder
 │   ├───EmployeeMenu.cs        # Menu for håndtering af medarbejdere
 │   ├───AdoptionMenu.cs        # Menu for håndtering af adoptioner
-│   ├───BlogMenu.cs            # Menu for håndtering af blogindlæg
+│   ├───BlogMenu.cs            # Menu for håndtering af blogindlæg (inkl. titel, indhold, PictureUrl, forfatter, kategori, tags etc.)
 │   └───MembershipMenu.cs      # Menu for håndtering af medlemskaber
 │
 ├───Properties/
@@ -53,7 +53,7 @@ Systemet anvender en række menu-klasser til at strukturere brugerinteraktionen:
 
 *   **Feature-Specifikke Menuer (f.eks. `AnimalMenu.cs`, `CustomerMenu.cs`):**
     *   Hver menu er ansvarlig for at præsentere muligheder relateret til en specifik feature i `ClassLibrary` (f.eks. dyreadministration, kundeadministration).
-    *   Implementerer metoder til at vise lister, oprette, opdatere, slette og udføre andre specifikke handlinger ved at kalde de relevante metoder på de injectede services.
+    *   Implementerer metoder til at vise lister, oprette, opdatere, slette og udføre andre specifikke handlinger ved at kalde de relevante metoder på de injectede services, hvilket giver mulighed for at teste alle aspekter af featurens modeller (f.eks. alle felter på `BlogPost`).
     *   Indeholder logik for at indsamle brugerinput og validere det i et vist omfang før det sendes til service-laget.
     *   Anvender en række private hjælpemetoder til at standardisere input-opsamling for heltal, decimaltal, datoer, boolean værdier og enums.
 

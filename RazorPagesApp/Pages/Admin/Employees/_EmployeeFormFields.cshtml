@@ -1,23 +1,31 @@
 @model ClassLibrary.Features.Employees.Core.Models.Employee
 @using ClassLibrary.Features.Employees.Core.Models // For Employee, hvis modellen fjerner det
 
+@* Denne partial view indeholder formularfelterne til oprettelse eller redigering af en medarbejder. *@
 <form id="employeeFormPartial" method="post">
+    @* Viser en opsummering af valideringsfejl for hele modellen. *@
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    @* Skjult felt for medarbejderens ID. Nødvendigt ved redigering. *@
     <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="RegistrationDate" /> @* Skal bevares ved redigering *@
+    @* Skjult felt for registreringsdato. Denne dato bør ikke ændres efter oprettelse og skal bevares ved redigering. *@
+    <input type="hidden" asp-for="RegistrationDate" /> 
 
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for fornavn. *@
                 <label asp-for="FirstName" class="form-label"></label>
                 <input asp-for="FirstName" class="form-control" />
+                @* Viser valideringsfejl specifikt for FirstName. *@
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for efternavn. *@
                 <label asp-for="LastName" class="form-label"></label>
                 <input asp-for="LastName" class="form-control" />
+                @* Viser valideringsfejl specifikt for LastName. *@
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
         </div>
@@ -26,34 +34,42 @@
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for e-mail. Input type er sat til "email" for browser-validering. *@
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" type="email" />
+                @* Viser valideringsfejl specifikt for Email. *@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for telefonnummer. Input type er sat til "tel" for browser-validering (formattering kan variere). *@
                 <label asp-for="Phone" class="form-label"></label>
                 <input asp-for="Phone" class="form-control" type="tel" />
+                @* Viser valideringsfejl specifikt for Phone. *@
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
         </div>
     </div>
 
-    <hr class="my-4">
+    <hr class="my-4"> @* Horisontal linje til visuel adskillelse af sektioner i formularen. *@
 
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for stilling. *@
                 <label asp-for="Position" class="form-label"></label>
                 <input asp-for="Position" class="form-control" />
+                @* Viser valideringsfejl specifikt for Position. *@
                 <span asp-validation-for="Position" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for afdeling. *@
                 <label asp-for="Department" class="form-label"></label>
                 <input asp-for="Department" class="form-control" />
+                @* Viser valideringsfejl specifikt for Department. *@
                 <span asp-validation-for="Department" class="text-danger"></span>
             </div>
         </div>
@@ -62,35 +78,46 @@
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for ansættelsesdato. Input type er sat til "date" for en datovælger. *@
                 <label asp-for="HireDate" class="form-label"></label>
                 <input asp-for="HireDate" class="form-control" type="date" />
+                @* Viser valideringsfejl specifikt for HireDate. *@
                 <span asp-validation-for="HireDate" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
+                @* Label og inputfelt for løn. Input type er "number" og "step" tillader decimaler. *@
                 <label asp-for="Salary" class="form-label"></label>
                 <input asp-for="Salary" class="form-control" type="number" step="0.01" />
+                @* Viser valideringsfejl specifikt for Salary. *@
                 <span asp-validation-for="Salary" class="text-danger"></span>
             </div>
         </div>
     </div>
 
     <div class="mb-3">
+        @* Label og inputfelt for URL til billede. *@
         <label asp-for="PictureUrl" class="form-label"></label>
         <input asp-for="PictureUrl" class="form-control" />
+        @* Viser valideringsfejl specifikt for PictureUrl. *@
         <span asp-validation-for="PictureUrl" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
+        @* Label for specialiseringer. *@
         <label asp-for="Specializations" class="form-label"></label>
-        @* En simpel måde at håndtere list<string> på er som en kommasepareret streng *@
+        @* En simpel måde at håndtere List<string> for Specializations på i en HTML-formular er at bruge et tekstfelt,
+           hvor brugeren kan indtaste værdier adskilt af komma.
+           `name="SpecializationsString"` bruges til at binde dette felt til en separat property i PageModel/Controller,
+           som så kan konvertere strengen til en List<string> server-side.
+           `value` sættes til den nuværende liste af specialiseringer, joinet som en kommasepareret streng. *@
         <input type="text" class="form-control" 
                name="SpecializationsString" 
                value="@(Model.Specializations != null ? string.Join(", ", Model.Specializations) : "")" 
                placeholder="F.eks. Hundetræning, Katteadfærd, Administration"/>
         <small class="form-text text-muted">Angiv specialiseringer adskilt af komma.</small>
-        @* Server-side skal SpecializationsString konverteres til List<string> for Employee.Specializations *@ 
+        @* Server-side skal SpecializationsString konverteres til List<string> for Employee.Specializations. Dette sker typisk i PageModel'ens OnPost-handler. *@ 
     </div>
 
 </form> 

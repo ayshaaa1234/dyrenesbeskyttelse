@@ -11,16 +11,29 @@ using ClassLibrary.SharedKernel.Exceptions; // For RepositoryException
 
 namespace ClassLibrary.Features.Employees.Application.Implementations
 {
+    /// <summary>
+    /// Service til håndtering af medarbejderdata og -operationer.
+    /// </summary>
     public class EmployeeService : BaseUserService<Employee>, IEmployeeService
     {
         private readonly IEmployeeRepository _employeeRepository;
 
+        /// <summary>
+        /// Initialiserer en ny instans af <see cref="EmployeeService"/> klassen.
+        /// </summary>
+        /// <param name="employeeRepository">Repository for medarbejderdata.</param>
         public EmployeeService(IEmployeeRepository employeeRepository) : base(employeeRepository)
         {
             _employeeRepository = employeeRepository;
         }
 
         // Implementering af abstrakte metoder fra BaseUserService
+        /// <summary>
+        /// Henter medarbejdere baseret på navn.
+        /// </summary>
+        /// <param name="name">Navnet der søges efter.</param>
+        /// <returns>En samling af medarbejdere, der matcher navnet.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis navnet er tomt eller null.</exception>
         public override async Task<IEnumerable<Employee>> GetByNameAsync(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -28,6 +41,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByNameAsync(name);
         }
 
+        /// <summary>
+        /// Henter en medarbejder baseret på email.
+        /// </summary>
+        /// <param name="email">Email der søges efter.</param>
+        /// <returns>Medarbejderen der matcher emailen, eller null hvis ingen findes.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis emailen er tom, null eller i ugyldigt format.</exception>
         public override async Task<Employee?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email))
@@ -35,6 +54,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByEmailAsync(email);
         }
 
+        /// <summary>
+        /// Henter medarbejdere baseret på telefonnummer.
+        /// </summary>
+        /// <param name="phone">Telefonnummeret der søges efter.</param>
+        /// <returns>En samling af medarbejdere, der matcher telefonnummeret.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis telefonnummeret er tomt eller null.</exception>
         public override async Task<IEnumerable<Employee>> GetByPhoneAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone))
@@ -42,6 +67,13 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByPhoneAsync(phone);
         }
 
+        /// <summary>
+        /// Henter medarbejdere baseret på ansættelsesdato inden for et interval.
+        /// </summary>
+        /// <param name="startDate">Startdato for intervallet.</param>
+        /// <param name="endDate">Slutdato for intervallet.</param>
+        /// <returns>En samling af medarbejdere ansat inden for det angivne datointerval.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis startdato er efter slutdato.</exception>
         public override async Task<IEnumerable<Employee>> GetByRegistrationDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             // For Employees, RegistrationDate er typisk lig HireDate.
@@ -52,6 +84,11 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByHireDateRangeAsync(startDate, endDate); // Bruger HireDate specifikt her
         }
 
+        /// <summary>
+        /// Søger efter medarbejdere baseret på et generelt søgeord (matcher på navn, email, telefon, stilling, afdeling).
+        /// </summary>
+        /// <param name="searchTerm">Søgeordet.</param>
+        /// <returns>En samling af unikke medarbejdere, der matcher søgeordet. Returnerer en tom liste, hvis søgeordet er tomt eller null.</returns>
         public override async Task<IEnumerable<Employee>> SearchAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -69,6 +106,13 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
         }
 
         // Override CreateAsync & UpdateAsync for Employee specifik logik
+        /// <summary>
+        /// Opretter en ny medarbejder.
+        /// </summary>
+        /// <param name="employee">Medarbejderen der skal oprettes.</param>
+        /// <returns>Den oprettede medarbejder.</returns>
+        /// <exception cref="ArgumentNullException">Kastes hvis employee er null.</exception>
+        /// <exception cref="RepositoryException">Kastes hvis en aktiv medarbejder med samme email allerede eksisterer.</exception>
         public override async Task<Employee> CreateAsync(Employee employee)
         {
             if (employee == null) throw new ArgumentNullException(nameof(employee));
@@ -94,6 +138,14 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await base.CreateAsync(employee); // Kalder BaseUserService.CreateAsync
         }
 
+        /// <summary>
+        /// Opdaterer en eksisterende medarbejder.
+        /// </summary>
+        /// <param name="employee">Medarbejderen med de opdaterede værdier.</param>
+        /// <returns>Den opdaterede medarbejder.</returns>
+        /// <exception cref="ArgumentNullException">Kastes hvis employee er null.</exception>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="RepositoryException">Kastes hvis en anden aktiv medarbejder med den nye email allerede eksisterer.</exception>
         public override async Task<Employee> UpdateAsync(Employee employee)
         {
             if (employee == null) throw new ArgumentNullException(nameof(employee));
@@ -124,6 +176,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await base.UpdateAsync(employee); // Kalder BaseUserService.UpdateAsync
         }
 
+        /// <summary>
+        /// Validerer en medarbejderentitet, inklusiv BaseUser validering og medarbejderspecifikke regler.
+        /// </summary>
+        /// <param name="employee">Medarbejderen der skal valideres.</param>
+        /// <exception cref="ArgumentException">Kastes hvis Stilling er tom.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis Løn er negativ, eller Ansættelsesdato/Registreringsdato er ugyldig.</exception>
         protected override void ValidateUser(Employee employee) // Employee-specifik validering
         {
             base.ValidateUser(employee); // Generel BaseUser validering
@@ -141,6 +199,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
         }
 
         // Implementering af IEmployeeService specifikke metoder
+        /// <summary>
+        /// Henter medarbejdere baseret på deres stilling.
+        /// </summary>
+        /// <param name="position">Stillingen der søges efter.</param>
+        /// <returns>En samling af medarbejdere med den angivne stilling.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis stillingen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetEmployeesByPositionAsync(string position)
         {
             if (string.IsNullOrWhiteSpace(position))
@@ -148,6 +212,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByPositionAsync(position);
         }
 
+        /// <summary>
+        /// Henter medarbejdere baseret på deres afdeling.
+        /// </summary>
+        /// <param name="department">Afdelingen der søges efter.</param>
+        /// <returns>En samling af medarbejdere i den angivne afdeling.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis afdelingen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetEmployeesByDepartmentAsync(string department)
         {
             if (string.IsNullOrWhiteSpace(department))
@@ -155,6 +225,13 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByDepartmentAsync(department);
         }
 
+        /// <summary>
+        /// Henter medarbejdere ansat inden for et specificeret datointerval.
+        /// </summary>
+        /// <param name="startDate">Startdato for ansættelsesintervallet.</param>
+        /// <param name="endDate">Slutdato for ansættelsesintervallet.</param>
+        /// <returns>En samling af medarbejdere ansat inden for det angivne interval.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis startdato er efter slutdato.</exception>
         public async Task<IEnumerable<Employee>> GetEmployeesByHireDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             if (startDate > endDate)
@@ -162,6 +239,13 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetByHireDateRangeAsync(startDate, endDate);
         }
 
+        /// <summary>
+        /// Henter medarbejdere inden for et specificeret løninterval.
+        /// </summary>
+        /// <param name="minSalary">Minimumsløn.</param>
+        /// <param name="maxSalary">Maksimumsløn.</param>
+        /// <returns>En samling af medarbejdere inden for det angivne løninterval.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis lønninger er negative, eller hvis minimumsløn er større end maksimumsløn.</exception>
         public async Task<IEnumerable<Employee>> GetEmployeesBySalaryRangeAsync(decimal minSalary, decimal maxSalary)
         {
             if (minSalary < 0 || maxSalary < 0)
@@ -171,6 +255,12 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetBySalaryRangeAsync(minSalary, maxSalary);
         }
 
+        /// <summary>
+        /// Henter medarbejdere baseret på deres specialisering.
+        /// </summary>
+        /// <param name="specialization">Specialiseringen der søges efter.</param>
+        /// <returns>En samling af medarbejdere med den angivne specialisering.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis specialiseringen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetEmployeesBySpecializationAsync(string specialization)
         {
             if (string.IsNullOrWhiteSpace(specialization))
@@ -178,6 +268,13 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             return await _employeeRepository.GetBySpecializationAsync(specialization);
         }
 
+        /// <summary>
+        /// Reaktiverer en tidligere slettet (deaktiveret) medarbejder.
+        /// </summary>
+        /// <param name="employeeId">ID på medarbejderen der skal reaktiveres.</param>
+        /// <returns>En opgave der repræsenterer den asynkrone operation.</returns>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="InvalidOperationException">Kastes hvis medarbejderen allerede er aktiv.</exception>
         public async Task ReactivateEmployeeAsync(int employeeId)
         {
             var employee = await _employeeRepository.GetByIdIncludeDeletedAsync(employeeId); // Antager en metode der kan hente selvom IsDeleted=true
@@ -191,6 +288,14 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             await _employeeRepository.UpdateAsync(employee); // Repository.UpdateAsync bør håndtere dette korrekt.
         }
 
+        /// <summary>
+        /// Opdaterer en medarbejders løn.
+        /// </summary>
+        /// <param name="employeeId">ID på medarbejderen hvis løn skal opdateres.</param>
+        /// <param name="newSalary">Den nye løn.</param>
+        /// <returns>En opgave der repræsenterer den asynkrone operation.</returns>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis den nye løn er negativ.</exception>
         public async Task UpdateEmployeeSalaryAsync(int employeeId, decimal newSalary)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId);
@@ -203,6 +308,15 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             await _employeeRepository.UpdateAsync(employee);
         }
 
+        /// <summary>
+        /// Tilføjer en specialisering til en medarbejder.
+        /// </summary>
+        /// <param name="employeeId">ID på medarbejderen.</param>
+        /// <param name="specialization">Specialiseringen der skal tilføjes.</param>
+        /// <returns>En opgave der repræsenterer den asynkrone operation.</returns>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="ArgumentException">Kastes hvis specialiseringen er tom eller null.</exception>
+        /// <exception cref="InvalidOperationException">Kastes hvis medarbejderen allerede har den angivne specialisering.</exception>
         public async Task AddSpecializationAsync(int employeeId, string specialization)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId);
@@ -219,6 +333,15 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             await _employeeRepository.UpdateAsync(employee);
         }
 
+        /// <summary>
+        /// Fjerner en specialisering fra en medarbejder.
+        /// </summary>
+        /// <param name="employeeId">ID på medarbejderen.</param>
+        /// <param name="specialization">Specialiseringen der skal fjernes.</param>
+        /// <returns>En opgave der repræsenterer den asynkrone operation.</returns>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="ArgumentException">Kastes hvis specialiseringen er tom eller null.</exception>
+        /// <exception cref="InvalidOperationException">Kastes hvis medarbejderen ikke har den angivne specialisering.</exception>
         public async Task RemoveSpecializationAsync(int employeeId, string specialization)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId);
@@ -235,14 +358,23 @@ namespace ClassLibrary.Features.Employees.Application.Implementations
             await _employeeRepository.UpdateAsync(employee);
         }
 
+        /// <summary>
+        /// En intern hjælpeklasse til at sammenligne medarbejdere baseret på deres ID for Distinct() operationer.
+        /// </summary>
         private class EmployeeComparer : IEqualityComparer<Employee>
         {
+            /// <summary>
+            /// Bestemmer om to Employee objekter er ens baseret på deres ID.
+            /// </summary>
             public bool Equals(Employee? x, Employee? y)
             {
                 if (ReferenceEquals(x, y)) return true;
                 if (x is null || y is null) return false;
                 return x.Id == y.Id;
             }
+            /// <summary>
+            /// Returnerer en hash-kode for det specificerede Employee objekt, baseret på dets ID.
+            /// </summary>
             public int GetHashCode(Employee obj) => obj.Id.GetHashCode();
         }
     }

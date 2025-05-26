@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin - Dyrenes Beskyttelse</title>
+    @* Inkluderer Font Awesome for ikoner. *@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -22,6 +23,7 @@
     </style>
 </head>
 <body>
+    @* Header sektion for admin layout. `fixed-top` holder headeren fast i toppen. *@
     <header class="header-adapt fixed-top admin-header-adapt">
         <div class="header-bg">
             <div class="container-fluid container-adapt">
@@ -43,8 +45,9 @@
                         </nav>
                     </div>
 
+                    @* Logo, der linker til admin forsiden. *@
                     <a class="header-logo" asp-area="" asp-page="/Admin/Index"> 
-                        <partial name="_LogoPartial" /> 
+                        <partial name="_LogoPartial" /> @* Indlæser logoet fra en partial view. *@
                         @* <span class="badge bg-primary admin-badge">Admin</span> FJERNET *@
                     </a>
 
@@ -80,15 +83,16 @@
         </div>
     </header>
 
+    @* Sektion for indhold, der skal vises i fuld bredde, f.eks. en hero banner. Valgfri. *@
     @RenderSection("FullWidthHeaderContent", required: false) 
 
     <div class="container content-wrapper">
-        <main role="main" class="pb-3 pt-5"> @* Added pt-5 for spacing below fixed header *@
-            @RenderBody()
+        <main role="main" class="pb-3 pt-5"> @* `pt-5` tilføjer padding i toppen for at undgå overlap med fixed header. *@
+            @RenderBody() @* Her renderes indholdet fra de specifikke sider. *@
         </main>
     </div>
 
-    <!-- Toast Container -->
+    <!-- Toast Container til notifikationer -->
     <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1090"> 
         <div id="toastContainer" class="toast-container"> 
             <!-- Toasts vil blive tilføjet her af JavaScript -->
@@ -110,6 +114,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/admin/admin-common.js" asp-append-version="true"></script>
 
+    @* Sektion for side-specifikke scripts. Valgfri. *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html> 

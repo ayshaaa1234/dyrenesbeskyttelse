@@ -153,6 +153,11 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
             return await base.FindAsync(a => !string.IsNullOrWhiteSpace(a.Breed) && a.Breed.Contains(breed, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Henter dyr, der har behov for vaccination. 
+        /// Dette baseres på manglende vaccinationsjournaler eller udløbne næste vaccinationsdatoer.
+        /// </summary>
+        /// <returns>En samling af dyr, der trænger til vaccination.</returns>
         public async Task<IEnumerable<Animal>> GetAnimalsNeedingVaccinationAsync()
         {
             var animalsInCare = await base.FindAsync(a => 
@@ -190,6 +195,11 @@ namespace ClassLibrary.Features.AnimalManagement.Infrastructure.Implementations
             return animalsNeedingVaccination;
         }
 
+        /// <summary>
+        /// Henter en liste af dyr baseret på en samling af ID'er.
+        /// </summary>
+        /// <param name="ids">En samling af dyre-ID'er.</param>
+        /// <returns>En samling af dyr, der matcher de angivne ID'er. Returnerer en tom samling, hvis ingen ID'er angives, eller hvis ingen dyr matches.</returns>
         public async Task<IEnumerable<Animal>> GetAnimalsByIdsAsync(IEnumerable<int> ids)
         {
             if (ids == null || !ids.Any())

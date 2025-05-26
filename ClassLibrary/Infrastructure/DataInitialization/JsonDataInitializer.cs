@@ -17,17 +17,29 @@ using ClassLibrary.Features.Memberships.Core.Enums;
 
 namespace ClassLibrary.Infrastructure.DataInitialization
 {
+    /// <summary>
+    /// Håndterer initialisering af JSON-datafiler med standarddata, hvis de ikke allerede eksisterer.
+    /// Dette sikrer, at applikationen har et grundlæggende datasæt ved første opstart eller i udviklingsmiljøer.
+    /// </summary>
     public static class JsonDataInitializer
     {
+        /// <summary>
+        /// Den beregnede rodsti for workspace. Bestemmes dynamisk under initialisering.
+        /// </summary>
         public static string CalculatedWorkspaceRoot { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// JsonSerializerOptions der bruges til serialisering og deserialisering af JSON, inkluderer Enum-konvertering.
+        /// </summary>
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
             Converters = { new JsonStringEnumConverter() }
         };
 
-        // Liste over forventede datafiler og deres eventuelle seed-data generatorer
+        /// <summary>
+        /// En dictionary der mapper relative filstier til funktioner, der genererer standard JSON-indhold for den pågældende fil.
+        /// </summary>
         private static readonly Dictionary<string, Func<Task<string>>> _dataFilesToInitialize = new Dictionary<string, Func<Task<string>>>
         {
             { "Data/Json/animals.json", GetDefaultAnimalsJson },
@@ -41,6 +53,12 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             { "Data/Json/customermemberships.json", GetDefaultCustomerMembershipsJson }
         };
 
+        /// <summary>
+        /// Initialiserer JSON-datafilerne asynkront.
+        /// Metoden beregner workspace-rodstien, opretter nødvendige mapper og filer, og fylder dem med standarddata, hvis de ikke allerede eksisterer.
+        /// Statusmeddelelser logges til konsollen under processen.
+        /// </summary>
+        /// <returns>En opgave, der repræsenterer den asynkrone initialiseringsproces.</returns>
         public static async Task InitializeAsync()
         {
             Console.WriteLine($"JsonDataInitializer: AppContext.BaseDirectory = {AppContext.BaseDirectory}");
@@ -87,6 +105,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
 
         // Eksempler på seed-data metoder (kan returnere "[]" for tom liste)
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for dyr (<see cref="Animal"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standarddyr.</returns>
         private static Task<string> GetDefaultAnimalsJson()
         {
             var animals = new List<Animal>
@@ -103,6 +125,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(animals, _jsonOptions));
         }
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for blogindlæg (<see cref="BlogPost"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standard blogindlæg.</returns>
         private static Task<string> GetDefaultBlogPostsJson()
         {
             var posts = new List<BlogPost>
@@ -117,6 +143,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(posts, _jsonOptions));
         }
         
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for kunder (<see cref="Customer"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standardkunder.</returns>
         private static Task<string> GetDefaultCustomersJson()
         {
              var customers = new List<Customer>
@@ -130,6 +160,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(customers, _jsonOptions));
         }
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for medarbejdere (<see cref="Employee"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standardmedarbejdere.</returns>
         private static Task<string> GetDefaultEmployeesJson()
         {
             var employees = new List<Employee>
@@ -143,6 +177,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(employees, _jsonOptions));
         }
         
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for adoptioner (<see cref="Adoption"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standardadoptioner.</returns>
         private static Task<string> GetDefaultAdoptionsJson()
         {
             var adoptions = new List<Adoption>
@@ -157,6 +195,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(adoptions, _jsonOptions));
         }
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for sundhedsjournaler (<see cref="HealthRecord"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standardsundhedsjournaler.</returns>
         private static Task<string> GetDefaultHealthRecordsJson()
         {
              var records = new List<HealthRecord>
@@ -173,6 +215,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(records, _jsonOptions));
         }
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for besøg (<see cref="Visit"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standardbesøg.</returns>
         private static Task<string> GetDefaultVisitsJson()
         {
              var visits = new List<Visit>
@@ -181,12 +227,16 @@ namespace ClassLibrary.Infrastructure.DataInitialization
                 new Visit { Id = 2, AnimalId = 2, CustomerId = 1, PlannedDate = DateTime.UtcNow.AddDays(-1), ActualDate = DateTime.UtcNow.AddDays(-1), Type = "Fremvisning (Bella)", Status = VisitStatus.Completed, PlannedDuration = 30, ActualDuration = 45, Visitor = "Anders Andersen", Notes = "Anders mødte Bella og var meget interesseret.", EmployeeId = 4, ResultedInAdoption = false /* Endnu */ },
                 new Visit { Id = 3, AnimalId = 5, /* Cooper */ PlannedDate = DateTime.UtcNow.AddDays(5), Type = "Interesse (Kanin)", Status = VisitStatus.Scheduled, PlannedDuration = 30, Visitor = "Familien Hansen", Notes = "Familie med børn vil gerne se på kaniner.", EmployeeId = 5 },
                 new Visit { Id = 4, AnimalId = 7, /* Rocky */ PlannedDate = DateTime.UtcNow.AddDays(-10), ActualDate = DateTime.UtcNow.AddDays(-10), Type = "Adfærdskonsultation", Status = VisitStatus.Completed, PlannedDuration = 90, ActualDuration = 85, Visitor = "Hundetræner Karen", Notes = "Vurdering af Rockys adfærd og træningsbehov.", EmployeeId = 3 },
-                new Visit { Id = 5, AnimalId = 1, /* Max */ PlannedDate = DateTime.UtcNow.AddDays(-80), ActualDate = DateTime.UtcNow.AddDays(-80), Type = "Første møde", Status = VisitStatus.Completed, PlannedDuration = 45, ActualDuration = 40, Visitor = "Potentiel adoptant (ikke Carla)", EmployeeId = 2, Notes = "God kemi, men de valgte en anden hund."}
+                new Visit { Id = 5, AnimalId = 1, /* Max */ PlannedDate = DateTime.UtcNow.AddDays(-80), ActualDate = DateTime.UtcNow.AddDays(-80), Type = "Første møde", Status = VisitStatus.Completed, PlannedDuration = 45, ActualDuration = 40, Visitor = "Potentiel adoptant (ikke Carla)", EmployeeId = 2, Notes = "God kemi, men de valgte en anden hund."} 
             };
             // Antager AnimalId og CustomerId eksisterer
             return Task.FromResult(JsonSerializer.Serialize(visits, _jsonOptions));
         }
 
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for medlemskabsprodukter (<see cref="MembershipProduct"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standard medlemskabsprodukter.</returns>
         private static Task<string> GetDefaultMembershipProductsJson()
         {
             var products = new List<MembershipProduct>
@@ -200,6 +250,10 @@ namespace ClassLibrary.Infrastructure.DataInitialization
             return Task.FromResult(JsonSerializer.Serialize(products, _jsonOptions));
         }
         
+        /// <summary>
+        /// Genererer en JSON-streng med standarddata for kundemedlemskaber (<see cref="CustomerMembership"/>).
+        /// </summary>
+        /// <returns>En opgave, der resulterer i en JSON-formateret streng med standard kundemedlemskaber.</returns>
         private static Task<string> GetDefaultCustomerMembershipsJson()
         {
             var customerMemberships = new List<CustomerMembership>

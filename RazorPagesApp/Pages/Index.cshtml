@@ -1,15 +1,17 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Velkommen";
+    ViewData["Title"] = "Velkommen"; @* Sætter sidens titel. *@
 }
 
+@* Definerer en sektion, der kan overskrives af _Layout.cshtml for at indsætte indhold i fuld bredde øverst på siden. *@
 @section FullWidthHeaderContent {
-    <a name="_hero_redesign-19630"></a>
-    <section class="super-hero">
+    <a name="_hero_redesign-19630"></a> @* Anker tag, potentielt til intern navigation eller sporing. *@
+    <section class="super-hero"> @* Hero-sektion øverst på forsiden. *@
         <div class="image">
             <div class="image-sizer">
                 <figure>
+                    @* Billede i hero-sektionen. `loading="eager"` antyder at billedet skal loades hurtigst muligt. *@
                     <img loading="eager" src="/images/grisetransport.png" width="1280" height="720"
                         alt="Overfyldt grisetransport">
                 </figure>
@@ -26,13 +28,15 @@
                         forfærdelige udvikling er en decideret dyrevelfærdskatastrofe.</div>
                     <div class="button-list">
                         <div>
+                            @* Knap i hero-sektionen der linker til en artikel. *@
                             <a href="/artikler/forfaerdelig-udvikling-skal-stoppes-lange-grisetransporter-saetter-igen-rekord"
                                 role="button" class="button hero-button">
                                 <span class="button-label">Det skal forbydes</span>
                                 <div class="icon">
                                     <div class="icon-out">
                                     
- <svg fill="none" viewBox="0 0 16 12" id="arrow-right-alt" xmlns="http://www.w3.org/2000/svg"><path d="M9.225 11.1A.734.734 0 019 10.562c0-.208.075-.387.225-.537l3.3-3.275H.75A.726.726 0 010 6a.728.728 0 01.75-.75h11.775L9.2 1.95a.766.766 0 01-.2-.525c0-.2.075-.375.225-.525A.687.687 0 019.75.65c.2 0 .383.083.55.25l4.475 4.475a.825.825 0 01.188.287.944.944 0 010 .675.823.823 0 01-.188.288l-4.5 4.5a.72.72 0 01-.525.225.687.687 0 01-.525-.25z" fill="currentColor"></path></symbol>
+ <svg fill="none" viewBox="0 0 16 12" id="arrow-right-alt" xmlns="http://www.w3.org/2000/svg"><path d="M9.225 11.1A.734.734 0 019 10.562c0-.208.075-.387.225-.537l3.3-3.275H.75A.726.726 0 010 6a.728.728 0 01.75-.75h11.775L9.2 1.95a.766.766 0 01-.2-.525c0-.2.075-.375.225-.525A.687.687 0 019.75.65c.2 0 .383.083.55.25l4.475 4.475a.825.825 0 01.188.287.944.944 0 010 .675.823.823 0 01-.188.288l-4.5 4.5a.72.72 0 01-.525.225.687.687 0 01-.525-.25z" fill="currentColor"></path></svg>
+ @* Bemærk: Den oprindelige kode havde </symbol> her, hvilket er ukorrekt i denne kontekst og er fjernet. Korrekt SVG lukning er </svg> *@
                                     
                                     </div>
                                 </div>
@@ -52,18 +56,19 @@
             <h2>Seneste nyheder</h2>
             <p class="lead">Hold dig opdateret på dyrevelfærd og vores arbejde.</p>
         </div>
-        @if (Model.LatestBlogPosts != null && Model.LatestBlogPosts.Any())
+        @if (Model.LatestBlogPosts != null && Model.LatestBlogPosts.Any()) @* Tjekker om der er seneste blogindlæg at vise. *@
         {
-            foreach (var post in Model.LatestBlogPosts)
+            foreach (var post in Model.LatestBlogPosts) @* Gennemløber listen af seneste blogindlæg. *@
             {
                 <div class="col-md-4 mb-4">
+                    @* Kort-komponent for hvert blogindlæg. *@
                     <div class="card h-100" style="background-color: var(--db-white);">
-                        @if (!string.IsNullOrEmpty(post.PictureUrl))
+                        @if (!string.IsNullOrEmpty(post.PictureUrl)) @* Viser billede hvis URL findes. *@
                         {
                             <img src="@post.PictureUrl" class="card-img-top" alt="@post.Title"
-                                style="object-fit: cover; width: 100%; aspect-ratio: 16/9;">
+                                style="object-fit: cover; width: 100%; aspect-ratio: 16/9;"> @* `aspect-ratio` sikrer ensartet billedformat. *@
                         }
-                        else
+                        else @* Viser placeholder billede hvis URL mangler. *@
                         {
                             <img src="https://placehold.co/600x400/eeeeee/999999?text=Billede+mangler" class="card-img-top"
                                 alt="Billede mangler" style="object-fit: cover; width: 100%; aspect-ratio: 16/9;">
@@ -82,7 +87,7 @@
                 </div>
             }
         }
-        else
+        else @* Vises hvis der ingen seneste blogindlæg er. *@
         {
             <div class="col-12 text-center">
                 <p>Ingen nyheder at vise i øjeblikket.</p>

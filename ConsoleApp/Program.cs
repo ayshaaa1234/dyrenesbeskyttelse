@@ -31,8 +31,19 @@ using ConsoleApp.Menus; // For MainMenu
 
 namespace ConsoleApp
 {
+    /// <summary>
+    /// Hovedklassen for konsolapplikationen.
+    /// Ansvarlig for opsætning af dependency injection, datainitialisering og start af hovedmenuen.
+    /// </summary>
     class Program
     {
+        /// <summary>
+        /// Applikationens indgangspunkt.
+        /// Konfigurerer services, initialiserer data, og starter brugerinteraktionen via MainMenu.
+        /// Håndterer også overordnet fejlhåndtering for applikationen.
+        /// </summary>
+        /// <param name="args">Kommandolinjeargumenter (bruges ikke i denne applikation).</param>
+        /// <returns>En Task, der repræsenterer den asynkrone udførelse af programmet.</returns>
         static async Task Main(string[] args)
         {
             try

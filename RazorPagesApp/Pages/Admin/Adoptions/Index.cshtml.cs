@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace RazorPagesApp.Pages.Admin.Adoptions
 {
     // TODO: Tilføj [Authorize(Roles = "Administrator,AdoptionCoordinator")] eller lignende
+    /// <summary>
+    /// PageModel for administrationssiden for adoptioner.
+    /// Håndterer visning, filtrering, søgning og statusændringer af adoptioner.
+    /// </summary>
     public class IndexModel : PageModel
     {
         private readonly IAdoptionService _adoptionService;
@@ -23,6 +27,13 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
         private readonly IEmployeeService _employeeService;
         // Overvej IEmployeeService hvis medarbejdernavn skal vises for "Håndteret Af"
 
+        /// <summary>
+        /// Initialiserer en ny instans af <see cref="IndexModel"/> klassen.
+        /// </summary>
+        /// <param name="adoptionService">Service til håndtering af adoptionsdata.</param>
+        /// <param name="animalService">Service til håndtering af dyredata.</param>
+        /// <param name="customerService">Service til håndtering af kundedata.</param>
+        /// <param name="employeeService">Service til håndtering af medarbejderdata.</param>
         public IndexModel(
             IAdoptionService adoptionService, 
             IAnimalManagementService animalService,
@@ -35,28 +46,58 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             _employeeService = employeeService;
         }
 
+        /// <summary>
+        /// BindProperty for den aktuelle adoption, der redigeres eller oprettes.
+        /// </summary>
         [BindProperty]
         public ClassLibrary.Features.Adoptions.Core.Models.Adoption Adoption { get; set; } = default!;
 
+        /// <summary>
+        /// Liste over adoptioner, der skal vises på siden.
+        /// </summary>
         public IList<ClassLibrary.Features.Adoptions.Core.Models.Adoption> Adoptions { get; set; } = new List<ClassLibrary.Features.Adoptions.Core.Models.Adoption>();
         
         // Bruges til at cache navne for at undgå gentagne DB-kald i loop
         private Dictionary<int, string> _animalNamesCache = new Dictionary<int, string>();
         private Dictionary<int, string> _customerNamesCache = new Dictionary<int, string>();
 
+        /// <summary>
+        /// Besked til brugeren, typisk efter en handling (f.eks. succes eller fejl).
+        /// Vises via TempData.
+        /// </summary>
         [TempData]
         public string? Message { get; set; }
+        /// <summary>
+        /// Typen af besked (f.eks. "success", "danger") for styling af Message.
+        /// Vises via TempData.
+        /// </summary>
         [TempData]
         public string? MessageType { get; set; }
 
+        /// <summary>
+        /// Søgeterm indtastet af brugeren.
+        /// Bindes fra querystring.
+        /// </summary>
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
+        /// <summary>
+        /// Valgt status til filtrering af adoptioner.
+        /// Bindes fra querystring.
+        /// </summary>
         [BindProperty(SupportsGet = true)]
         public AdoptionStatus? FilterStatus { get; set; }
 
+        /// <summary>
+        /// SelectList med muligheder for at filtrere på adoptionsstatus.
+        /// </summary>
         public SelectList StatusOptions { get; set; } = default!;
 
+        /// <summary>
+        /// Håndterer GET requests til siden.
+        /// Henter adoptioner, anvender eventuel filtrering og søgning, og forbereder data til visning.
+        /// </summary>
+        /// <returns>En <see cref="IActionResult"/> der repræsenterer sidens resultat.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             // Initialiser StatusOptions for dropdown
@@ -108,12 +149,21 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             return Page();
         }
 
-        // Hjælpefunktioner til Razor view
+        /// <summary>
+        /// Henter navnet på et dyr baseret på dets ID. Bruger en intern cache for at minimere databasekald.
+        /// </summary>
+        /// <param name="animalId">ID på dyret.</param>
+        /// <returns>Dyrets navn eller en standardtekst hvis ikke fundet.</returns>
         public string GetAnimalName(int animalId)
         {
             return _animalNamesCache.TryGetValue(animalId, out var name) ? name : "Henter...";
         }
 
+        /// <summary>
+        /// Henter navnet på en kunde baseret på dets ID. Bruger en intern cache for at minimere databasekald.
+        /// </summary>
+        /// <param name="customerId">ID på kunden.</param>
+        /// <returns>Kundens navn eller en standardtekst hvis ikke fundet.</returns>
         public string GetCustomerName(int customerId)
         {
             return _customerNamesCache.TryGetValue(customerId, out var name) ? name : "Henter...";
@@ -121,6 +171,12 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
 
         // --- Handlers for AJAX status updates --- 
 
+        /// <summary>
+        /// Handler for AJAX POST request til at godkende en adoption.
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal godkendes.</param>
+        /// <param name="employeeIdToAssign">ID på medarbejderen der godkender.</param>
+        /// <returns>JsonResult med status for handlingen.</returns>
         public async Task<IActionResult> OnPostApproveAdoptionAsync(int adoptionId, int employeeIdToAssign) // employeeId forventes fra admin input
         {
             // TODO: Hent nuværende logget ind admin/employee ID i stedet for at sende det
@@ -145,6 +201,12 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             }
         }
 
+        /// <summary>
+        /// Handler for AJAX POST request til at afvise en adoption.
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal afvises.</param>
+        /// <param name="employeeIdToAssign">ID på medarbejderen der afviser.</param>
+        /// <returns>JsonResult med status for handlingen.</returns>
         public async Task<IActionResult> OnPostRejectAdoptionAsync(int adoptionId, int employeeIdToAssign) // employeeId forventes fra admin input
         {
             if (employeeIdToAssign <= 0) employeeIdToAssign = 1; // Fallback
@@ -166,6 +228,11 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             }
         }
 
+        /// <summary>
+        /// Handler for AJAX POST request til at markere en adoption som gennemført.
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal markeres som gennemført.</param>
+        /// <returns>JsonResult med status for handlingen.</returns>
         public async Task<IActionResult> OnPostCompleteAdoptionAsync(int adoptionId)
         {
             try
@@ -185,6 +252,13 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             }
         }
         
+        /// <summary>
+        /// Handler for AJAX POST request til at annullere en adoption (eller dens godkendelse).
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal annulleres.</param>
+        /// <param name="employeeIdToAssign">ID på medarbejderen der annullerer.</param>
+        /// <param name="reason">Årsag til annulleringen.</param>
+        /// <returns>JsonResult med status for handlingen.</returns>
         public async Task<IActionResult> OnPostCancelAdoptionAsync(int adoptionId, int employeeIdToAssign, string reason = "Annulleret af administrator")
         {
             if (employeeIdToAssign <= 0) employeeIdToAssign = 1; // Fallback
@@ -207,7 +281,12 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             }
         }
 
-        // Handler for at hente detaljer til modal
+        /// <summary>
+        /// Handler for AJAX GET request til at hente en partial view med detaljer for en adoption.
+        /// Bruges til at indlæse indhold i en modal.
+        /// </summary>
+        /// <param name="adoptionId">ID på den ønskede adoption.</param>
+        /// <returns>PartialViewResult med adoptionsdetaljer eller NotFoundResult.</returns>
         public async Task<IActionResult> OnGetAdoptionDetailsPartialAsync(int adoptionId)
         {
             var adoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
@@ -228,7 +307,12 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             return Partial("_AdoptionDetailsPartial", adoption); 
         }
 
-        // NY HANDLER: Hent redigeringsformular for adoption
+        /// <summary>
+        /// Handler for AJAX GET request til at hente en partial view med et redigeringsformular for en adoption.
+        /// Bruges til at indlæse indhold i en modal for redigering.
+        /// </summary>
+        /// <param name="adoptionId">ID på den adoption, der skal redigeres.</param>
+        /// <returns>PartialViewResult med redigeringsformularen eller NotFoundResult.</returns>
         public async Task<IActionResult> OnGetEditAdoptionFormAsync(int adoptionId)
         {
             Adoption = await _adoptionService.GetAdoptionByIdAsync(adoptionId);
@@ -240,7 +324,10 @@ namespace RazorPagesApp.Pages.Admin.Adoptions
             return Partial("_AdoptionFormFields", Adoption);
         }
 
-        // NY HANDLER: Post redigering af adoption
+        /// <summary>
+        /// Handler for AJAX POST request til at gemme ændringer til en adoption.
+        /// </summary>
+        /// <returns>JsonResult med status for handlingen eller PartialViewResult med formularen ved valideringsfejl.</returns>
         public async Task<IActionResult> OnPostEditAdoptionAsync()
         {
             if (Request.Form["Adoption.EmployeeId"] == "")

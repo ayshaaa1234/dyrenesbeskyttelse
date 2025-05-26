@@ -14,7 +14,7 @@ using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataI
 namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opdateret namespace
 {
     /// <summary>
-    /// Repository til håndtering af kunder
+    /// Repository til håndtering af kundedata.
     /// </summary>
     public class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
@@ -23,10 +23,18 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
         private static readonly Regex PhoneRegex = new Regex(@"^(\+45\s?)?\d{8}$", RegexOptions.Compiled); 
         private static readonly Regex PostalCodeRegex = new Regex(@"^\d{4}$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Initialiserer en ny instans af <see cref="CustomerRepository"/> klassen.
+        /// </summary>
         public CustomerRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "customers.json"))
         {
         }
 
+        /// <summary>
+        /// Validerer en kundeentitet.
+        /// </summary>
+        /// <param name="entity">Kunden der skal valideres.</param>
+        /// <exception cref="ArgumentException">Kastes hvis påkrævede felter (Fornavn, Efternavn, Email, Telefon, Adresse, Postnummer, By) er tomme eller har ugyldigt format.</exception>
         protected override void ValidateEntity(Customer entity)
         {
             base.ValidateEntity(entity); // Kalder basisklassens null-check
@@ -53,6 +61,13 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
                 throw new ArgumentException("By kan ikke være tom", nameof(entity.City));
         }
 
+        /// <summary>
+        /// Tilføjer en ny kunde asynkront efter validering og tjek for unik email.
+        /// </summary>
+        /// <param name="customer">Kunden der skal tilføjes.</param>
+        /// <returns>Den tilføjede kunde.</returns>
+        /// <exception cref="ArgumentNullException">Kastes hvis customer er null.</exception>
+        /// <exception cref="RepositoryException">Kastes hvis en aktiv kunde med samme email allerede eksisterer.</exception>
         public override async Task<Customer> AddAsync(Customer customer)
         {   
             ValidateEntity(customer); // Valider først
@@ -64,6 +79,14 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.AddAsync(customer); // base.AddAsync håndterer IsDeleted = false etc.
         }
 
+        /// <summary>
+        /// Opdaterer en eksisterende kunde asynkront efter validering og tjek for unik email (hvis ændret).
+        /// </summary>
+        /// <param name="customer">Kunden med de opdaterede værdier.</param>
+        /// <returns>Den opdaterede kunde.</returns>
+        /// <exception cref="ArgumentNullException">Kastes hvis customer er null.</exception>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv kunde findes med det angivne ID.</exception>
+        /// <exception cref="RepositoryException">Kastes hvis en anden aktiv kunde med den nye email allerede eksisterer.</exception>
         public override async Task<Customer> UpdateAsync(Customer customer)
         {
             ValidateEntity(customer); // Valider først
@@ -83,6 +106,12 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.UpdateAsync(customer);
         }
 
+        /// <summary>
+        /// Sletter en kunde (soft delete) asynkront. 
+        /// Bemærk: Tjek for aktive adoptioner bør foretages i et service-lag før kald til denne metode.
+        /// </summary>
+        /// <param name="id">ID på kunden der skal slettes.</param>
+        /// <returns>En opgave der repræsenterer den asynkrone sletteoperation.</returns>
         public override async Task DeleteAsync(int id)
         { 
             // Dette tjek bør flyttes til et service-lag, da Customer.Adoptions ikke vil være populære her.
@@ -95,6 +124,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             await base.DeleteAsync(id); 
         }
 
+        /// <summary>
+        /// Henter kunder baseret på navn (fornavn, efternavn eller fulde navn).
+        /// </summary>
+        /// <param name="name">Navnet eller en del af navnet der søges efter (case-insensitive).</param>
+        /// <returns>En samling af kunder, der matcher navnet. Returnerer en tom samling, hvis navnet er tomt eller null.</returns>
         public async Task<IEnumerable<Customer>> GetByNameAsync(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -108,6 +142,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             );
         }
 
+        /// <summary>
+        /// Henter en kunde baseret på email.
+        /// </summary>
+        /// <param name="email">Email der søges efter (case-insensitive, eksakt matchning efter validering).</param>
+        /// <returns>Kunden der matcher emailen, eller null hvis ingen findes eller emailen er ugyldig.</returns>
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email))
@@ -118,6 +157,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return customers.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Henter kunder baseret på telefonnummer (kun cifre sammenlignes).
+        /// </summary>
+        /// <param name="phone">Telefonnummeret der søges efter.</param>
+        /// <returns>En samling af kunder, der matcher telefonnummeret (delvis matchning af cifre). Returnerer en tom samling, hvis telefonnummeret er tomt eller kun indeholder ikke-cifre.</returns>
         public async Task<IEnumerable<Customer>> GetByPhoneAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone))
@@ -137,6 +181,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             );
         }
 
+        /// <summary>
+        /// Henter kunder baseret på adresse.
+        /// </summary>
+        /// <param name="address">Adressen eller en del af adressen der søges efter (case-insensitive).</param>
+        /// <returns>En samling af kunder, der matcher adressen. Returnerer en tom samling, hvis adressen er tom eller null.</returns>
         public async Task<IEnumerable<Customer>> GetByAddressAsync(string address)
         {
             if (string.IsNullOrWhiteSpace(address))
@@ -146,6 +195,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.FindAsync(c => !string.IsNullOrWhiteSpace(c.Address) && c.Address.Contains(address, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Henter kunder baseret på postnummer.
+        /// </summary>
+        /// <param name="postalCode">Postnummeret der søges efter (eksakt matchning efter validering).</param>
+        /// <returns>En samling af kunder, der matcher postnummeret. Returnerer en tom samling, hvis postnummeret er ugyldigt, tomt eller null.</returns>
         public async Task<IEnumerable<Customer>> GetByPostalCodeAsync(string postalCode)
         {
             if (string.IsNullOrWhiteSpace(postalCode) || !PostalCodeRegex.IsMatch(postalCode))
@@ -155,6 +209,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.FindAsync(c => !string.IsNullOrWhiteSpace(c.PostalCode) && c.PostalCode.Equals(postalCode));
         }
 
+        /// <summary>
+        /// Henter kunder baseret på by.
+        /// </summary>
+        /// <param name="city">Byen eller en del af byen der søges efter (case-insensitive).</param>
+        /// <returns>En samling af kunder, der matcher byen. Returnerer en tom samling, hvis byen er tom eller null.</returns>
         public async Task<IEnumerable<Customer>> GetByCityAsync(string city)
         {
             if (string.IsNullOrWhiteSpace(city))
@@ -164,6 +223,13 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.FindAsync(c => !string.IsNullOrWhiteSpace(c.City) && c.City.Contains(city, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Henter kunder registreret inden for et specificeret datointerval.
+        /// </summary>
+        /// <param name="startDate">Startdato for intervallet.</param>
+        /// <param name="endDate">Slutdato for intervallet.</param>
+        /// <returns>En samling af kunder registreret inden for det angivne datointerval.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis startdato er efter slutdato.</exception>
         public async Task<IEnumerable<Customer>> GetByRegistrationDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             if (startDate > endDate)
@@ -171,6 +237,11 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.FindAsync(c => c.RegistrationDate.Date >= startDate.Date && c.RegistrationDate.Date <= endDate.Date);
         }
 
+        /// <summary>
+        /// Henter kunder med aktive adoptioner. 
+        /// Bemærk: Denne metode er pt. en stub og returnerer en tom liste, da adoptionsdata ikke er direkte tilgængelig i Customer JSON-filen.
+        /// </summary>
+        /// <returns>En tom samling af kunder (stub implementering).</returns>
         public async Task<IEnumerable<Customer>> GetCustomersWithActiveAdoptionsAsync()
         {
             Console.WriteLine("Advarsel: GetCustomersWithActiveAdoptionsAsync i CustomerRepository er en stub pga. manglende adoptionsdata i Customer JSON.");

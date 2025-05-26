@@ -4,19 +4,22 @@
 @* Genskab using for Employee model, hvis den fjernes af modellen nedenfor *@
 
 @{    ViewData["Title"] = "Administrer ansatte";
-    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml"; // Angiver, at denne side bruger admin-layoutet.
 }
 
 <h1>@ViewData["Title"]</h1>
 
 <p>
+    @* Knap til at åbne modalen for oprettelse af en ny medarbejder. *@
     <button type="button" class="btn btn-success" id="btnAddEmployee">Opret Ny Medarbejder</button>
 </p>
 
+@* Formular til at søge efter medarbejdere. Bruger GET-metoden, så søgetermer vises i URL'en. *@
 <form method="get" class="mb-3">
     <div class="input-group">
         <input type="text" asp-for="SearchTerm" class="form-control" placeholder="Søg efter navn eller email..." />
         <button type="submit" class="btn btn-outline-secondary">Søg</button>
+        @* Viser en "Nulstil søgning"-knap, hvis der er en aktiv søgning. *@
         @if(!string.IsNullOrWhiteSpace(Model.SearchTerm))
         {
             <a asp-page="Index" class="btn btn-outline-info ms-2">Nulstil søgning</a>
@@ -24,6 +27,7 @@
     </div>
 </form>
 
+@* Viser en statusmeddelelse (f.eks. succes eller fejl) til brugeren, hvis Model.Message er sat. *@
 @if (!string.IsNullOrEmpty(Model.Message))
 {
     <div class="alert alert-@Model.MessageType" role="alert">
@@ -44,6 +48,7 @@
         </tr>
     </thead>
     <tbody>
+        @* Tjekker om der er nogen medarbejdere at vise. *@
         @if (Model.Employees == null || !Model.Employees.Any())
         {
             <tr>
@@ -52,8 +57,10 @@
         }
         else
         {
+            @* Gennemløber alle medarbejdere og viser dem i tabellen. *@
             @foreach (var employee in Model.Employees)
             {
+                @* `data-employee-id` bruges af JavaScript til at identificere rækken. *@
                 <tr data-employee-id="@employee.Id">
                     <td>@employee.Id</td>
                     <td>@employee.FirstName @employee.LastName</td>
@@ -62,6 +69,7 @@
                     <td>@employee.Department</td>
                     <td>@employee.HireDate.ToString("dd-MM-yyyy")</td>
                     <td>
+                        @* Knapper til at redigere og slette en medarbejder. `data-`-attributter bruges af JavaScript. *@
                         <button type="button" class="btn btn-sm btn-outline-primary btnEditEmployee" data-employeeid="@employee.Id">Rediger</button>
                         <button type="button" class="btn btn-sm btn-outline-danger btnDeleteEmployee" data-employeeid="@employee.Id" data-employeename="@employee.FirstName @employee.LastName">Slet</button>
                     </td>
@@ -80,7 +88,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="employeeModalBody">
-                <!-- Formular indlæses her -->
+                <!-- Formularen (_EmployeeFormFields.cshtml) indlæses her via JavaScript. -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
@@ -91,15 +99,17 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} @* Inkluderer standard valideringsscripts. *@
     <script>
         $(document).ready(function () {
             var employeeModal = new bootstrap.Modal(document.getElementById('employeeModal'));
-            var currentEmployeeId = null;
+            var currentEmployeeId = null; // Holder styr på ID'et for den medarbejder, der redigeres.
 
-            // --- Toast Helper Function (genbrug fra Details.cshtml eller globaliser) ---
+            // --- Toast Helper Function --- 
+            // Funktion til at vise toast-notifikationer. Denne funktion bør overvejes globaliseret for genbrug.
             function showToast(message, type = 'info') { 
-                var toastId = 'toast-' + new Date().getTime();
+                var toastId = 'toast-' + new Date().getTime(); // Unikt ID for hver toast.
+                // HTML-struktur for toasten. Typen bestemmer farven.
                 var toastHTML = `
                     <div id="${toastId}" class="toast align-items-center text-white ${type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary') } border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
                         <div class="d-flex">
@@ -109,24 +119,27 @@
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                     </div>`;
-                // Sørg for at #toastContainer eksisterer i _AdminLayout.cshtml
+                // Tilføjer toasten til en container (forventer et element med ID 'toastContainer' globalt, f.eks. i _AdminLayout.cshtml).
                 $('#toastContainer').append(toastHTML);
                 var toastElement = new bootstrap.Toast(document.getElementById(toastId));
-                toastElement.show();
+                toastElement.show(); // Viser toasten.
+                // Fjerner toasten fra DOM'en, når den er skjult, for at undgå ophobning.
                 document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
                     this.remove();
                 });
             }
 
+            // Funktion til at formatere datoer til dd-MM-yyyy format.
             function formatEmployeeDate(dateString) {
                 if (!dateString) return '';
                 const date = new Date(dateString);
                 const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Måneder er 0-baserede.
                 const year = date.getFullYear();
                 return `${day}-${month}-${year}`;
             }
 
+            // Funktion til at bygge en HTML-række for en medarbejder til tabellen.
             function buildEmployeeRow(employee) {
                 return `
                     <tr data-employee-id="${employee.id}">
@@ -143,65 +156,75 @@
                     </tr>`;
             }
 
+            // Funktion til at opdatere medarbejdertabellen (enten ved redigering eller oprettelse).
             function updateEmployeesTable(newEmployee, isEdit = false) {
                 const tbody = $('#employeesTable tbody');
-                const noRecordsRow = tbody.find('td[colspan="7"]'); // Række med "Ingen ansatte fundet"
+                const noRecordsRow = tbody.find('td[colspan="7"]'); // Finder rækken "Ingen ansatte fundet".
 
                 if (isEdit) {
+                    // Erstatter den eksisterende række med den opdaterede række.
                     tbody.find(`tr[data-employee-id="${newEmployee.id}"]`).replaceWith(buildEmployeeRow(newEmployee));
                 } else {
-                    if (noRecordsRow.length) noRecordsRow.parent().remove(); // Fjern "ingen data" række
-                    tbody.append(buildEmployeeRow(newEmployee)); // Tilføj nederst eller prepend for øverst
+                    if (noRecordsRow.length) noRecordsRow.parent().remove(); // Fjerner "ingen data"-rækken, hvis den findes.
+                    tbody.append(buildEmployeeRow(newEmployee)); // Tilføjer den nye række til tabellen.
                 }
                 
-                // Sorter efter efternavn, fornavn (hvis nye tilføjes)
+                // Sorterer tabellen efter navn efter en opdatering for at bevare ordenen.
                 var rows = tbody.find('tr').get();
                 rows.sort(function(a, b) {
-                    var nameA = $(a).find('td:nth-child(2)').text().toLowerCase();
+                    var nameA = $(a).find('td:nth-child(2)').text().toLowerCase(); // Navn er i anden kolonne.
                     var nameB = $(b).find('td:nth-child(2)').text().toLowerCase();
                     if (nameA < nameB) return -1;
                     if (nameA > nameB) return 1;
                     return 0;
                 });
                 $.each(rows, function(index, row) {
-                    tbody.append(row); 
+                    tbody.append(row); // Tilføjer de sorterede rækker tilbage til tbody.
                 });
 
+                // Hvis tabellen er tom efter en sletning, vises "Ingen ansatte fundet"-rækken igen.
                 if (tbody.find('tr').length === 0) {
                     tbody.html('<tr><td colspan="7" class="text-center">Ingen ansatte fundet.</td></tr>');
                 }
             }
 
+            // Event listener for klik på "Opret Ny Medarbejder"-knappen.
             $('#btnAddEmployee').click(function () {
-                currentEmployeeId = null;
-                $('#employeeModalLabel').text('Opret ny medarbejder');
+                currentEmployeeId = null; // Nulstiller currentEmployeeId, da vi opretter en ny.
+                $('#employeeModalLabel').text('Opret ny medarbejder'); // Sætter modalens titel.
+                // Indlæser _EmployeeFormFields.cshtml (via CreateEmployeeForm handler) i modal-body.
                 $('#employeeModalBody').load('?handler=CreateEmployeeForm', function () {
-                    $.validator.unobtrusive.parse($('#employeeModalBody form')); 
-                    employeeModal.show();
+                    $.validator.unobtrusive.parse($('#employeeModalBody form')); // Gen-parser validering for den nye formular.
+                    employeeModal.show(); // Viser modalen.
                 });
             });
 
+            // Event listener for klik på "Rediger"-knapper i tabellen (delegeret event).
             $(document).on('click', '.btnEditEmployee', function () {
-                currentEmployeeId = $(this).data('employeeid');
+                currentEmployeeId = $(this).data('employeeid'); // Gemmer ID'et for den medarbejder, der skal redigeres.
                 $('#employeeModalLabel').text('Rediger medarbejder');
+                // Indlæser _EmployeeFormFields.cshtml (via EditEmployeeForm handler) med medarbejderdata.
                 $('#employeeModalBody').load('?handler=EditEmployeeForm&employeeId=' + currentEmployeeId, function () {
-                    $.validator.unobtrusive.parse($('#employeeModalBody form')); 
+                    $.validator.unobtrusive.parse($('#employeeModalBody form'));
                     employeeModal.show();
                 });
             });
 
+            // Event listener for klik på "Gem"-knappen i modalen.
             $('#btnSaveEmployee').click(function () {
-                var form = $('#employeeModalBody form');
+                var form = $('#employeeModalBody form'); // Finder formularen inde i modalen.
                 if (!form.length) {
                     showToast('Formular ikke fundet.', 'error');
                     return;
                 }
 
+                // Udfører klient-side validering.
                 if (!form.valid()) { 
-                    return false; 
+                    return false; // Stopper, hvis formularen ikke er gyldig.
                 }
 
-                var formData = form.serialize();
+                var formData = form.serialize(); // Serialiserer formulardata.
+                // Bestemmer URL baseret på om det er oprettelse eller redigering.
                 var url = currentEmployeeId ?
                     '?handler=EditEmployee&employeeId=' + currentEmployeeId :
                     '?handler=CreateEmployee';
@@ -211,20 +234,20 @@
                     url: url,
                     data: formData,
                     headers: {
-                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Antiforgery token
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Inkluderer AntiForgeryToken.
                     },
                     success: function (response) {
                         if (response.success && response.data) {
                             employeeModal.hide();
                             showToast(response.message, 'success');
-                            updateEmployeesTable(response.data, !!currentEmployeeId);
+                            updateEmployeesTable(response.data, !!currentEmployeeId); // Opdaterer tabellen.
                         } else {
-                            // Hvis serveren returnerer partial view med fejl (pga. ModelState)
+                            // Håndterer situationen, hvor serveren returnerer en partial view med valideringsfejl.
                             if (typeof response === 'string') {
-                                $('#employeeModalBody').html(response);
+                                $('#employeeModalBody').html(response); // Erstatter modal-body med den returnerede HTML (med fejl).
                                 var newForm = $('#employeeModalBody').find('form');
-                                $.validator.unobtrusive.parse(newForm);
-                                // Sørg for at eventuelle dropdowns eller specielle inputs geninitialiseres hvis nødvendigt
+                                $.validator.unobtrusive.parse(newForm); // Gen-parser validering for den opdaterede formular.
+                                // TODO: Overvej at geninitialisere specielle inputs (f.eks. datepickers) her, hvis de bruges.
                             } else if (response.message) {
                                 showToast('Fejl: ' + response.message, 'error');
                             } else {
@@ -233,16 +256,16 @@
                         }
                     },
                     error: function (xhr) {
+                        // Håndterer serverfejl under AJAX-kaldet.
                         var errorMessage = 'Der skete en serverfejl.';
                         if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
                         else if (xhr.responseText) {
                             try {
                                 var errData = JSON.parse(xhr.responseText);
                                 if(errData.message) errorMessage = errData.message;
-                                else if (errData.title) errorMessage = errData.title; // For ProblemDetails
+                                else if (errData.title) errorMessage = errData.title; // For ProblemDetails objekter.
                             } catch(e) { 
-                                // Hvis responseText ikke er JSON, vis den direkte (eller en del af den)
-                                // Dette kan ske hvis det er en HTML fejlside fra serveren
+                                // Hvis responseText ikke er JSON (f.eks. en HTML fejlside), vises en generisk fejl i modalen.
                                  $('#employeeModalBody').html('<div>En serverfejl opstod. Prøv venligst igen. Fejl: ' + xhr.status + '</div>');
                                  return;
                             }
@@ -252,9 +275,11 @@
                 });
             });
 
+            // Event listener for klik på "Slet"-knapper i tabellen (delegeret event).
             $('#employeesTable').on('click', '.btnDeleteEmployee', function () {
                 var employeeIdToDelete = $(this).data('employeeid');
                 var employeeName = $(this).data('employeename') || 'denne medarbejder';
+                // Bekræftelsesdialog før sletning.
                 if (confirm(`Er du sikker på, at du vil slette ${employeeName}?`)) {
                     $.ajax({
                         url: `?handler=DeleteEmployee&employeeId=${employeeIdToDelete}`,
@@ -264,7 +289,8 @@
                         },
                         success: function (response) {
                             if (response.success) { 
-                                $(`#employeesTable tbody tr[data-employee-id="${response.employeeId}"]`).remove();
+                                $(`#employeesTable tbody tr[data-employee-id="${response.employeeId}"]`).remove(); // Fjerner rækken fra tabellen.
+                                // Hvis tabellen nu er tom, vises "Ingen ansatte fundet" igen.
                                 if ($('#employeesTable tbody tr').length === 0) {
                                     $('#employeesTable tbody').html('<tr><td colspan="7" class="text-center">Ingen ansatte fundet.</td></tr>');
                                 }
@@ -283,7 +309,8 @@
                 }
             });
             
-            // Ryd modal body når den lukkes for at undgå gammelt indhold
+            // Event listener for når modalen lukkes.
+            // Rydder modal-body og nulstiller currentEmployeeId for at undgå gammelt indhold ved genåbning.
             document.getElementById('employeeModal').addEventListener('hidden.bs.modal', function () {
                 $('#employeeModalBody').html(''); 
                 currentEmployeeId = null; 

@@ -11,6 +11,9 @@ using ClassLibrary.Infrastructure.DataInitialization; // Tilføjet for JsonDataI
 
 namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opdateret namespace
 {
+    /// <summary>
+    /// Repository til håndtering af medarbejderdata, gemt i en JSON-fil.
+    /// </summary>
     public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     {
         // Fjernet: private const string FilePath = "Data/Json/employees.json";
@@ -20,8 +23,18 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
         private static readonly Regex PhoneRegex = new Regex(@"^(\+45\s?)?\d{8}$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Initialiserer en ny instans af <see cref="EmployeeRepository"/> klassen.
+        /// Stien til JSON-filen bestemmes via <see cref="JsonDataInitializer"/>.
+        /// </summary>
         public EmployeeRepository() : base(Path.Combine(JsonDataInitializer.CalculatedWorkspaceRoot, "Data", "Json", "employees.json")) { }
 
+        /// <summary>
+        /// Validerer en medarbejderentitet.
+        /// </summary>
+        /// <param name="entity">Medarbejderen der skal valideres.</param>
+        /// <exception cref="ArgumentException">Kastes hvis påkrævede felter (Fornavn, Efternavn, Email, Telefon, Stilling) er tomme eller har ugyldigt format.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis Ansættelsesdato er ugyldig eller Løn er negativ.</exception>
         protected override void ValidateEntity(Employee entity)
         {
             base.ValidateEntity(entity); // Generel null-tjek etc.
@@ -50,6 +63,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
                 throw new ArgumentOutOfRangeException(nameof(entity.Salary), "Løn kan ikke være negativ.");
         }
 
+        /// <summary>
+        /// Tilføjer en ny medarbejder asynkront efter validering og tjek for unik email.
+        /// </summary>
+        /// <param name="employee">Medarbejderen der skal tilføjes.</param>
+        /// <returns>Den tilføjede medarbejder.</returns>
+        /// <exception cref="RepositoryException">Kastes hvis en aktiv medarbejder med samme email allerede eksisterer.</exception>
         public override async Task<Employee> AddAsync(Employee employee)
         {
             ValidateEntity(employee);
@@ -60,6 +79,14 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.AddAsync(employee);
         }
 
+        /// <summary>
+        /// Opdaterer en eksisterende medarbejder asynkront efter validering og tjek for unik email (hvis ændret).
+        /// Oprindelig ansættelsesdato og registreringsdato bevares.
+        /// </summary>
+        /// <param name="employee">Medarbejderen med de opdaterede værdier.</param>
+        /// <returns>Den opdaterede medarbejder.</returns>
+        /// <exception cref="KeyNotFoundException">Kastes hvis ingen aktiv medarbejder findes med det angivne ID.</exception>
+        /// <exception cref="RepositoryException">Kastes hvis en anden aktiv medarbejder med den nye email allerede eksisterer.</exception>
         public override async Task<Employee> UpdateAsync(Employee employee)
         {
             ValidateEntity(employee);
@@ -80,6 +107,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.UpdateAsync(employee);
         }
 
+        /// <summary>
+        /// Tjekker om en given email allerede eksisterer for en *anden* aktiv medarbejder.
+        /// </summary>
+        /// <param name="email">Emailen der skal tjekkes.</param>
+        /// <param name="currentEmployeeId">ID på den nuværende medarbejder (0 hvis det er en ny medarbejder).</param>
+        /// <returns>True hvis emailen findes hos en anden aktiv medarbejder, ellers false.</returns>
         private async Task<bool> EmailExistsForAnotherActiveEmployeeAsync(string email, int currentEmployeeId)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email)) return false;
@@ -92,6 +125,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
         }
 
         // Implementering af IEmployeeRepository metoder
+        /// <summary>
+        /// Henter en aktiv medarbejder baseret på email.
+        /// </summary>
+        /// <param name="email">Email der søges efter.</param>
+        /// <returns>Den fundne medarbejder, eller null hvis ingen aktiv medarbejder matcher emailen.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis emailen er tom, null eller i ugyldigt format.</exception>
         public async Task<Employee?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailRegex.IsMatch(email))
@@ -99,6 +138,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return (await base.FindAsync(e => e.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && !e.IsDeleted)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere baseret på stilling (delvis matchning, case-insensitive).
+        /// </summary>
+        /// <param name="position">Stillingen der søges efter.</param>
+        /// <returns>En samling af aktive medarbejdere, der matcher stillingen.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis stillingen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetByPositionAsync(string position)
         {
             if (string.IsNullOrWhiteSpace(position))
@@ -106,6 +151,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => e.Position.Contains(position, StringComparison.OrdinalIgnoreCase) && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere baseret på afdeling (delvis matchning, case-insensitive).
+        /// </summary>
+        /// <param name="department">Afdelingen der søges efter.</param>
+        /// <returns>En samling af aktive medarbejdere, der matcher afdelingen.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis afdelingen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetByDepartmentAsync(string department)
         {
             if (string.IsNullOrWhiteSpace(department))
@@ -113,6 +164,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => e.Department.Contains(department, StringComparison.OrdinalIgnoreCase) && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere, der har en specifik specialisering (eksakt matchning, case-insensitive).
+        /// </summary>
+        /// <param name="specialization">Specialiseringen der søges efter.</param>
+        /// <returns>En samling af aktive medarbejdere, der har den angivne specialisering.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis specialiseringen er tom eller null.</exception>
         public async Task<IEnumerable<Employee>> GetBySpecializationAsync(string specialization)
         {
             if (string.IsNullOrWhiteSpace(specialization))
@@ -120,6 +177,13 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => e.Specializations.Contains(specialization, StringComparer.OrdinalIgnoreCase) && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere ansat inden for et specificeret datointerval.
+        /// </summary>
+        /// <param name="startDate">Startdato for ansættelsesintervallet.</param>
+        /// <param name="endDate">Slutdato for ansættelsesintervallet.</param>
+        /// <returns>En samling af aktive medarbejdere ansat inden for det angivne interval.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis startdato er efter slutdato.</exception>
         public async Task<IEnumerable<Employee>> GetByHireDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             if (startDate > endDate)
@@ -127,6 +191,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => e.HireDate.Date >= startDate.Date && e.HireDate.Date <= endDate.Date && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere baseret på navn (delvis matchning på fornavn, efternavn eller fulde navn, case-insensitive).
+        /// </summary>
+        /// <param name="name">Navnet der søges efter.</param>
+        /// <returns>En samling af aktive medarbejdere, der matcher navnet.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis navnet er tomt eller null.</exception>
         public async Task<IEnumerable<Employee>> GetByNameAsync(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -137,6 +207,12 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
                  e.FullName.Contains(name, StringComparison.OrdinalIgnoreCase)) && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere baseret på telefonnummer (delvis matchning af cifre).
+        /// </summary>
+        /// <param name="phone">Telefonnummeret der søges efter.</param>
+        /// <returns>En samling af aktive medarbejdere, der matcher telefonnummeret.</returns>
+        /// <exception cref="ArgumentException">Kastes hvis telefonnummeret er tomt, null eller ikke indeholder cifre.</exception>
         public async Task<IEnumerable<Employee>> GetByPhoneAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone))
@@ -153,6 +229,13 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             );
         }
 
+        /// <summary>
+        /// Henter aktive medarbejdere inden for et specificeret løninterval.
+        /// </summary>
+        /// <param name="minSalary">Minimumsløn.</param>
+        /// <param name="maxSalary">Maksimumsløn.</param>
+        /// <returns>En samling af aktive medarbejdere inden for det angivne løninterval.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Kastes hvis lønninger er negative, eller hvis minimumsløn er større end maksimumsløn.</exception>
         public async Task<IEnumerable<Employee>> GetBySalaryRangeAsync(decimal minSalary, decimal maxSalary)
         {
             if (minSalary < 0 || maxSalary < 0)
@@ -162,6 +245,11 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => e.Salary >= minSalary && e.Salary <= maxSalary && !e.IsDeleted);
         }
 
+        /// <summary>
+        /// Henter en medarbejder baseret på ID, uanset om medarbejderen er markeret som slettet (soft-deleted).
+        /// </summary>
+        /// <param name="id">ID på medarbejderen der søges efter.</param>
+        /// <returns>Den fundne medarbejder (aktiv eller soft-deleted), eller null hvis ingen medarbejder matcher ID'et.</returns>
         public async Task<Employee?> GetByIdIncludeDeletedAsync(int id)
         {
             var items = await LoadDataAsync(); 

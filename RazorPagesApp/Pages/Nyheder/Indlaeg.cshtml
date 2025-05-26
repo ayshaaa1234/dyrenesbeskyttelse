@@ -1,17 +1,18 @@
 @page "{id:int}"
+@* Definerer routen for siden. {id:int} betyder, at siden forventer et heltal 'id' i URL'en for at identificere blogindlægget. *@
 @model RazorPagesApp.Pages.Nyheder.IndlaegModel
 
-@if (Model.BlogPost != null)
+@if (Model.BlogPost != null) // Tjekker om blogindlægget blev fundet og indlæst i modellen.
 {
-    ViewData["Title"] = Model.BlogPost.Title;
+    ViewData["Title"] = Model.BlogPost.Title; // Sætter sidens titel til blogindlæggets titel.
 
     <div class="container mt-5 blog-post-container">
         <div class="row">
-            <div class="col-lg-10 mx-auto">
+            <div class="col-lg-10 mx-auto"> @* Centrerer indholdet på større skærme. *@
                 <h1>@Model.BlogPost.Title</h1>
                 <hr />
 
-                <div class="text-muted mb-3">
+                <div class="text-muted mb-3"> @* Sektion med metadata for blogindlægget. *@
                     <span>Publiceret: @Model.BlogPost.PublishDate.ToString("dd. MMMM yyyy")</span>
                     @if (!string.IsNullOrEmpty(Model.BlogPost.Author))
                     {
@@ -23,16 +24,16 @@
                     }
                 </div>
 
-                @if (!string.IsNullOrEmpty(Model.BlogPost.PictureUrl))
+                @if (!string.IsNullOrEmpty(Model.BlogPost.PictureUrl)) // Viser hovedbillede for blogindlægget, hvis URL findes.
                 {
                     <img src="@Model.BlogPost.PictureUrl" class="img-fluid rounded mb-4 blog-post-image" alt="@Model.BlogPost.Title">
                 }
                 
                 <div class="blog-post-content">
-                    @Html.Raw(Model.BlogPost.Content) <!-- Brug Html.Raw hvis Content indeholder HTML -->
+                    @Html.Raw(Model.BlogPost.Content)
                 </div>
 
-                @if (Model.BlogPost.Tags != null && Model.BlogPost.Tags.Any())
+                @if (Model.BlogPost.Tags != null && Model.BlogPost.Tags.Any()) // Viser tags, hvis der er nogen tilknyttet indlægget.
                 {
                     <div class="mt-4 mb-3">
                         <strong>Tags:</strong>
@@ -44,12 +45,13 @@
                 }
                 
                 <hr />
+                @* Knap til at navigere tilbage til oversigten over nyheder. *@
                 <a asp-page="/Nyheder/Index" class="btn btn-outline-secondary btn-arrow-left">Tilbage til nyheder</a>
             </div>
         </div>
     </div>
 }
-else
+else // Vises hvis blogindlægget ikke blev fundet (Model.BlogPost er null).
 {
     <div class="container mt-5">
         <div class="alert alert-warning" role="alert">
@@ -59,22 +61,24 @@ else
     </div>
 }
 
+@* Sektion til at tilføje side-specifikke CSS styles. *@
 @section Styles {
     <style>
         .blog-post-container {
             padding-bottom: 3rem; 
         }
         .blog-post-image {
-            max-height: 500px; /* Juster efter behov */
+            max-height: 500px; /* Justerer maksimal højde på billedet. */
             width: 100%;
-            object-fit: cover;
+            object-fit: cover; /* Sikrer at billedet dækker området uden at forvrænge. */
             margin-bottom: 2rem;
         }
+        /* Styles for overskrifter og afsnit i blogindlæggets indhold. */
         .blog-post-content h2 {
             font-size: 1.75rem;
             margin-top: 2rem;
             margin-bottom: 1rem;
-            color: var(--db-primary-red);
+            color: var(--db-primary-red); /* Bruger CSS variabel for farve. */
         }
         .blog-post-content h3 {
             font-size: 1.5rem;
@@ -97,6 +101,7 @@ else
             font-style: italic;
             color: #555;
         }
+       /* Simpel CSS for at tilføje en pil før "Tilbage" knappen. */
        .btn-arrow-left::before {
             content: "← "; 
         }
