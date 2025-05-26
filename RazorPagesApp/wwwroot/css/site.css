@@ -695,7 +695,7 @@ a:hover {
     /* Denne regel kan evt. fjernes helt, hvis 768px-reglen er tilstrækkelig */
   }
   .super-hero .text {
-    max-width:619.8px;
+    /* max-width:619.8px; */
     padding:60px;
   }
 }
