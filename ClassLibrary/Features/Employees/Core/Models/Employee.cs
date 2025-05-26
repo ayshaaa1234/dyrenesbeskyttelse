@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations; // Tilføjet for Display
 using ClassLibrary.SharedKernel.Domain.Models; // For BaseUser
 using ClassLibrary.Features.AnimalManagement.Core.Models; // For HealthRecord, Visit
 using ClassLibrary.Features.Blog.Core.Models; // For BlogPost
@@ -14,27 +15,32 @@ namespace ClassLibrary.Features.Employees.Core.Models // Opdateret namespace
         /// <summary>
         /// Medarbejderens stilling
         /// </summary>
+        [Display(Name = "Stilling")]
         public string Position { get; set; } = string.Empty;
 
         /// <summary>
         /// Medarbejderens afdeling
         /// </summary>
+        [Display(Name = "Afdeling")]
         public string Department { get; set; } = string.Empty;
 
         /// <summary>
         /// Liste over medarbejderens specialiseringer
         /// </summary>
+        [Display(Name = "Specialiseringer")]
         public List<string> Specializations { get; set; }
 
         /// <summary>
         /// Medarbejderens løn
         /// </summary>
+        [Display(Name = "Løn")]
         public decimal Salary { get; set; }
 
         /// <summary>
         /// Dato for hvornår medarbejderen blev ansat
         /// (RegistrationDate fra BaseUser kan afspejle dette)
         /// </summary>
+        [Display(Name = "Ansættelsesdato")]
         public DateTime HireDate { get; set; }
 
         /// <summary>
@@ -55,6 +61,7 @@ namespace ClassLibrary.Features.Employees.Core.Models // Opdateret namespace
         /// <summary>
         /// URL til et billede af medarbejderen
         /// </summary>
+        [Display(Name = "Billed-URL")]
         public string? PictureUrl { get; set; }
 
         /// <summary>

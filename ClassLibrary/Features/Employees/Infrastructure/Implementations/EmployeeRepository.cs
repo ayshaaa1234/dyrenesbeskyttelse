@@ -134,17 +134,23 @@ namespace ClassLibrary.Features.Employees.Infrastructure.Implementations // Opda
             return await base.FindAsync(e => 
                 (e.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase) || 
                  e.LastName.Contains(name, StringComparison.OrdinalIgnoreCase) || 
-                 e.Name.Contains(name, StringComparison.OrdinalIgnoreCase)) && !e.IsDeleted);
+                 e.FullName.Contains(name, StringComparison.OrdinalIgnoreCase)) && !e.IsDeleted);
         }
 
         public async Task<IEnumerable<Employee>> GetByPhoneAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone))
                 throw new ArgumentException("Telefonnummer kan ikke være tomt.", nameof(phone));
+            
             var normalizedPhone = new string(phone.Where(char.IsDigit).ToArray());
             if (string.IsNullOrWhiteSpace(normalizedPhone)) 
                 throw new ArgumentException("Telefonnummer indeholder ingen cifre.");
-            return await base.FindAsync(e => new string(e.Phone.Where(char.IsDigit).ToArray()).Contains(normalizedPhone) && !e.IsDeleted);
+
+            return await base.FindAsync(e => 
+                e.Phone != null &&
+                new string(e.Phone.Where(char.IsDigit).ToArray()).Contains(normalizedPhone) && 
+                !e.IsDeleted
+            );
         }
 
         public async Task<IEnumerable<Employee>> GetBySalaryRangeAsync(decimal minSalary, decimal maxSalary)

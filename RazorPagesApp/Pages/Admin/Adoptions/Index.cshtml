@@ -1,0 +1,238 @@
+@page "/admin/adoptions"
+@model RazorPagesApp.Pages.Admin.Adoptions.IndexModel
+@using ClassLibrary.SharedKernel.Extensions
+@using ClassLibrary.Features.Adoptions.Core.Enums
+
+@{    ViewData["Title"] = "Administrer adoptioner og ansøgninger";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-@Model.MessageType" role="alert">
+        @Model.Message
+    </div>
+}
+
+<form method="get" class="mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-6 col-md-4">
+            <label asp-for="SearchTerm" class="form-label visually-hidden">Søgeterm</label>
+            <input type="text" asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Søg på dyr, kunde, ID..." />
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <label asp-for="FilterStatus" class="form-label visually-hidden">Status</label>
+            <select asp-for="FilterStatus" asp-items="Model.StatusOptions" class="form-select form-select-sm">
+                <option value="">Alle statusser</option>
+            </select>
+        </div>
+        <div class="col-sm-2 col-md-auto">
+            <button type="submit" class="btn btn-sm btn-primary">Filtrer/Søg</button>
+            @if(!string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.FilterStatus.HasValue)
+            {
+                <a asp-page="Index" class="btn btn-sm btn-outline-secondary ms-1">Nulstil</a>
+            }
+        </div>
+    </div>
+</form>
+
+@* TODO: Tilføj filtreringsmuligheder her (f.eks. på status) *@
+
+<table class="table table-striped table-hover" id="adoptionsTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Dyr (ID)</th> @* Overvej at vise dyrenavn via opslag *@
+            <th>Kunde (ID)</th> @* Overvej at vise kundenavn via opslag *@
+            <th>Ansøgt Dato</th>
+            <th>Status</th>
+            <th>Adoptionsdato</th>
+            <th>Håndteret Af (ID)</th>
+            <th>Handlinger</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Adoptions == null || !Model.Adoptions.Any())
+        {
+            <tr>
+                <td colspan="8" class="text-center">Ingen adoptioner eller ansøgninger fundet.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var adoption in Model.Adoptions.OrderByDescending(a => a.ApplicationDate))
+            {
+                <tr data-adoption-id="@adoption.Id">
+                    <td>@adoption.Id</td>
+                    <td>@adoption.AnimalId (@(Model.GetAnimalName(adoption.AnimalId)))</td>
+                    <td>@adoption.CustomerId (@(Model.GetCustomerName(adoption.CustomerId)))</td>
+                    <td>@adoption.ApplicationDate.ToString("dd-MM-yyyy")</td>
+                    <td class="adoption-status">@adoption.Status.GetDisplayName()</td>
+                    <td>@adoption.AdoptionDate.ToString("dd-MM-yyyy")</td>
+                    <td>@adoption.EmployeeId?.ToString()</td>
+                    <td class="adoption-actions">
+                        <button type="button" class="btn btn-sm btn-outline-info btnViewAdoptionDetails" data-adoptionid="@adoption.Id">Detaljer</button>
+                        @* Knapper til statusændring tilføjes dynamisk baseret på nuværende status i JavaScript eller her *@
+                        @if (adoption.Status == AdoptionStatus.Pending)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-success btnApproveAdoption ms-1" data-adoptionid="@adoption.Id">Godkend</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning btnRejectAdoption ms-1" data-adoptionid="@adoption.Id">Afvis</button>
+                        }
+                        else if (adoption.Status == AdoptionStatus.Approved)
+                        {
+                            <button type="button" class="btn btn-sm btn-success btnCompleteAdoption ms-1" data-adoptionid="@adoption.Id">Gennemfør</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btnCancelAdoption ms-1" data-adoptionid="@adoption.Id">Annuller Godkendelse</button>
+                        }
+                        @* Flere statusser kan håndteres her *@
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Modal for Adoption Detaljer/Status Ændring -->
+<div class="modal fade" id="adoptionModal" tabindex="-1" role="dialog" aria-labelledby="adoptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adoptionModalLabel">Adoptionsdetaljer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="adoptionModalBody">
+                <!-- Indhold indlæses her -->
+            </div>
+            <div class="modal-footer" id="adoptionModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+                @* Knapper til handlinger (f.eks. Gem Noter) kan tilføjes her dynamisk *@
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} 
+    <script>
+        $(document).ready(function () {
+            var adoptionModal = new bootstrap.Modal(document.getElementById('adoptionModal'));
+
+            // --- Toast Helper Function (genbrug eller globaliser) ---
+            function showToast(message, type = 'info') {
+                // (Identisk med toast funktion fra Employees/Index.cshtml - bør globaliseres)
+                var toastId = 'toast-' + new Date().getTime();
+                var toastHTML = `
+                    <div id="${toastId}" class="toast align-items-center text-white ${type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary') } border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>`;
+                $('#toastContainer').append(toastHTML);
+                var toastElement = new bootstrap.Toast(document.getElementById(toastId));
+                toastElement.show();
+                document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
+                    this.remove();
+                });
+            }
+
+            // Viser detaljer i modal
+            $('#adoptionsTable').on('click', '.btnViewAdoptionDetails', function () {
+                var adoptionId = $(this).data('adoptionid');
+                $('#adoptionModalLabel').text('Detaljer for Adoption ID: ' + adoptionId);
+                $('#adoptionModalBody').html('<p class="text-center"><em>Henter detaljer...</em></p>'); // Loading state
+                $('#adoptionModalFooter').find('.btn-primary').remove(); // Fjern evt. gamle handlingsknapper
+                adoptionModal.show();
+
+                $('#adoptionModalBody').load('?handler=AdoptionDetailsPartial&adoptionId=' + adoptionId, function(response, status, xhr) {
+                    if (status == "error") {
+                        $('#adoptionModalBody').html('<p class="text-danger">Kunne ikke hente detaljer: ' + xhr.status + " " + xhr.statusText + '</p>');
+                    }
+                    // Her kan man tilføje dynamiske knapper til footeren baseret på adoptionens status, hvis man vil redigere noter etc. fra modalen
+                });
+            });
+
+            function updateAdoptionRowStatus(adoptionId, newStatusDisplay, employeeId) {
+                const row = $(`#adoptionsTable tr[data-adoption-id="${adoptionId}"]`);
+                row.find('.adoption-status').text(newStatusDisplay);
+                if (employeeId) {
+                     row.find('td:nth-child(7)').text(employeeId); // Opdater 'Håndteret Af'
+                }
+                // Opdater handlingsknapperne baseret på den nye status
+                // Dette er en forenklet version. En mere robust løsning ville gen-render knap-delen via en partial eller bygge dem i JS.
+                const actionsCell = row.find('.adoption-actions');
+                actionsCell.html(''); // Ryd eksisterende knapper
+                actionsCell.append(`<button type="button" class="btn btn-sm btn-outline-info btnViewAdoptionDetails" data-adoptionid="${adoptionId}">Detaljer</button>`);
+                
+                // Tilføj nye status knapper baseret på newStatusDisplay (eller endnu bedre, den faktiske enum værdi, hvis den returneres)
+                // For nu, baserer vi det på DisplayName, hvilket ikke er ideelt.
+                if (newStatusDisplay === '@AdoptionStatus.Pending.GetDisplayName()') {
+                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-success btnApproveAdoption ms-1" data-adoptionid="${adoptionId}">Godkend</button>`);
+                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-warning btnRejectAdoption ms-1" data-adoptionid="${adoptionId}">Afvis</button>`);
+                } else if (newStatusDisplay === '@AdoptionStatus.Approved.GetDisplayName()') {
+                    actionsCell.append(` <button type="button" class="btn btn-sm btn-success btnCompleteAdoption ms-1" data-adoptionid="${adoptionId}">Gennemfør</button>`);
+                    actionsCell.append(` <button type="button" class="btn btn-sm btn-outline-danger btnCancelAdoption ms-1" data-adoptionid="${adoptionId}">Annuller Godkendelse</button>`);
+                }
+                 // ... tilføj logik for andre statusser hvis nødvendigt ...
+            }
+
+            // Handler for statusændringsknapper
+            $('#adoptionsTable').on('click', '.btnApproveAdoption, .btnRejectAdoption, .btnCompleteAdoption, .btnCancelAdoption', function () {
+                var button = $(this);
+                var adoptionId = button.data('adoptionid');
+                var handlerUrl = '';
+                var confirmMessage = 'Er du sikker?';
+                var employeeIdToAssign = 1; // Skal erstattes med den aktuelle admin/medarbejders ID, eller et input felt.
+
+                if (button.hasClass('btnApproveAdoption')) {
+                    handlerUrl = `?handler=ApproveAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}`;
+                    confirmMessage = 'Er du sikker på, du vil godkende denne adoption?';
+                } else if (button.hasClass('btnRejectAdoption')) {
+                    handlerUrl = `?handler=RejectAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}`;
+                    confirmMessage = 'Er du sikker på, du vil afvise denne adoption?';
+                } else if (button.hasClass('btnCompleteAdoption')) {
+                    handlerUrl = `?handler=CompleteAdoption&adoptionId=${adoptionId}`;
+                    confirmMessage = 'Er du sikker på, du vil markere denne adoption som gennemført?';
+                } else if (button.hasClass('btnCancelAdoption')) {
+                    // For cancel, kunne man prompt for en årsag.
+                    let reason = prompt("Angiv årsag til annullering (valgfri):");
+                    if(reason === null) return; // Bruger annullerede prompt
+                    handlerUrl = `?handler=CancelAdoption&adoptionId=${adoptionId}&employeeIdToAssign=${employeeIdToAssign}&reason=${encodeURIComponent(reason || 'Annulleret af administrator')}`;
+                    confirmMessage = 'Er du sikker på, du vil annullere denne adoption/godkendelse?';
+                }
+
+                if (!handlerUrl) return;
+
+                if (confirm(confirmMessage)) {
+                    $.ajax({
+                        type: 'POST',
+                        url: handlerUrl,
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                showToast(response.message, 'success');
+                                updateAdoptionRowStatus(response.adoptionId, response.newStatus, response.employeeId);
+                            } else {
+                                showToast('Fejl: ' + (response.message || 'Ukendt serverfejl.'), 'error');
+                            }
+                        },
+                        error: function (xhr) {
+                            showToast('Serverfejl: ' + xhr.status + ' ' + xhr.statusText, 'error');
+                        }
+                    });
+                }
+            });
+
+            // Ryd modal body når den lukkes
+            document.getElementById('adoptionModal').addEventListener('hidden.bs.modal', function () {
+                $('#adoptionModalBody').html(''); 
+            });
+
+        });
+    </script>
+} 

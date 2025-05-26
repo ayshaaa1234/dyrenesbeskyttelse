@@ -127,5 +127,13 @@ namespace ClassLibrary.Features.Adoptions.Application.Abstractions
         /// Gennemfører en adoption
         /// </summary>
         Task CompleteAdoptionAsync(int adoptionId);
+
+        /// <summary>
+        /// Annullerer en adoption
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal annulleres.</param>
+        /// <param name="employeeId">ID på medarbejderen der annullerer.</param>
+        /// <param name="reason">Årsag til annullering.</param>
+        Task CancelAdoptionAsync(int adoptionId, int employeeId, string reason);
     }
 } 

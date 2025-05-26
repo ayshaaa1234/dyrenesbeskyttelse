@@ -1,0 +1,43 @@
+@page "/admin/animals/delete/{id:int}"
+@model RazorPagesApp.Pages.Admin.Animals.DeleteModel
+
+@{   ViewData["Title"] = "Slet dyr";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.ErrorMessage
+    </div>
+}
+
+<h3>Er du sikker på, at du vil slette dette dyr?</h3>
+<div>
+    <h4>@Model.Animal.Name (ID: @Model.Animal.Id)</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Name)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Name)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Species)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Species)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Breed)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Breed)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.BirthDate)</dt>
+        <dd class="col-sm-9">@Model.Animal.BirthDate?.ToString("dd-MM-yyyy")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Animal.Status)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Animal.Status)</dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="Animal.Id" />
+        <input type="submit" value="Slet Dyr" class="btn btn-danger" /> |
+        <a asp-page="./Index" class="btn btn-outline-secondary">Annuller</a>
+    </form>
+</div> 

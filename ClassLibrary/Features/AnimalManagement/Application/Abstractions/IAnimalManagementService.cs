@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ClassLibrary.Features.AnimalManagement.Core.Models; // Opdateret
-using ClassLibrary.Features.AnimalManagement.Core.Enums; // Opdateret
+using ClassLibrary.Features.AnimalManagement.Core.Models; // Korrekt sti til modeller
+using ClassLibrary.Features.AnimalManagement.Core.Enums;   // Korrekt sti til enums
 using ClassLibrary.Features.AnimalManagement.Application.Models; // For AnimalHealthSummary
 
 namespace ClassLibrary.Features.AnimalManagement.Application.Abstractions // Opdateret
@@ -291,6 +291,11 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Abstractions // Opd
         /// Opdaterer noter for et besøg
         /// </summary>
         Task<Visit> UpdateVisitNotesAsync(int visitId, string notes);
+
+        /// <summary>
+        /// Henter alle besøg i systemet
+        /// </summary>
+        Task<IEnumerable<Visit>> GetAllVisitsAsync();
         #endregion
 
         #region Combined Operations

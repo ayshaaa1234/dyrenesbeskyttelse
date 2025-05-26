@@ -25,6 +25,9 @@ namespace ClassLibrary.Features.AnimalManagement.Core.Models
         /// </summary>
         public int AnimalId { get; set; }
 
+        // Navigation property for Animal
+        public Animal Animal { get; set; } = default!;
+
         /// <summary>
         /// ID for den besøgende kunde
         /// </summary>

@@ -541,6 +541,11 @@ namespace ClassLibrary.Features.AnimalManagement.Application.Implementations
             visit.Notes = notes ?? string.Empty; // Tillad at nulstille noter med null
             return await UpdateVisitAsync(visit);
         }
+
+        public async Task<IEnumerable<Visit>> GetAllVisitsAsync()
+        {
+            return await _visitRepository.GetAllAsync(); // Antager _visitRepository har GetAllAsync()
+        }
         #endregion
 
         #region Combined Operations

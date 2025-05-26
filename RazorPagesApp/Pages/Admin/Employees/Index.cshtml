@@ -1,0 +1,293 @@
+@page "/admin/employees"
+@model RazorPagesApp.Pages.Admin.Employees.IndexModel
+@using ClassLibrary.SharedKernel.Extensions 
+@* Genskab using for Employee model, hvis den fjernes af modellen nedenfor *@
+
+@{    ViewData["Title"] = "Administrer ansatte";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <button type="button" class="btn btn-success" id="btnAddEmployee">Opret Ny Medarbejder</button>
+</p>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" asp-for="SearchTerm" class="form-control" placeholder="Søg efter navn eller email..." />
+        <button type="submit" class="btn btn-outline-secondary">Søg</button>
+        @if(!string.IsNullOrWhiteSpace(Model.SearchTerm))
+        {
+            <a asp-page="Index" class="btn btn-outline-info ms-2">Nulstil søgning</a>
+        }
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-@Model.MessageType" role="alert">
+        @Model.Message
+    </div>
+}
+
+<table class="table table-striped table-hover" id="employeesTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Navn</th>
+            <th>Email</th>
+            <th>Stilling</th>
+            <th>Afdeling</th>
+            <th>Ansættelsesdato</th>
+            <th>Handlinger</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Employees == null || !Model.Employees.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center">Ingen ansatte fundet.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var employee in Model.Employees)
+            {
+                <tr data-employee-id="@employee.Id">
+                    <td>@employee.Id</td>
+                    <td>@employee.FirstName @employee.LastName</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.Position</td>
+                    <td>@employee.Department</td>
+                    <td>@employee.HireDate.ToString("dd-MM-yyyy")</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary btnEditEmployee" data-employeeid="@employee.Id">Rediger</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger btnDeleteEmployee" data-employeeid="@employee.Id" data-employeename="@employee.FirstName @employee.LastName">Slet</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Modal for Employee Opret/Rediger -->
+<div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-labelledby="employeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="employeeModalLabel">Medarbejder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="employeeModalBody">
+                <!-- Formular indlæses her -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEmployee">Gem</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            var employeeModal = new bootstrap.Modal(document.getElementById('employeeModal'));
+            var currentEmployeeId = null;
+
+            // --- Toast Helper Function (genbrug fra Details.cshtml eller globaliser) ---
+            function showToast(message, type = 'info') { 
+                var toastId = 'toast-' + new Date().getTime();
+                var toastHTML = `
+                    <div id="${toastId}" class="toast align-items-center text-white ${type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary') } border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>`;
+                // Sørg for at #toastContainer eksisterer i _AdminLayout.cshtml
+                $('#toastContainer').append(toastHTML);
+                var toastElement = new bootstrap.Toast(document.getElementById(toastId));
+                toastElement.show();
+                document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
+                    this.remove();
+                });
+            }
+
+            function formatEmployeeDate(dateString) {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            }
+
+            function buildEmployeeRow(employee) {
+                return `
+                    <tr data-employee-id="${employee.id}">
+                        <td>${employee.id}</td>
+                        <td>${employee.firstName} ${employee.lastName}</td>
+                        <td>${employee.email || ''}</td>
+                        <td>${employee.position || ''}</td>
+                        <td>${employee.department || ''}</td>
+                        <td>${formatEmployeeDate(employee.hireDate)}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary btnEditEmployee" data-employeeid="${employee.id}">Rediger</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btnDeleteEmployee" data-employeeid="${employee.id}" data-employeename="${employee.firstName} ${employee.lastName}">Slet</button>
+                        </td>
+                    </tr>`;
+            }
+
+            function updateEmployeesTable(newEmployee, isEdit = false) {
+                const tbody = $('#employeesTable tbody');
+                const noRecordsRow = tbody.find('td[colspan="7"]'); // Række med "Ingen ansatte fundet"
+
+                if (isEdit) {
+                    tbody.find(`tr[data-employee-id="${newEmployee.id}"]`).replaceWith(buildEmployeeRow(newEmployee));
+                } else {
+                    if (noRecordsRow.length) noRecordsRow.parent().remove(); // Fjern "ingen data" række
+                    tbody.append(buildEmployeeRow(newEmployee)); // Tilføj nederst eller prepend for øverst
+                }
+                
+                // Sorter efter efternavn, fornavn (hvis nye tilføjes)
+                var rows = tbody.find('tr').get();
+                rows.sort(function(a, b) {
+                    var nameA = $(a).find('td:nth-child(2)').text().toLowerCase();
+                    var nameB = $(b).find('td:nth-child(2)').text().toLowerCase();
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return 0;
+                });
+                $.each(rows, function(index, row) {
+                    tbody.append(row); 
+                });
+
+                if (tbody.find('tr').length === 0) {
+                    tbody.html('<tr><td colspan="7" class="text-center">Ingen ansatte fundet.</td></tr>');
+                }
+            }
+
+            $('#btnAddEmployee').click(function () {
+                currentEmployeeId = null;
+                $('#employeeModalLabel').text('Opret ny medarbejder');
+                $('#employeeModalBody').load('?handler=CreateEmployeeForm', function () {
+                    $.validator.unobtrusive.parse($('#employeeModalBody form')); 
+                    employeeModal.show();
+                });
+            });
+
+            $(document).on('click', '.btnEditEmployee', function () {
+                currentEmployeeId = $(this).data('employeeid');
+                $('#employeeModalLabel').text('Rediger medarbejder');
+                $('#employeeModalBody').load('?handler=EditEmployeeForm&employeeId=' + currentEmployeeId, function () {
+                    $.validator.unobtrusive.parse($('#employeeModalBody form')); 
+                    employeeModal.show();
+                });
+            });
+
+            $('#btnSaveEmployee').click(function () {
+                var form = $('#employeeModalBody form');
+                if (!form.length) {
+                    showToast('Formular ikke fundet.', 'error');
+                    return;
+                }
+
+                if (!form.valid()) { 
+                    return false; 
+                }
+
+                var formData = form.serialize();
+                var url = currentEmployeeId ?
+                    '?handler=EditEmployee&employeeId=' + currentEmployeeId :
+                    '?handler=CreateEmployee';
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Antiforgery token
+                    },
+                    success: function (response) {
+                        if (response.success && response.data) {
+                            employeeModal.hide();
+                            showToast(response.message, 'success');
+                            updateEmployeesTable(response.data, !!currentEmployeeId);
+                        } else {
+                            // Hvis serveren returnerer partial view med fejl (pga. ModelState)
+                            if (typeof response === 'string') {
+                                $('#employeeModalBody').html(response);
+                                var newForm = $('#employeeModalBody').find('form');
+                                $.validator.unobtrusive.parse(newForm);
+                                // Sørg for at eventuelle dropdowns eller specielle inputs geninitialiseres hvis nødvendigt
+                            } else if (response.message) {
+                                showToast('Fejl: ' + response.message, 'error');
+                            } else {
+                                showToast('Ukendt fejl ved gem.', 'error');
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        var errorMessage = 'Der skete en serverfejl.';
+                        if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
+                        else if (xhr.responseText) {
+                            try {
+                                var errData = JSON.parse(xhr.responseText);
+                                if(errData.message) errorMessage = errData.message;
+                                else if (errData.title) errorMessage = errData.title; // For ProblemDetails
+                            } catch(e) { 
+                                // Hvis responseText ikke er JSON, vis den direkte (eller en del af den)
+                                // Dette kan ske hvis det er en HTML fejlside fra serveren
+                                 $('#employeeModalBody').html('<div>En serverfejl opstod. Prøv venligst igen. Fejl: ' + xhr.status + '</div>');
+                                 return;
+                            }
+                        }
+                        showToast(errorMessage, 'error');
+                    }
+                });
+            });
+
+            $('#employeesTable').on('click', '.btnDeleteEmployee', function () {
+                var employeeIdToDelete = $(this).data('employeeid');
+                var employeeName = $(this).data('employeename') || 'denne medarbejder';
+                if (confirm(`Er du sikker på, at du vil slette ${employeeName}?`)) {
+                    $.ajax({
+                        url: `?handler=DeleteEmployee&employeeId=${employeeIdToDelete}`,
+                        type: 'POST',
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            if (response.success) { 
+                                $(`#employeesTable tbody tr[data-employee-id="${response.employeeId}"]`).remove();
+                                if ($('#employeesTable tbody tr').length === 0) {
+                                    $('#employeesTable tbody').html('<tr><td colspan="7" class="text-center">Ingen ansatte fundet.</td></tr>');
+                                }
+                                showToast(response.message || 'Medarbejder slettet!', 'success');
+                            } 
+                            else { 
+                                showToast('Fejl under sletning: ' + (response.message || 'Ukendt fejl.'), 'error');
+                            }
+                        },
+                        error: function (xhr) {
+                            var errorMessage = 'Serverfejl under sletning.';
+                            if(xhr.responseJSON && xhr.responseJSON.message) errorMessage = xhr.responseJSON.message;
+                            showToast(errorMessage, 'error');
+                        }
+                    });
+                }
+            });
+            
+            // Ryd modal body når den lukkes for at undgå gammelt indhold
+            document.getElementById('employeeModal').addEventListener('hidden.bs.modal', function () {
+                $('#employeeModalBody').html(''); 
+                currentEmployeeId = null; 
+            });
+        });
+    </script>
+} 

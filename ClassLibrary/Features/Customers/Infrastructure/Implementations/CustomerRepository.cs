@@ -104,7 +104,7 @@ namespace ClassLibrary.Features.Customers.Infrastructure.Implementations // Opda
             return await base.FindAsync(c => 
                 (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase)) ||
                 (!string.IsNullOrWhiteSpace(c.LastName) && c.LastName.Contains(name, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrWhiteSpace(c.Name) && c.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                (!string.IsNullOrWhiteSpace(c.FullName) && c.FullName.Contains(name, StringComparison.OrdinalIgnoreCase))
             );
         }
 

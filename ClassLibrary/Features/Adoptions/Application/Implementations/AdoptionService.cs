@@ -439,33 +439,59 @@ namespace ClassLibrary.Features.Adoptions.Application.Implementations
             // Dyrets status er allerede 'Adopted' fra ApproveAdoptionAsync
         }
         
-        public async Task CancelAdoptionAsync(int adoptionId, string reason)
+        /// <summary>
+        /// Annullerer en godkendt eller afventende adoption.
+        /// Opdaterer adoptionens status til Cancelled og tilføjer en note med årsagen.
+        /// Hvis dyret var reserveret eller adopteret pga. denne adoption, sættes dyrets status tilbage til Available.
+        /// </summary>
+        /// <param name="adoptionId">ID på adoptionen der skal annulleres.</param>
+        /// <param name="employeeId">ID på medarbejderen der foretager annulleringen.</param>
+        /// <param name="reason">Årsag til annulleringen.</param>
+        public async Task CancelAdoptionAsync(int adoptionId, int employeeId, string reason)
         {
-            var adoption = await _adoptionRepository.GetByIdAsync(adoptionId);
-            if (adoption == null) throw new KeyNotFoundException($"Adoption med ID {adoptionId} blev ikke fundet.");
-            if (adoption.Status == AdoptionStatus.Completed || adoption.Status == AdoptionStatus.Cancelled)
-                 throw new InvalidOperationException($"Adoption med status '{adoption.Status}' kan ikke annulleres.");
+            var adoption = await GetAdoptionByIdAsync(adoptionId); // Genbruger GetAdoptionByIdAsync for validering
 
-            var originalStatus = adoption.Status;
+            if (adoption.Status != AdoptionStatus.Pending && adoption.Status != AdoptionStatus.Approved)
+            {
+                throw new InvalidOperationException($"Kun adoptioner med status 'Pending' eller 'Approved' kan annulleres. Nuværende status: {adoption.Status}");
+            }
+
+            // Log hvem der annullerede
+            adoption.EmployeeId = employeeId; 
             adoption.Status = AdoptionStatus.Cancelled;
-            adoption.Notes = string.IsNullOrWhiteSpace(adoption.Notes) ? $"Annulleret: {reason}" : $"{adoption.Notes}\nAnnulleret: {reason}";
-            // Nulstil datoer relateret til tidligere status, hvis relevant
+            adoption.Notes = string.IsNullOrWhiteSpace(adoption.Notes) 
+                ? $"Annulleret af medarbejder ID {employeeId}. Årsag: {reason}" 
+                : adoption.Notes + $"\nAnnulleret af medarbejder ID {employeeId}. Årsag: {reason}";
+            
+            // Nulstil datoer der ikke længere er relevante
             adoption.ApprovalDate = null;
-            adoption.RejectionDate = null;
+            adoption.RejectionDate = null; // Hvis den fejlagtigt var sat
             adoption.CompletionDate = null;
+            // AdoptionDate skal muligvis også nulstilles, hvis den var sat ved Approved.
+            // Hvis en adoption annulleres, er den ikke længere 'adopteret' på en specifik dato via denne proces.
+            adoption.AdoptionDate = default(DateTime); 
+
+            // Hvis dyret var reserveret eller adopteret pga. denne adoption, gør det ledigt igen.
+            var animal = await _animalRepository.GetByIdAsync(adoption.AnimalId);
+            if (animal != null && (animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Reserved || animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Adopted))
+            {
+                // Tjek om denne adoption var årsagen til dyrets nuværende status
+                if (animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Adopted && animal.AdoptionDate.HasValue && adoption.CompletionDate.HasValue && animal.AdoptedByCustomerId == adoption.CustomerId) {
+                     // Hvis adoptionen var Gennemført, og vi annullerer, skal dyret blive Ledigt
+                     animal.Status = AnimalManagement.Core.Enums.AnimalStatus.Available;
+                     animal.IsAdopted = false;
+                     animal.AdoptionDate = null;
+                     animal.AdoptedByCustomerId = null;
+                }
+                else if (animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Reserved) {
+                    // Hvis dyret blot var reserveret, og adoptionen nu annulleres, skal dyret blive Ledigt
+                    // (Antaget at 'Reserved' betyder reserveret til en specifik 'Pending' eller 'Approved' adoption)
+                    animal.Status = AnimalManagement.Core.Enums.AnimalStatus.Available;
+                }
+                await _animalRepository.UpdateAsync(animal);
+            }
 
             await _adoptionRepository.UpdateAsync(adoption);
-
-            // Hvis dyret var sat til Adopted eller Reserved pga. denne adoption, skal det gøres ledigt.
-            if (originalStatus == AdoptionStatus.Approved || originalStatus == AdoptionStatus.Pending)
-            {
-                var animal = await _animalRepository.GetByIdAsync(adoption.AnimalId);
-                if (animal != null && (animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Adopted || animal.Status == AnimalManagement.Core.Enums.AnimalStatus.Reserved))
-                {
-                    animal.Status = AnimalManagement.Core.Enums.AnimalStatus.Available;
-                    await _animalRepository.UpdateAsync(animal);
-                }
-            }
         }
 
         private async Task ValidateAdoptionAsync(Adoption adoption, bool isNew)

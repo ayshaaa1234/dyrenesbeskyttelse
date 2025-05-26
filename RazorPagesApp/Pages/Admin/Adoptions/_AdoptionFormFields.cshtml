@@ -1,0 +1,47 @@
+@model ClassLibrary.Features.Adoptions.Core.Models.Adoption
+@* @using ClassLibrary.Features.Adoptions.Core.Enums - Hvis enums skal bruges direkte her *@
+
+<form id="adoptionFormPartial" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" />
+    @* Skjulte felter for data, der ikke direkte redigeres i denne form, men som skal sendes med tilbage for at bevare dataintegritet. AnimalId og CustomerId bør ikke ændres her. Status ændres via separate handlinger. ApprovalDate, RejectionDate, CompletionDate sættes af specifikke actions. *@
+    <input type="hidden" asp-for="AnimalId" />
+    <input type="hidden" asp-for="CustomerId" />
+    <input type="hidden" asp-for="Status" />
+    <input type="hidden" asp-for="ApprovalDate" /> 
+    <input type="hidden" asp-for="RejectionDate" /> 
+    <input type="hidden" asp-for="CompletionDate" /> 
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="ApplicationDate" class="form-label"></label>
+            <input asp-for="ApplicationDate" class="form-control" type="datetime-local" />
+            <span asp-validation-for="ApplicationDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="AdoptionDate" class="form-label"></label>
+            <input asp-for="AdoptionDate" class="form-control" type="datetime-local" />
+            <span asp-validation-for="AdoptionDate" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AdoptionType" class="form-label"></label>
+        <input asp-for="AdoptionType" class="form-control" />
+        <span asp-validation-for="AdoptionType" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EmployeeId" class="form-label">Tildelt medarbejder</label>
+        <select asp-for="EmployeeId" class="form-select" asp-items="@((SelectList)ViewData["EmployeeList"]!)">
+            <option value="">-- Vælg medarbejder --</option>
+        </select>
+        <span asp-validation-for="EmployeeId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+</form> 

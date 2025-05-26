@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin - Dyrenes Beskyttelse</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RazorPagesApp.styles.css" asp-append-version="true" />
+    <style>
+        /* Admin specifikke styles kan tilføjes her om nødvendigt */
+        .admin-header-adapt {
+            /* Du kan tilføje specifikke styles for admin headeren her, hvis den skal afvige mere */
+        }
+        .admin-badge {
+            font-size: 0.8rem;
+            padding: 0.2em 0.5em;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header-adapt fixed-top admin-header-adapt">
+        <div class="header-bg">
+            <div class="container-fluid container-adapt">
+                <div class="header-wrapper">
+                    <div class="header-left">
+                        <!-- Mobile STØT Button - Måske ikke relevant for admin? Ellers erstat med admin-specifikt ikon -->
+                         <div class="header-left-mobile d-xxl-none">
+                            @* <span class="navbar-brand">Admin</span>  FJERNET *@
+                        </div>
+                        <!-- Desktop Menu Links -->
+                        <nav class="desktop-menu d-none d-xxl-block">
+                            <ul>
+                                <li><a class="nav-link" asp-page="/Admin/Index">OVERBLIK</a></li>
+                                <li><a class="nav-link" asp-page="/Admin/Animals/Index">Dyr</a></li>
+                                <li><a class="nav-link" asp-page="/Admin/Employees/Index">Ansatte</a></li>
+                                <li><a class="nav-link" asp-page="/Admin/Adoptions/Index">Adoptioner</a></li>
+                                @* <li><a class="nav-link" asp-page="/Admin/Users/Index">BRUGERE</a></li> *@ 
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <a class="header-logo" asp-area="" asp-page="/Admin/Index"> 
+                        <partial name="_LogoPartial" /> 
+                        @* <span class="badge bg-primary admin-badge">Admin</span> FJERNET *@
+                    </a>
+
+                    <div class="header-right">
+                        <!-- Mobile Toggler -->
+                        <div class="header-right-mobile d-xxl-none">
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAdminNavbarCollapse" aria-controls="mobileAdminNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                        </div>
+                         <!-- Desktop Right Items -->
+                        <div class="header-right-desktop d-none d-xxl-flex align-items-center">
+                            <a class="nav-link text-dark" asp-page="/Index">Tilbage til Hovedsiden</a>
+                            @* Overvej Login/Logout Partial her senere *@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Collapsible Mobile Menu -->
+        <div class="container-fluid d-xxl-none mobile-menu-container-adapt">
+            <div class="collapse navbar-collapse mobile-menu-adapt" id="mobileAdminNavbarCollapse">
+                <ul class="navbar-nav flex-column mx-auto mt-2 text-center">
+                    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Index">OVERBLIK</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Animals/Index">Dyr</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Employees/Index">Ansatte</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Adoptions/Index">Adoptioner</a></li>
+                    @* <li class="nav-item"><a class="nav-link" asp-page="/Admin/Users/Index">BRUGERE</a></li> *@
+                    <hr/>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Index">Tilbage til hovedsiden</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    @RenderSection("FullWidthHeaderContent", required: false) 
+
+    <div class="container content-wrapper">
+        <main role="main" class="pb-3 pt-5"> @* Added pt-5 for spacing below fixed header *@
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1090"> 
+        <div id="toastContainer" class="toast-container"> 
+            <!-- Toasts vil blive tilføjet her af JavaScript -->
+        </div>
+    </div>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="text-center py-3 footer-copyright">
+                     &copy; @DateTime.Now.Year - Dyrenes Beskyttelse - Admin Sektion
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html> 

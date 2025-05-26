@@ -1,0 +1,156 @@
+@page "/admin"
+@model RazorPagesApp.Pages.Admin.IndexModel
+@using ClassLibrary.SharedKernel.Extensions 
+@using ClassLibrary.Features.AnimalManagement.Core.Enums
+
+@{    ViewData["Title"] = "Overblik";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Antal dyr i alt</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalAnimals</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-paw fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Dyr klar til adoption</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.AnimalsReadyForAdoption</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-home fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Dyr der trænger til vaccination</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @if (Model.AnimalsNeedingVaccination == -1)
+                                {
+                                    <small><em>(Funktion ikke klar)</em></small>
+                                }
+                                else if (Model.AnimalsNeedingVaccination == -2)
+                                {
+                                    <small><em>(Fejl ved hentning)</em></small>
+                                }
+                                else
+                                {
+                                    @Model.AnimalsNeedingVaccination
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-syringe fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* TODO: Tilføj "Nye Adoptionsansøgninger" her senere med korrekt casing: "Nye adoptionsansøgninger" *@
+        @* TODO: Tilføj "Senest Tilføjede Medarbejdere" her senere med korrekt casing: "Senest tilføjede medarbejdere" *@
+
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Nyligt tilføjede dyr</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentlyAddedAnimals.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var animal in Model.RecentlyAddedAnimals)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        @if (!string.IsNullOrEmpty(animal.PictureUrl))
+                                        {
+                                            <img src="@animal.PictureUrl" alt="@animal.Name" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin-right: 10px;" />
+                                        }
+                                        else
+                                        {
+                                            <span style="display: inline-block; width: 40px; height: 40px; background-color: #eee; border-radius: 50%; margin-right: 10px; text-align: center; line-height: 40px;">?</span>
+                                        }
+                                        @animal.Name (@animal.Species) - Tilføjet: @animal.IntakeDate.ToString("dd-MM-yyyy")
+                                    </span>
+                                    <a asp-page="/Admin/Animals/Details" asp-route-id="@animal.Id" class="btn btn-sm btn-outline-info">Detaljer</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>Ingen nyligt tilføjede dyr.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Kommende planlagte besøg</h6>
+                </div>
+                <div class="card-body">
+                     @if (Model.UpcomingVisits.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var visit in Model.UpcomingVisits)
+                            {
+                                <li class="list-group-item">
+                                    <strong>@visit.Animal?.Name (@visit.Animal?.Species):</strong> @visit.Purpose <br />
+                                    <small>@visit.PlannedDate.ToString("dddd d. MMMM HH:mm") (@visit.Visitor) - Status: @visit.Status.GetDisplayName()</small><br/>
+                                    <small><em>Note: @visit.Notes</em></small><br/>
+                                    <a asp-page="/Admin/Animals/Details" asp-route-id="@visit.AnimalId" class="btn btn-sm btn-outline-secondary mt-1">Se dyrs detaljer</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>Ingen kommende planlagte besøg.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @* For at få ikonerne vist kan FontAwesome CDN inkluderes her eller globalt i _Layout.cshtml
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    *@
+} 
